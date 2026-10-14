@@ -107,7 +107,9 @@ class MeasureRenderTest {
     /**
      * §13.1 item 2 (2026-09-26): characters per line of measure-capped prose, on Android's wide
      * layouts (600dp and up -- Compose Desktop fixes fontScale at 1, so Windows never varies), at
-     * every text scale Android offers. Activity's note is the longest capped paragraph on a root.
+     * every text scale Android offers. The Buffer report's live-figure note is the longest capped
+     * paragraph on a root: Activity's note, measured here until 2026-10-09, became one line that opens
+     * the rest in a sheet (§4.4), so it no longer reports a `note-text`.
      */
     @Test fun `measure line lengths at Android text scales`() {
         if (System.getenv("SCIFIN_MEASURE") != "1") return
@@ -115,8 +117,8 @@ class MeasureRenderTest {
         for (w in listOf(600, 858, 1280)) for (fs in listOf(1.0f, 1.15f, 1.3f, 1.5f, 1.8f, 2.0f)) {
             val heard = ArrayList<Map<String, Float>>()
             var columns = 0f
-            for (tab in listOf(Tab.ACTIVITY, Tab.BUDGET)) {
-                val s = store(Density.COMFORTABLE); s.selectTab(tab)
+            for ((tab, sub) in listOf(Tab.REPORTS to "buffer", Tab.BUDGET to null)) {
+                val s = store(Density.COMFORTABLE); s.selectTab(tab); if (sub != null) s.selectSub(sub)
                 ImageComposeScene(width = w, height = 900, density = UnitDensity(1f, fontScale = fs)).use { scene ->
                     scene.setContent {
                         CompositionLocalProvider(LocalProbe provides { n, v -> if (n == "note-text") heard += v else if (n == "page" && tab == Tab.BUDGET) columns = v.getValue("n") }) {
@@ -126,7 +128,7 @@ class MeasureRenderTest {
                     scene.render()
                 }
             }
-            val v = heard.maxBy { it.getValue("len") }
+            val v = checkNotNull(heard.maxByOrNull { it.getValue("len") }) { "no capped prose (note-text) on Reports › Buffer or Budget at $w dp, ${fs}x" }
             lines += listOf(w, fs, v["w"], v["lines"], v["chars0"], v["len"], columns).joinToString("\t")
         }
         File(out, "linelength.tsv").writeText("win\tfs\ttextW\tlines\tchars0\tlen\tbudgetColumns\n" + lines.joinToString("\n") + "\n")
