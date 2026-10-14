@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Entry sentence prototype</title>
+<!-- One entry for every editable element (owner, 2026-10-09). Each + opens the sentence (W) already pointed at its own
+     kind; the floating + opens the last kind and target used. The capture line is kept as a toggle, so the two
+     arrangements can be compared on the same data. Swiss Blue tokens from ui/Tokens.kt; the row + fill and glyph from
+     tools/plus_colours.py (40% Oklab blend). Scores: design/scratch-2026-10-08/entry-kinds-scores.txt.
+     Every visible sentence is a DRAFT for the owner's review. Seed: native/shared/src/desktopTest/resources/prototype-seed.json,
+     plus the owner's "Holidays" (a Goal) and a Category of the same name, to show the collision. -->
+<style>
+:root{--bg:#F4F4F2;--surf:#F5F9FE;--surf2:#E1EAF7;--bord:#D5DBE5;--bordS:#6A727D;--txt:#131313;--txt2:#636363;--txt3:#ABABAB;
+  --acc:#1D3557;--accH:#0E2646;--onAcc:#FFFFFF;--plus:#97a3b2;--plusG:#131313;--chip:#E1E4E9;--scrim:rgba(0,0,0,.18)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#17181A;--surf:#1D2227;--surf2:#252E36;--bord:#30363D;--bordS:#69737D;--txt:#F2F2EF;--txt2:#999997;--txt3:#5A5A57;
+  --acc:#90BDEB;--accH:#7DAAD7;--onAcc:#17181A;--plus:#445465;--plusG:#F2F2EF;--chip:#1E2328;--scrim:rgba(0,0,0,.45)}}
+:root[data-theme="dark"]{--bg:#17181A;--surf:#1D2227;--surf2:#252E36;--bord:#30363D;--bordS:#69737D;--txt:#F2F2EF;--txt2:#999997;--txt3:#5A5A57;
+  --acc:#90BDEB;--accH:#7DAAD7;--onAcc:#17181A;--plus:#445465;--plusG:#F2F2EF;--chip:#1E2328;--scrim:rgba(0,0,0,.45)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:16px}
+h1{font-size:19px;margin:0 0 4px}.dim{color:var(--txt2)}
+.bar{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;padding:12px 0 16px;border-bottom:1px solid var(--bord);margin-bottom:16px}
+.ctl{display:flex;flex-direction:column;gap:4px}
+.lbl{font-size:11.5px;letter-spacing:.06em;font-weight:600;color:var(--txt2);text-transform:uppercase}
+.seg2{display:inline-flex;border-radius:999px;box-shadow:inset 0 0 0 1px var(--bord);overflow:hidden}
+.seg2 button,.plain{font:inherit;font-size:13px;color:var(--txt);background:none;border:0;padding:0 14px;min-height:36px;cursor:pointer;white-space:nowrap}
+.seg2 button.on{background:var(--acc);color:var(--onAcc)}
+.plain{border-radius:999px;box-shadow:inset 0 0 0 1px var(--bord)}
+.keys label{font-size:13px;display:inline-flex;gap:6px;align-items:center;margin-right:14px}
+.stage{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
+.frame{flex:none;max-width:100%}.frame.grow{flex:1 1 640px;min-width:0}
+.cap{font-size:12px;color:var(--txt2);margin:0 0 6px}
+.deskwrap{overflow-x:auto;border-radius:10px}
+.notes{margin-top:24px}.notes summary{font-weight:600;cursor:pointer;min-height:36px;display:flex;align-items:center}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px 24px}
+.cards h2{font-size:15px;margin:12px 0 6px}
+.cards ul{padding-left:18px;margin:4px 0}.cards li{margin:3px 0}
+.note{font-size:12.5px;color:var(--txt2)}
+table.sc{border-collapse:collapse;font-size:12.5px;margin:6px 0}
+table.sc td,table.sc th{padding:3px 8px 3px 0;text-align:right;border-bottom:1px solid var(--bord)}
+table.sc td:first-child,table.sc th:first-child{text-align:left}
+table.sc tr.front td{font-weight:600}
+/* ---- frames ---- */
+.phone{width:360px;height:740px;border-radius:28px;background:var(--bg);position:relative;overflow:hidden;box-shadow:0 0 0 1px var(--bord);flex:none;max-width:100%}
+.desk{width:100%;min-width:720px;height:740px;border-radius:10px;background:var(--bg);position:relative;overflow:hidden;box-shadow:inset 0 0 0 1px var(--bord);display:flex}
+.titlebar{position:absolute;left:0;right:0;top:0;height:30px;display:flex;align-items:center;padding:0 12px;font-size:12px;color:var(--txt2);border-bottom:1px solid var(--bord)}
+.screen{position:absolute;inset:0;overflow:auto;padding:12px 16px 120px;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.col{scrollbar-width:thin}
+.phone .screen{bottom:64px}
+.nav{position:absolute;left:0;right:0;bottom:0;height:64px;display:flex;border-top:1px solid var(--bord);background:var(--bg)}
+.nav button{flex:1;background:none;border:0;color:var(--txt2);font:inherit;font-size:12px;cursor:pointer;min-height:48px}
+.nav button.on{color:var(--txt);font-weight:600}
+.rail{width:88px;flex:none;border-right:1px solid var(--bord);padding:40px 0 0;display:flex;flex-direction:column;align-items:center;gap:4px}
+.rail button{width:72px;min-height:48px;background:none;border:0;border-radius:12px;color:var(--txt2);font:inherit;font-size:12px;cursor:pointer}
+.rail button.on{background:var(--surf2);color:var(--txt);font-weight:600}
+.col{position:relative;overflow:auto;padding:42px 20px 90px}
+.col1{flex:0 0 46%;border-right:1px solid var(--bord)}.col2{flex:1}
+.hdr{display:flex;align-items:center;justify-content:space-between;min-height:48px}
+.hdr .t{font-size:17px;font-weight:600}
+/* ---- ledger ---- */
+.sec{font-size:11.5px;letter-spacing:.06em;font-weight:600;color:var(--txt2);margin:18px 0 4px}
+.sav{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0 12px;border-bottom:1px solid var(--bord)}
+.sav .fig{font-size:30px;font-weight:600;color:var(--accH)}
+:root[data-theme="dark"] .sav .fig{color:var(--acc)}
+.row{display:flex;align-items:center;min-height:48px;border-bottom:1px solid var(--bord);gap:8px}
+.row .nm{flex:1}.row .sub{font-size:12px;color:var(--txt2)}
+.row .amt{font-variant-numeric:tabular-nums;text-align:right}
+.rplus{width:48px;height:48px;display:grid;place-items:center;background:none;border:0;cursor:pointer;flex:none;padding:0}
+.rplus span{width:30px;height:30px;border-radius:50%;background:var(--plus);color:var(--plusG);display:grid;place-items:center;font-size:20px;line-height:1}
+.fab{position:absolute;right:16px;bottom:80px;width:56px;height:56px;border-radius:16px;background:var(--acc);color:var(--onAcc);border:0;font-size:28px;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.2);z-index:2}
+.desk .fab{bottom:20px;right:20px}
+.addbtn{background:var(--acc);color:var(--onAcc);border:0;border-radius:999px;min-height:40px;padding:0 18px;font:inherit;font-weight:600;cursor:pointer}
+.line{display:flex;align-items:center;min-height:48px;margin:10px 0 2px;padding:0 14px;border-radius:12px;background:var(--surf2);color:var(--txt2);cursor:text;border:0;width:100%;font:inherit;text-align:left}
+.kbd{font-size:11.5px;color:var(--txt2);border:1px solid var(--bord);border-radius:4px;padding:0 4px}
+.led{font-size:13px}.led .row{min-height:40px}
+.led .new{background:var(--surf2)}
+/* ---- the sheet (grows upward; the sentence stays at its foot) ---- */
+.scrim{position:absolute;inset:0;background:var(--scrim);z-index:3}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:94%;display:flex;flex-direction:column;background:var(--surf);border-radius:20px 20px 0 0;padding:4px 14px 18px;box-shadow:0 -8px 24px rgba(0,0,0,.16);z-index:4}
+.desk .sheet{left:88px;right:auto;width:46%;border-radius:16px 16px 0 0}
+.top{display:flex;justify-content:space-between;align-items:center;min-height:48px;flex:none}
+.top .ttl{font-weight:600;font-size:15px}
+.area{overflow:auto;min-height:0}
+.foot{flex:none;border-top:1px solid var(--bord);padding-top:2px}
+.sent{font-size:17.5px;line-height:48px}
+.tok{display:inline-flex;align-items:center;min-height:48px;padding:0 2px;cursor:pointer;background:none;border:0;font:inherit;color:inherit}
+.tok b{font-weight:600;text-decoration:underline;text-decoration-color:var(--bordS);text-underline-offset:4px}
+.tok.open b{text-decoration-thickness:2px;text-decoration-color:var(--txt)}
+.amtf{font:inherit;font-weight:600;width:96px;min-height:40px;border:0;border-bottom:2px solid var(--acc);background:transparent;color:var(--txt);padding:0 4px;text-align:right}
+.payf{font:inherit;width:150px;min-height:40px;border:0;border-bottom:1px solid var(--bordS);background:transparent;color:var(--txt);padding:0 4px}
+.readout{font-size:13px;color:var(--txt2);min-height:22px}
+.readout b{color:var(--txt);font-weight:600}
+.caption{font-size:12.5px;color:var(--txt2);margin:4px 0}
+.btns{display:flex;gap:10px;margin-top:8px}
+.btns button{flex:1;min-height:48px;border-radius:999px;font:inherit;font-weight:600;cursor:pointer}
+.ghost{background:none;border:1px solid var(--bord);color:var(--txt)}
+.conf{background:var(--acc);border:0;color:var(--onAcc)}.conf:disabled{opacity:.4;cursor:default}
+.seg{display:flex;border-radius:12px;box-shadow:inset 0 0 0 1px var(--bord);margin:6px 0 2px;overflow:hidden}
+.seg button{flex:1;min-height:48px;background:none;border:0;font:inherit;font-size:13.5px;color:var(--txt2);cursor:pointer;padding:0 2px}
+.seg button.on{background:var(--chip);color:var(--txt);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:0 6px;align-items:center}
+.chip{min-height:48px;display:inline-flex;align-items:center;cursor:pointer;background:none;border:0;font:inherit;color:var(--txt);padding:0}
+.chip span{display:inline-flex;align-items:center;height:32px;padding:0 12px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--bord);font-size:14px;white-space:nowrap}
+.chip.on span{background:var(--chip);box-shadow:none;font-weight:600}
+.grp{font-size:11.5px;letter-spacing:.06em;font-weight:600;color:var(--txt2);margin:8px 0 0}
+.lin{display:flex;align-items:center;gap:6px;border-radius:12px;background:var(--surf2);padding:0 12px;min-height:48px;margin:6px 0}
+.lin input{flex:1;font:inherit;font-size:16px;border:0;background:transparent;color:var(--txt);min-height:44px;outline:none}
+.hl{background:var(--chip);border-radius:4px;padding:0 2px;font-weight:600}
+.hint{font-size:12.5px;color:var(--txt2)}
+.ask{font-size:13px;color:var(--txt);margin:4px 0 0}
+@media (max-width:420px){body{padding:16px}.phone{width:100%}.frame{width:100%}}
+</style>
+</head>
+<body>
+<h1>One entry for every editable element</h1>
+<p class="dim">Tap any +, or the floating +. Underlined words are options. Every sentence here is a draft for review; icons are placeholders.</p>
+<div class="bar">
+  <div class="ctl"><span class="lbl">Arrangement</span><div class="seg2"><button id="arrW" onclick="setArr('W')">W only</button><button id="arrL" onclick="setArr('L')">Line + W</button></div></div>
+  <div class="ctl"><span class="lbl">Desktop Add</span><div class="seg2"><button id="d1" onclick="setDesk(1)">Row + and Ctrl+N</button><button id="d2" onclick="setDesk(2)">"Add" in the header</button><button id="d3" onclick="setDesk(3)">Floating +</button></div></div>
+  <div class="ctl"><span class="lbl">Area</span><div class="seg2"><button id="aW" onclick="setArea('word')">Word in the sentence</button><button id="aS" onclick="setArea('switch')">Switch row</button></div></div>
+  <div class="ctl"><span class="lbl">Theme</span><div class="seg2"><button id="tL" onclick="theme('light')">Light</button><button id="tD" onclick="theme('dark')">Dark</button></div></div>
+  <div class="ctl"><span class="lbl">&nbsp;</span><button class="plain" onclick="resetAll()">Reset the data</button></div>
+  <div class="ctl keys"><span class="lbl">Keyboard (scored, not decided)</span>
+    <label><input type="checkbox" id="kFocus" checked onchange="K.focus=this.checked"> Cursor in the amount on open</label>
+    <label><input type="checkbox" id="kEnter" checked onchange="K.enter=this.checked"> Enter confirms once complete</label>
+    <label><input type="checkbox" id="kCtrl" checked onchange="K.ctrl=this.checked;draw()"> Ctrl+N opens it (desktop)</label></div>
+</div>
+<div class="stage">
+  <div class="frame"><div class="cap">Phone · 360 dp</div><div class="phone" id="phone"></div></div>
+  <div class="frame grow"><div class="cap">Desktop window</div><div class="deskwrap"><div class="desk" id="desk"></div></div></div>
+</div>
+<details class="notes" open><summary>Scores and rules</summary>
+<div class="cards">
+  <section><h2>W only, or the line as well</h2>
+    <p class="note">W only (the owner's point 6): no line; a goal's + opens "Add € to [that goal]", a category's + "Spent € on [it]", the floating + the last kind and target used. The line variant puts a line above CATEGORIES on Budget and at the top of every other screen.</p>
+    <p class="note">Five tasks, from the target's own screen ("here") and from another ("away"; the floating + last used on Entertainment):</p>
+    <table class="sc"><tr><th></th><th>W here</th><th>W away</th><th>line</th></tr>
+      <tr><td>phone, keys + taps</td><td>25</td><td>32</td><td>82</td></tr>
+      <tr><td>desktop, seconds (KLM)</td><td>21.9</td><td>31.0</td><td>42.5</td></tr></table>
+    <p class="note">The line is quicker only for Income logged away from Budget on a desktop (6.97 s against 7.05 s), and it costs 56 dp on every screen.</p></section>
+  <section><h2>How the line finds its target</h2>
+    <p class="note">14 lines from the seed's real names (tools/entry_kinds_score.py). Wrong writes must be 0 (§4.3, never a guess); a first-match control writes 3 wrongly. The word before a shared name ("from" a goal, "on" a category) settles it without a question.</p>
+    <table class="sc"><tr><th>option</th><th>wrong</th><th>asks</th><th>keys + taps</th><th>rules</th></tr>
+      <tr><td>C1 bare names</td><td>0</td><td>2</td><td>297</td><td>8</td></tr>
+      <tr><td>C2 kind nouns ("goal Holidays")</td><td>0</td><td>2</td><td>373</td><td>11</td></tr>
+      <tr><td>C3 marks ^ # @ with a legend</td><td>0</td><td>2</td><td>327</td><td>11</td></tr>
+      <tr><td>C4 names unique across kinds</td><td>0</td><td>2</td><td>302</td><td>8</td></tr>
+      <tr><td>C5 name chips (in this prototype)</td><td>0</td><td>0</td><td>230</td><td>8</td></tr>
+      <tr class="front"><td>W the sentence's picker</td><td>0</td><td>0</td><td>61</td><td>0</td></tr></table></section>
+  <section><h2>The group selector</h2>
+    <p class="note">Savings | Goals | Categories | Accounts above the sentence; the target word offers only that group (tools/selector_score.py). Against one picker of everything (P), five tasks. Seed: 4 goals, 5 categories, 2 accounts; many: 12, 20, 3.</p>
+    <table class="sc"><tr><th></th><th>P seed</th><th>G seed</th><th>P many</th><th>G many</th></tr>
+      <tr><td>taps</td><td>8</td><td>7</td><td>9</td><td>7</td></tr>
+      <tr><td>scrolls</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+      <tr><td>choosing time, Hick (s)</td><td>2.22</td><td>0.97</td><td>3.13</td><td>1.51</td></tr>
+      <tr><td>picker height open (px)</td><td>392</td><td>122</td><td>680</td><td>314</td></tr>
+      <tr><td>sheet at rest (px extra)</td><td>0</td><td>48</td><td>0</td><td>48</td></tr></table></section>
+  <section><h2>Rules that stay</h2>
+    <ul class="note">
+      <li>Savings only takes money in (owner, 2026-10-09): every expense is spent on a Category, from a Goal, or charged to an Account, so nothing leaves untracked. An imported expense needs a target before import review confirms.</li>
+      <li>Categories only take spending; a correction opens the Category's editor. Goals take money in, or spending up to what they hold.</li>
+      <li>Savings is never set by a sentence; the typed-UPDATE editor stays.</li>
+      <li>A payee that is a recurring expense gets a caption: it is taken on its own date.</li>
+      <li>Confirm and Cancel, never undo; nothing is written before Confirm.</li>
+    </ul></section>
+</div></details>
+<script>
+// ---- data (the seed) -----------------------------------------------------------------------------------------------
+const SEED=()=>({savings:3067,income:true,
+  goals:[{id:"g1",name:"Emergency fund",saved:1050,target:2200},{id:"g2",name:"Trip to Lisbon",saved:400,target:900},{id:"g3",name:"Someday fund",saved:0,target:null},{id:"g4",name:"Holidays",saved:120,target:800}],
+  cats:[{id:"c1",name:"Groceries",planned:300,spent:350},{id:"c2",name:"Dining out",planned:120,spent:165},{id:"c3",name:"Transport",planned:150,spent:90},{id:"c4",name:"Entertainment",planned:100,spent:50},{id:"c5",name:"Holidays",planned:200,spent:0}],
+  // linked: the account's recurring expense (§7.2), which already moves Savings on its own date
+  accts:[{id:"a1",name:"Credit Card",type:"credit",bal:640,linked:null},{id:"a2",name:"Car Loan",type:"loan",bal:5320.79,linked:"Car loan payment"}],
+  recurring:["Rent","Phone bill","Streaming service","Car insurance","Pest control","Car loan payment"],
+  ledger:[{d:"Thu 8 Oct",p:"Groceries",t:"Groceries",a:-42.1},{d:"Wed 7 Oct",p:"Paycheck",t:"Savings",a:1450,inc:true},{d:"Tue 6 Oct",p:"Toward Trip to Lisbon",t:"Trip to Lisbon",a:-50}]});
+let D=SEED();
+const $=s=>document.querySelector(s);
+const eur=n=>(n<0?"−":"")+"€"+Math.abs(n).toLocaleString("en-GB",{minimumFractionDigits:Math.abs(n)%1?2:0,maximumFractionDigits:2});
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const K={focus:true,enter:true,ctrl:true};
+let AREA="word";   // owner, 2026-10-09: the area as a tappable word in front of the sentence ("switch": v4's row)
+let ARR="W",DESK=1,TAB={phone:"Budget",desk:"Budget"};
+let LAST={kind:"cat",id:"c1",dir:"out"};          // before any entry: the first Category
+let LASTBY={savings:null};                    // the last target in each group, for the selector   // the floating + opens this (owner: last kind and last target)
+let S=null;                                    // the open sheet
+
+// ---- kinds: the words, the directions, what moves (§3.6's table; DRAFT wording) -------------------------------------
+function item(kind,id){return kind==="goal"?D.goals.find(x=>x.id===id):kind==="cat"?D.cats.find(x=>x.id===id):kind==="acct"?D.accts.find(x=>x.id===id):{name:"Savings"}}
+function dirs(kind,id){
+  // owner, 2026-10-09: no Money out on Savings; money only leaves through something that tracks it
+  if(kind==="savings")return D.income?[["in","Add"],["income","Income"]]:null;   // owner's wording, 2026-10-09
+  if(kind==="goal")return[["in","Add"],["spend","Spent"]];   // owner, 2026-10-09: spent from a goal
+  // owner, 2026-10-09: "Paid off" instead of "Payment"
+  if(kind==="acct")return item(kind,id).type==="credit"?[["charge","Charged"],["payment","Paid off"]]:[["payment","Paid off"],["increase","Increased"]];
+  return null}                                  // Goals and Categories: one direction, so no control
+// §7.2: a payment also leaves Savings by default only when no recurring expense already moves Savings for that account
+const pairDefault=(kind,id)=>kind==="acct"&&!item(kind,id).linked;
+// the note: who was paid, or who the money came from. Not on a goal (it reads "Toward <goal>") nor on a paying-off
+// (it reads "Payment to <account>"), where it would only repeat the target
+// owner's draft, 2026-10-09: Savings "from" (owner, 2026-10-09; was "source"), a goal's Add "for", Category and Charged "at"; a goal's Spent takes
+// "at" here (the owner wrote "for/from", and "from" is already the goal's own word: "Spent €80 from Holidays")
+function noteWord(){const k=S.kind,d=S.dir;
+  if(k==="acct"&&d==="payment")return null;
+  if(k==="savings")return"from";if(k==="goal")return d==="in"?"for":"at";return"at"}
+const NOTE_HINT={from:"who or where",for:"what for",at:"where"};
+function verb(){const k=S.kind;
+  if(k==="cat")return"Spent";if(k==="savings"&&!dirs(k))return"Add";
+  return tok("dir",dirs(k,S.id).find(x=>x[0]===S.dir)[1])}
+function prep(){const k=S.kind,d=S.dir;
+  if(k==="goal")return d==="spend"?"from":"to";if(k==="cat")return"on";
+  if(k==="savings")return"to";
+  return"on"}
+function moves(){const a=S.amt,k=S.kind,it=item(k,S.id),d=S.dir;if(!(a>0))return null;
+  if(k==="goal")return d==="spend"?(a>it.saved?null:[[it.name,-a]]):[[it.name,+a],["Savings",-a]];
+  if(k==="cat")return[[it.name+" spent",+a],["Savings",-a]];
+  if(k==="savings")return[["Savings",d==="out"?-a:+a]];
+  const r=[[it.name+(it.type==="credit"?" owed":" balance"),d==="payment"?-a:+a]];
+  if(d==="payment"&&S.pair)r.push(["Savings",-a]);return r}
+
+// ---- the sentence (W) ----------------------------------------------------------------------------------------------
+function tok(id,text){return `<button class="tok${S.open===id?" open":""}" onclick="tapTok('${id}')"><b>${esc(text)}</b></button>`}
+function sentence(){const k=S.kind,it=item(k,S.id);
+  const area=AREA==="word"?`${tok("area",({savings:"Savings",goal:"Goal",cat:"Category",acct:"Account"})[k])} – `:"";
+  // Savings needs no target: the area already names it
+  const target=k==="savings"?"":` ${prep()} ${tok("target",it.name)}`;
+  let s=`${area}${verb()} € <input class="amtf" id="amt" inputmode="decimal" value="${S.amtText}" oninput="amtIn(this.value)" onkeydown="keyIn(event)" aria-label="Amount">${target} ${tok("date",S.date)}`;
+  const nw=noteWord();
+  if(nw)s+=`, ${nw} <input class="payf" id="pay" value="${esc(S.payee)}" placeholder="${NOTE_HINT[nw]} (optional)" oninput="S.payee=this.value;refresh()" onkeydown="keyIn(event)" aria-label="${NOTE_HINT[nw]}">`;
+  if(k==="acct"&&S.dir==="payment")s+=`, ${tok("pair",S.pair?"also from Savings":"not from Savings")}`;
+  return s}
+function chooser(){const o=S.open;if(!o)return"";
+  if(o==="area")return`<div class="chips">${GROUPS.map(([k])=>chip(({savings:"Savings",goal:"Goal",cat:"Category",acct:"Account"})[k],S.kind===k,`S.open=null;pickGroup('${k}');if(S.open!=='target')draw()`)).join("")}</div>`;
+  if(o==="dir")return`<div class="chips">${dirs(S.kind,S.id).map(([v,l])=>chip(l,S.dir===v,`pickDir('${v}')`)).join("")}</div>`;
+  if(o==="date")return`<div class="chips">${["today","yesterday","Wed 7 Oct","Tue 6 Oct"].map(x=>chip(x,S.date===x,`S.date='${x}';S.open=null;draw()`)).join("")}<span class="hint">&nbsp;or the calendar</span></div>`;
+  if(o==="target"){   // owner, 2026-10-09: the selector chooses the group, so the picker holds only that group's chips
+    const xs=groupItems(S.kind);
+    return `<div class="chips">${xs.map(x=>chip(x.name,S.id===x.id,`pickTarget('${S.kind}',${x.id?`'${x.id}'`:"null"})`)).join("")}</div>`}
+  return""}
+function chip(label,on,act){return `<button class="chip${on?" on":""}" onclick="${act}"><span>${esc(label)}</span></button>`}
+function readout(){const m=moves();if(!m)return"";
+  return m.map(([n,a])=>`${esc(n)} <b>${a>0?"+":""}${eur(a)}</b>`).join(" · ")}
+function captions(){const c=[];
+  if(goalShort()){const g=item("goal",S.id);c.push(`${g.name} holds ${eur(g.saved)}, so this can spend up to that.`)}
+  if(S.kind==="savings"&&S.dir==="income")c.push("Counts toward this month's income received.");
+  const rec=D.recurring.find(r=>S.payee&&r.toLowerCase().includes(S.payee.trim().toLowerCase())&&S.payee.trim().length>2);
+  if(rec&&(S.kind==="cat"||(S.kind==="goal"&&S.dir==="spend")))c.push(`${rec} is a recurring expense and is taken on its own date. Log it here only if this is an extra payment.`);
+  if(S.kind==="acct"&&S.dir==="payment"){const it=item(S.kind,S.id);
+    if(it.linked)c.push(S.pair?`${it.linked} already takes this from Savings on its date, so this would count it twice.`:`Savings stays: ${it.linked} already takes this from Savings on its date.`);
+    else c.push(S.pair?"Savings goes down by the same amount: nothing else moves it for this account.":"Savings stays as it is.")}
+  return c.map(x=>`<div class="caption">${esc(x)}</div>`).join("")}
+function goalShort(){return S&&S.kind==="goal"&&S.dir==="spend"&&S.amt>item("goal",S.id).saved}
+function complete(){return S.mode==="W"?moves()!==null:(parsed().state==="ok")}
+
+// ---- the capture line (C5: bare names + name chips) -------------------------------------------------------------------
+const VERBS={spent:["cat","out"],paid:[null,"payment"],bought:["cat","out"],add:["goal","in"],put:["goal","in"],save:["goal","in"],
+  received:["savings","income"],got:["savings","in"],charge:["acct","charge"],charged:["acct","charge"],in:["savings","in"]};
+function allItems(){return[...D.goals.map(x=>["goal",x]),...D.cats.map(x=>["cat",x]),...D.accts.map(x=>["acct",x])]}
+function parsed(){const t=S.text,low=" "+t.toLowerCase().replace(/\s+/g," ")+" ";
+  const amts=(t.match(/(?:^|\s)€?(\d+(?:[.,]\d{1,2})?)(?=\s|$)/g)||[]).map(x=>parseFloat(x.replace("€","").replace(",",".")));
+  const r={amount:amts.length===1?amts[0]:null,amounts:amts.length,kind:null,item:null,dir:null,state:"empty",ask:null,part:""};
+  const v=Object.keys(VERBS).find(w=>low.startsWith(" "+w+" "));if(v){r.kind=VERBS[v][0];r.dir=VERBS[v][1]}
+  if(S.bound){r.kind=S.bound[0];r.item=item(S.bound[0],S.bound[1])}
+  else{const hits=allItems().filter(([k,x])=>low.includes(" "+x.name.toLowerCase()+" "));
+    if(hits.length){const top=Math.max(...hits.map(h=>h[1].name.length)),best=hits.filter(h=>h[1].name.length===top);
+      const pre=(low.split(" "+best[0][1].name.toLowerCase()+" ")[0].trim().split(" ").pop());
+      const fits={from:["goal"],on:["cat","acct"],to:["goal","acct"]}[pre];
+      if(best.length>1&&fits){const f=best.filter(h=>fits.includes(h[0]));if(f.length)best.splice(0,best.length,...f)}
+      if(best.length>1)r.ask={why:`Two items are called ${best[0][1].name}. Which one?`,opts:best};else{r.kind=best[0][0];r.item=best[0][1]}}
+    else{const m=low.match(/ (?:on|to|for|into) ([^\d€]+?) $/);if(m){r.part=m[1].trim();
+      const opts=allItems().filter(([k,x])=>x.name.toLowerCase().split(" ").some(w=>w.startsWith(r.part.split(" ")[0])));
+      r.ask={why:opts.length?"":`No item is called “${r.part}”. Which one?`,opts:opts.length?opts:allItems()}}}}
+  if(r.item&&r.kind==="acct"&&(!r.dir||!["charge","payment","increase"].includes(r.dir)))r.dir=r.item.type==="credit"?"charge":"payment";
+  if(r.item&&r.kind==="goal")r.dir=["spent","paid","bought"].includes(v)?"spend":"in";if(r.item&&r.kind==="cat")r.dir="out";
+  if(!r.item&&!r.ask&&r.amount){if(["in","income"].includes(r.dir)){r.kind="savings"}
+    else r.ask={why:"What was it spent on?",opts:D.cats.map(x=>["cat",x])}}   // nothing leaves Savings untracked
+  if(r.dir==="income"&&!D.income)r.dir="in";
+  if(S.dirOverride&&r.kind==="savings"&&dirs("savings"))r.dir=S.dirOverride;
+  if(r.dir==="spend"&&r.amount>r.item.saved)r.short=true;
+  r.state=r.amounts>1?"two":r.ask&&r.amount>0?"ask":r.short?"short":r.amount>0?"ok":"empty";return r}
+function lineView(){const r=parsed();
+  // the line keeps the text as typed; what was understood is shown under it, the direction a tappable word (§3.6)
+  let hl=esc(S.text);if(r.item&&!S.bound)hl=hl.replace(new RegExp(r.item.name.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"i"),m=>`<span class="hl">${m}</span>`);
+  if(r.amount)hl=hl.replace(String(r.amount).replace(".","[.,]")?new RegExp("€?"+String(r.amount).replace(".","[.,]")):"",m=>`<span class="hl">${m}</span>`);
+  let h=`<div class="lin"><input id="lineIn" value="${esc(S.text)}" placeholder="spent 30 on Entertainment" oninput="lineIn(this.value)" onkeydown="keyIn(event)" aria-label="Entry line"></div>`;
+  h+=`<div class="hint">${S.text?hl:"spent · paid · add · charge · received, an amount, then on or to a name"}</div>`;
+  if(r.state==="short")h+=`<div class="ask">${esc(r.item.name)} holds ${eur(r.item.saved)}, so this can spend up to that.</div>`;
+  if(r.state==="two")h+=`<div class="ask">Two amounts: which one is the money? Keep one in the line.</div>`;
+  if(r.ask){h+=r.ask.why?`<div class="ask">${esc(r.ask.why)}</div>`:"";
+    h+=`<div class="chips">${r.ask.opts.slice(0,8).map(([k,x])=>chip(x.name+(r.ask.why.startsWith("Two")?" · "+({goal:"goal",cat:"category",acct:"account"})[k]:""),false,`bind('${k}','${x.id}')`)).join("")}</div>`}
+  if(r.state==="ok"){S.kind=r.kind;S.id=r.item?r.item.id:null;S.dir=r.dir;S.amt=r.amount;
+    const w=dirs(r.kind,S.id);
+    h+=`<div class="readout" style="margin-top:6px">${w?tok("dir",w.find(x=>x[0]===r.dir)[1])+" · ":""}${readout()}</div>`}
+  return h}
+
+// ---- sheet lifecycle ------------------------------------------------------------------------------------------------
+function openW(frame,kind,id){const dd=dirs(kind,id);
+  S={frame,mode:"W",kind,id,dir:kind===LAST.kind&&id===LAST.id&&LAST.dir&&dd&&dd.some(x=>x[0]===LAST.dir)?LAST.dir:(dd?dd[0][0]:"in"),
+    amtText:"",amt:null,payee:"",date:"today",open:null,pair:pairDefault(kind,id)};draw();focusIn("amt")}
+function openLast(frame){openW(frame,LAST.kind,LAST.id)}
+function openLine(frame){S={frame,mode:"L",text:"",bound:null,kind:"cat",id:"c1",dir:"out",amt:null,payee:"",date:"today",open:null,pair:false,dirOverride:null};draw();focusIn("lineIn")}
+function focusIn(id){if(!K.focus)return;setTimeout(()=>{const e=document.getElementById(id);if(e){e.focus();const v=e.value;e.value="";e.value=v}},0)}
+function closeSheet(){S=null;draw()}
+function confirmS(){if(!complete())return;const m=moves();if(!m)return;const k=S.kind,it=item(k,S.id),a=S.amt;
+  if(k==="goal")it.saved+=(S.dir==="spend"?-a:a);if(k==="cat")it.spent+=a;
+  if(k==="acct")it.bal+=(S.dir==="payment"?-a:a);
+  m.forEach(([n,x])=>{if(n==="Savings")D.savings+=x});
+  const sav=m.find(x=>x[0]==="Savings");
+  const note=S.payee||(k==="goal"?(S.dir==="spend"?"Spent from "+it.name:"Toward "+it.name):it.name);
+  D.ledger.unshift({d:S.date==="today"?"Fri 9 Oct":S.date==="yesterday"?"Thu 8 Oct":S.date,p:note,t:it.name,a:sav?sav[1]:m[0][1],inc:k==="savings"&&S.dir==="income",fresh:true});
+  LAST={kind:k,id:S.id,dir:S.dir};LASTBY[k]=S.id;S=null;draw()}
+function amtIn(v){S.amtText=v;const n=parseFloat(v.replace(",","."));S.amt=/^\d+([.,]\d{1,2})?$/.test(v.trim())&&n>0?n:null;refresh()}
+function lineIn(v){S.text=v;S.bound=null;draw();focusIn("lineIn")}
+function bind(k,id){const it=item(k,id);if(S.mode==="L"){const r=parsed();
+    // the tap is the choice: the part word (or the clashing name) becomes the item's full name, and is bound
+    S.text=r.part?S.text.replace(new RegExp(r.part.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s*$","i"),it.name):S.text;S.bound=[k,id];draw();focusIn("lineIn")}}
+function keyIn(e){if(e.key==="Enter"&&K.enter){e.preventDefault();if(complete())confirmS()}if(e.key==="Escape")closeSheet()}
+function tapTok(id){if(id==="pair"){S.pair=!S.pair;draw();return}
+  if(id==="dir"&&S.mode==="L"){const r=parsed(),w=dirs(r.kind,S.id),i=w.findIndex(x=>x[0]===r.dir);S.dirOverride=w[(i+1)%w.length][0];
+    if(r.kind!=="savings"){const v=w[(i+1)%w.length][0];S.text=S.text.replace(/^\w+/,({payment:"paid",spend:"spent",in:"add"})[v]||v)}draw();return}
+  S.open=S.open===id?null:id;draw()}
+function pickDir(v){S.dir=v;S.open=null;draw()}
+function groupItems(k){return k==="goal"?D.goals:k==="cat"?D.cats:k==="acct"?D.accts:[{id:null,name:"Savings"}]}
+// the selector: a new group takes its last-used item (or its first) and opens its picker at once; Savings has one item
+function pickGroup(k){if(k===S.kind)return;const xs=groupItems(k),id=k in LASTBY&&xs.some(x=>x.id===LASTBY[k])?LASTBY[k]:xs[0].id;
+  pickTarget(k,id);if(xs.length>1){S.open="target";draw()}}
+const GROUPS=[["savings","Savings"],["goal","Goals"],["cat","Categories"],["acct","Accounts"]];
+function selector(){if(AREA==="word")return"";return `<div class="seg" role="radiogroup" aria-label="What it is for">${GROUPS.map(([k,l])=>`<button role="radio" aria-checked="${S.kind===k}" class="${S.kind===k?"on":""}" onclick="pickGroup('${k}')">${l}</button>`).join("")}</div>`}
+function pickTarget(k,id){const dd=dirs(k,id),changed=k!==S.kind;S.kind=k;S.id=id;
+  // a new group starts on its own first direction, or the one last used there; never one carried over from another group
+  if(changed)S.dir=dd?(LAST.kind===k&&dd.some(x=>x[0]===LAST.dir)?LAST.dir:dd[0][0]):"in";
+  else if(!dd||!dd.some(x=>x[0]===S.dir))S.dir=dd?dd[0][0]:"in";
+  if(k==="acct")S.pair=pairDefault(k,id);S.open=null;draw();focusIn("amt")}
+function refresh(){const f=document.querySelector("#"+S.frame+" .foot");if(!f)return;
+  f.querySelector(".readout").innerHTML=readout();f.querySelector(".caps").innerHTML=captions();f.querySelector(".conf").disabled=!complete()}
+
+// ---- screens ---------------------------------------------------------------------------------------------------------
+function rowPlus(kind,id,frame,label){return `<button class="rplus" aria-label="${esc(label)}" onclick="openW('${frame}','${kind}',${id?`'${id}'`:"null"})"><span>+</span></button>`}
+function lineBtn(frame){return ARR==="L"?`<button class="line" onclick="openLine('${frame}')">spent 30 on Entertainment…</button>`:""}
+function budget(frame){
+  let h=`<div class="hdr"><span class="t">Budget</span>${frame==="desk"&&DESK===2?`<button class="addbtn" onclick="openLast('desk')">+ Add</button>`:""}</div>`;
+  h+=`<div class="sav"><span>Savings</span><span class="fig">${eur(D.savings)}</span></div>`;
+  h+=`<div class="sec">GOALS</div>`+D.goals.map(g=>`<div class="row"><div class="nm">${esc(g.name)}<div class="sub">${g.target?eur(g.saved)+" of "+eur(g.target):eur(g.saved)+" saved"}</div></div>${rowPlus("goal",g.id,frame,"Add to "+g.name)}</div>`).join("");
+  h+=`<div class="sec">INCOME</div><div class="row"><div class="nm">Paycheck<div class="sub">${eur(1450)} every two weeks · next Fri 23 Oct</div></div></div>`;
+  h+=lineBtn(frame);
+  h+=`<div class="sec">CATEGORIES</div>`+D.cats.map(c=>`<div class="row"><div class="nm">${esc(c.name)}<div class="sub">${eur(c.spent)} of ${eur(c.planned)}</div></div>${rowPlus("cat",c.id,frame,"Spent on "+c.name)}</div>`).join("");
+  return h}
+function activity(frame){
+  let h=`<div class="hdr"><span class="t">Activity</span>${frame==="desk"&&DESK===2&&TAB.desk!=="Budget"?`<button class="addbtn" onclick="openLast('desk')">+ Add</button>`:""}</div>`;
+  if(frame==="phone")h+=lineBtn(frame);
+  h+=`<div class="sec">ACCOUNTS</div>`+D.accts.map(a=>`<div class="row"><div class="nm">${esc(a.name)}<div class="sub">${a.type==="credit"?"Credit card":"Loan"}</div></div><div class="amt">${eur(a.bal)}</div>${rowPlus("acct",a.id,frame,"Log on "+a.name)}</div>`).join("");
+  h+=`<div class="sec">ACTIVITY LOG</div><div class="led">`+D.ledger.slice(0,9).map(l=>`<div class="row${l.fresh?" new":""}"><div class="nm">${esc(l.p)}<div class="sub">${esc(l.d)} · ${esc(l.t)}${l.inc?" · income":""}</div></div><div class="amt">${l.a>0?"+":""}${eur(l.a)}</div></div>`).join("")+"</div>";
+  return h}
+function other(frame,name){return `<div class="hdr"><span class="t">${name}</span></div>${lineBtn(frame)}<p class="dim">${name} is unchanged by this prototype.</p>`}
+function sheetHtml(){
+  const ttl="Log";   // owner, 2026-10-09: neutral, and it names where the entry lands   // the selector names the group, so the title no longer does
+  const body=S.mode==="L"?lineView():"";
+  return `<div class="scrim" onclick="closeSheet()"></div><div class="sheet" role="dialog" aria-label="${ttl}"><div class="top"><span class="ttl">${ttl}</span>${S.frame==="desk"?'<span class="hint"><span class="kbd">Enter</span> confirm · <span class="kbd">Esc</span> cancel</span>':""}</div>
+    <div class="area">${S.mode==="W"?chooser():body}</div>
+    <div class="foot">${S.mode==="W"?`${selector()}<div class="sent">${sentence()}</div><div class="readout">${readout()}</div>`:`<div class="readout" style="display:none"></div>`}<div class="caps">${captions()}</div>
+    <div class="btns"><button class="ghost" onclick="closeSheet()">Cancel</button><button class="conf" ${complete()?"":"disabled"} onclick="confirmS()">Confirm</button></div></div></div>`}
+function draw(){
+  const ph=TAB.phone,dk=TAB.desk;
+  const phoneScreen=ph==="Budget"?budget("phone"):ph==="Activity"?activity("phone"):other("phone",ph);
+  $("#phone").innerHTML=`<div class="screen">${phoneScreen}</div>
+    <button class="fab" aria-label="Add (opens the last kind used)" onclick="openLast('phone')">+</button>
+    <div class="nav">${["Budget","Activity","Learn","Reports","Settings"].map(t=>`<button class="${ph===t?"on":""}" onclick="TAB.phone='${t}';S=null;draw()">${t}</button>`).join("")}</div>
+    ${S&&S.frame==="phone"?sheetHtml():""}`;
+  const c1=dk==="Budget"?budget("desk"):dk==="Activity"?activity("desk"):other("desk",dk);
+  const c2=dk==="Budget"?activity("desk"):`<p class="dim">The second column.</p>`;
+  $("#desk").innerHTML=`<div class="titlebar">Sci-Fin${K.ctrl&&DESK!==3?' &nbsp;·&nbsp; <span class="kbd">Ctrl+N</span>&nbsp;new entry':""}</div>
+    <div class="rail">${["Budget","Activity","Learn","Reports","Settings"].map(t=>`<button class="${dk===t?"on":""}" onclick="TAB.desk='${t}';S=null;draw()">${t}</button>`).join("")}</div>
+    <div class="col col1">${c1}</div><div class="col col2">${c2}</div>
+    ${DESK===3?`<button class="fab" aria-label="Add" onclick="openLast('desk')">+</button>`:""}
+    ${S&&S.frame==="desk"?sheetHtml():""}`;
+  ["arrW","arrL"].forEach(i=>$("#"+i).classList.toggle("on",i==="arr"+ARR));[1,2,3].forEach(i=>$("#d"+i).classList.toggle("on",DESK===i));$("#aW").classList.toggle("on",AREA==="word");$("#aS").classList.toggle("on",AREA==="switch")}
+function setArea(a){AREA=a;if(S)draw();else draw()}
+function setArr(a){ARR=a;S=null;draw()}
+function setDesk(n){DESK=n;S=null;draw()}
+function theme(t){document.documentElement.dataset.theme=t;$("#tL").classList.toggle("on",t==="light");$("#tD").classList.toggle("on",t==="dark")}
+function resetAll(){D=SEED();LAST={kind:"cat",id:"c1",dir:"out"};LASTBY={savings:null};S=null;draw()}
+document.addEventListener("keydown",e=>{if(K.ctrl&&e.ctrlKey&&(e.key==="n"||e.key==="N")&&!S){e.preventDefault();ARR==="L"?openLine("desk"):openLast("desk")}
+  if(e.key==="Escape"&&S)closeSheet()});
+draw();theme("light");
+</script>
+</body>
+</html>

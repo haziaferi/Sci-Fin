@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sci-Fin — the desktop, options (§4.8 reopened 2026-09-23)</title>
+<style>
+  :root{--bg:#F5F5F4;--surf:#FFFFFF;--surf2:#EBEBE9;--bord:#DCDCD9;--bordStrong:#8C8C8D;
+        --txt:#26262A;--txt2:#66666B;--txt3:#9D9DA1;--acc:#5B6670;--onAcc:#FFFFFF;
+        --xs:13.5px;--sm:14.8px;--base:16px;--md:17.2px;--lg:19.7px;--xl:22.2px;--xxl:27px;
+        --u:8px;--pad:14px;--gap:8px;--r:14px}
+  body{margin:0;background:#8a8a8a;font-family:"Segoe UI",system-ui,sans-serif;color:#fff;padding:28px}
+  h1{font-size:23px;margin:0 0 6px;font-weight:700}
+  h2{font-size:18px;margin:38px 0 4px;font-weight:700}
+  h3{font-size:15px;margin:22px 0 8px;font-weight:600;opacity:.9}
+  p.intro{max-width:78ch;line-height:1.6;font-size:15px;opacity:.94;margin:0 0 10px}
+  p.intro.tight{margin-bottom:4px}
+  blockquote{max-width:78ch;border-left:3px solid rgba(255,255,255,.45);margin:14px 0;padding:2px 0 2px 14px;
+             font-size:14.5px;line-height:1.6;opacity:.9}
+  .win{width:1100px;height:760px;background:var(--bg);border-radius:10px;overflow:hidden;
+       box-shadow:0 16px 50px rgba(0,0,0,.4);display:flex;color:var(--txt);margin:12px 0 0}
+  .chrome{height:34px;background:#d9d9d7;border-bottom:1px solid var(--bord);display:flex;align-items:center;
+          padding:0 12px;gap:7px;font-size:12.5px;color:#55555a;font-weight:600}
+  .dot{width:11px;height:11px;border-radius:50%;background:#bdbdbb}
+  .frame{width:1100px;margin:12px 0 0;border-radius:10px;overflow:hidden;box-shadow:0 16px 50px rgba(0,0,0,.4)}
+  .frame .win{margin:0;border-radius:0;box-shadow:none;height:726px}
+  .rail{width:88px;flex:none;background:var(--bg);border-right:1px solid var(--bordStrong);
+        padding:calc(var(--u)*2) 0;display:flex;flex-direction:column;gap:calc(var(--u)*.5)}
+  .rail div{padding:calc(var(--u)*1.25) 0;text-align:center;font-size:var(--xs);color:var(--txt2);font-weight:600}
+  .rail div.on{color:var(--acc);font-weight:800}
+  .rail div b{display:block;font-size:17px;font-weight:400;margin-bottom:3px;opacity:.75}
+  .pane{overflow:hidden;padding:calc(var(--u)*2);box-sizing:border-box}
+  .listpane{width:368px;flex:none;border-right:1px solid var(--bord)}
+  .detail{flex:1}
+  .measure{flex:1;display:flex;justify-content:center}
+  .col{width:560px;padding:calc(var(--u)*2);box-sizing:border-box}
+  .wide{flex:1;padding:calc(var(--u)*2.5) calc(var(--u)*4);box-sizing:border-box}
+  .card{background:var(--surf);border-radius:var(--r);padding:calc(var(--u)*1.5) calc(var(--u)*1.75);margin-bottom:var(--gap)}
+  .card.flat{background:var(--surf2)}
+  .lbl{color:var(--txt2);font-size:var(--xs);font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin:calc(var(--u)*1.5) 0 calc(var(--u)*.75)}
+  .lbl:first-child{margin-top:0}
+  .fig{font-size:var(--xxl);font-weight:800;line-height:1.1}
+  .fig.sm{font-size:var(--lg)}
+  .k{color:var(--txt2);font-size:var(--sm)}
+  .ttl{font-weight:700;font-size:var(--base)}
+  .seg{display:flex;background:var(--surf2);border-radius:12px;padding:3px;margin-bottom:var(--gap)}
+  .seg>div{flex:1;text-align:center;padding:9px 2px;border-radius:8px;font-weight:700;color:var(--txt2);font-size:var(--sm)}
+  .seg>div.on{background:var(--surf);color:var(--txt)}
+  .rowb{display:flex;justify-content:space-between;align-items:center;gap:var(--gap)}
+  .btnrow{display:flex;gap:var(--gap);margin-top:calc(var(--u)*1.5)}
+  .btn{padding:10px 16px;border-radius:12px;font-weight:700;font-size:var(--sm);border:1.5px solid var(--acc);color:var(--acc)}
+  .btn.p{background:var(--acc);color:var(--onAcc);border-color:var(--acc)}
+  .bar{height:calc(var(--u)*1.25);background:var(--surf2);border-radius:99px;overflow:hidden;margin-top:calc(var(--u)*.75)}
+  .bar i{display:block;height:100%;background:var(--acc);border-radius:99px}
+  .chart{height:150px;background:var(--surf);border-radius:var(--r);position:relative;overflow:hidden;margin-bottom:var(--gap)}
+  .chart.tall{height:230px}
+  .chart svg{position:absolute;inset:0;width:100%;height:100%}
+  .empty{flex:1;display:flex;align-items:center;justify-content:center;color:var(--txt3);font-size:var(--sm)}
+  .ghosted{opacity:.4}
+  .note{background:var(--surf2);border-radius:var(--r);padding:calc(var(--u)*1.25) calc(var(--u)*1.5);color:var(--txt2);font-size:var(--sm);line-height:1.5;margin-bottom:var(--gap)}
+  table{border-collapse:collapse;margin:14px 0 0;font-size:14px;background:rgba(0,0,0,.14);border-radius:8px;overflow:hidden}
+  th,td{padding:9px 13px;text-align:left;vertical-align:top;border-bottom:1px solid rgba(255,255,255,.14)}
+  th{font-weight:700;background:rgba(0,0,0,.18)}
+  td.y{color:#cfe8cf}td.n{color:#f0cfcf}
+  .verdict{max-width:78ch;background:rgba(0,0,0,.2);border-radius:10px;padding:14px 18px;margin:14px 0 0;line-height:1.6;font-size:14.5px}
+  .tag{display:inline-block;background:rgba(255,255,255,.16);border-radius:99px;padding:2px 10px;font-size:12.5px;font-weight:600;margin-left:8px;vertical-align:middle}
+  /* D renders the same tokens at the scale factor the phone rule would give a 644dp column */
+  .scaled{--u:13px;--pad:23px;--gap:13px;--r:14px;
+          --xs:13.5px;--sm:14.8px;--base:16px;--md:17.2px;--lg:19.7px;--xl:22.2px;--xxl:27px}
+</style>
+</head>
+<body>
+
+<h1>The desktop, six ways</h1>
+<p class="intro">§4.8 was reopened on 2026-09-23: <em>“the desktop app will not be a copy of the phone app.”</em> That section had decided the opposite — adaptive reflow over a separate desktop shell — and it decided it on register grounds rather than on cost, so its argument is not withdrawn. It is the case each option below has to answer:</p>
+
+<blockquote>“What authoring one actually buys is density: use the width to show more at once — Envelopes and Categories side by side rather than behind §4.3’s segmented control, Activity as a dashboard grid, every figure visible simultaneously. That payoff is one this app is designed not to want. §4.2 assigns Budget the <strong>habit-loop</strong> pattern and warns in its own words that Categories is ‘the screen most tempting to default to status-board’ … A desktop IA that surfaces every figure at once converts the app’s most-visited screen into exactly the scoreboard §2.2 and §2.4 exist to prevent.”</blockquote>
+
+<p class="intro">So the question is not “should the desktop use the width”. It is <strong>what the width buys, if it may not buy simultaneity of figures.</strong> There are four honest answers to that, and each is an option below: <strong>nothing</strong> (B), <strong>navigation</strong> (A), <strong>context</strong> (C), <strong>size</strong> (D). Two more options challenge the premise rather than answer it: <strong>E</strong> spends the width on a second view, and <strong>F</strong> spends the left edge on data instead of icons.</p>
+
+<h2 style="margin-top:30px">What the survey changed <span class="tag">added 2026-09-23, after the fact</span></h2>
+<p class="intro tight">Seven open-source desktop finance apps were surveyed — six of them fully weighted, Maybe discounted because it is no longer maintained — and every option here was scored against them. The full record is <code>design/desktop-prior-art-2026-09-23.md</code>; three findings bear directly on the frames below, and the first one <strong>weakens the blockquote above</strong>.</p>
+<ul class="intro" style="max-width:78ch;line-height:1.65;padding-left:20px">
+  <li><strong>Width and verdict-colour are independent choices.</strong> §4.8’s sentence treats them as one thing — show every figure at once and you get the scoreboard. <strong>KMyMoney</strong> is the counterexample: the widest, most figure-dense budget layout in the survey (budget list, full category tree, and an assignments panel, all at once) with <em>no</em> over/under colour coding at all. <strong>Actual Budget</strong> is the other side of the pair — it applies red to overspent envelopes and green to “every euro assigned”, and measuring its computed colours shows it colours <em>verdicts</em>, not negative numbers: <code>-770.24</code> and <code>-170.12</code> render in ordinary text. So Sci-Fin can take the width without taking the scoreboard, provided it keeps §2.1 — which it already mandates as a prohibition. <strong>Weakened later the same day:</strong> a second app was briefly cited as confirming this and does not — see the correction under <em>The survey’s “data sidebar” count was wrong</em>. This now rests on KMyMoney alone, which is documentation evidence, so <strong>treat it as an open question rather than a finding</strong>.</li>
+  <li><strong>Nobody uses an icon rail. Zero of seven.</strong> Five use a data sidebar, one tabs, one dockable panels. Actual’s sidebar measures <strong>240px</strong> at this exact window size — 2.7× Sci-Fin’s 88px rail — because it carries every account and its balance rather than five icons. That is what <strong>F</strong> below draws.</li>
+  <li><strong>Side-by-side exists in the wild, but only once, and not in E’s form.</strong> Actual pairs it with a data sidebar and inline editors; E pairs it with a rail and dialogs. The field does not support E’s particular combination — which is most of why the scoring below goes the way it does.</li>
+</ul>
+
+<p class="intro tight">Every frame is 1100 × 760, the window the app actually opens at, drawn in Slate light with the parity fixture’s real figures. Each shows <strong>Budget → Envelopes</strong>, because §4.2 names it the screen most at risk of becoming a scoreboard — if an option survives here it survives anywhere.</p>
+
+<!-- ─────────────────────────────── A ─────────────────────────────── -->
+<h2>A · Adaptive reflow <span class="tag">as built today</span></h2>
+<p class="intro">The width buys <strong>navigation</strong>: what would be a pushed screen on the phone opens beside its list instead. Rail 88 · list 368 · detail 644.</p>
+
+<div class="frame">
+  <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp;Sci-Fin</div>
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="pane listpane">
+      <div class="seg"><div class="on">Envelopes</div><div>Categories</div></div>
+      <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+      <div class="lbl">Income</div>
+      <div class="card"><div class="k">Per paycheck (monthly)</div><div class="fig sm">€2,400</div></div>
+      <div class="lbl">Recurring expenses</div>
+      <div class="card"><div class="rowb"><span class="ttl">6 recurring</span><span class="ttl">€1,095/mo</span></div></div>
+      <div class="lbl">Goals</div>
+      <div class="card"><div class="ttl">Emergency fund</div><div class="k">€1,150 left of goal</div><div class="bar"><i style="width:62%"></i></div></div>
+      <div class="card"><div class="ttl">New laptop</div><div class="k">€420 left of goal</div><div class="bar"><i style="width:79%"></i></div></div>
+    </div>
+    <div class="pane detail">
+      <div class="ttl" style="font-size:var(--xl);margin-bottom:calc(var(--u)*1.5)">Emergency fund</div>
+      <div class="note">A goal is money you have already set aside. Adding to it moves money out of Savings; it never creates money.</div>
+      <div class="card"><div class="k">Target</div><div class="fig sm">€3,000</div></div>
+      <div class="card"><div class="k">Saved so far</div><div class="fig sm">€1,850</div><div class="bar"><i style="width:62%"></i></div></div>
+      <div class="card"><div class="k">By</div><div class="ttl">August 2027</div><div class="k" style="margin-top:4px">About €105 a month from here.</div></div>
+      <div class="btnrow"><div class="btn p">Add to this goal</div><div class="btn">Edit</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="verdict"><strong>Answers the register argument</strong> by adding no figures at all — the right pane holds one thing you chose to open. <strong>What it costs:</strong> the second pane is empty on Reports and Learn, which §4.8 already had to carve out as exceptions, so the window’s shape changes tab to tab. It is also the only option where the phone’s element sizes sit in a 644dp column, which is what made the Windows walk read as “phone-sized elements in a desktop window”. And the live two-pane defect from 15 September lives here.</div>
+
+<!-- ─────────────────────────────── B ─────────────────────────────── -->
+<h2>B · Centred measure <span class="tag">the width buys nothing, deliberately</span></h2>
+<p class="intro">One column, phone-proportioned, centred. Everything pushes exactly as on the phone. The width buys <strong>margin</strong> — the refusal is the design.</p>
+
+<div class="frame">
+  <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp;Sci-Fin</div>
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="measure">
+      <div class="col">
+        <div class="seg"><div class="on">Envelopes</div><div>Categories</div></div>
+        <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+        <div class="note">The app’s core functions depend on this figure being real. Quick-add whenever you’re ready — no rush.</div>
+        <div class="lbl">Income</div>
+        <div class="card"><div class="k">Per paycheck (monthly)</div><div class="fig sm">€2,400</div><div class="k" style="margin-top:6px">€2,400 received so far this month</div></div>
+        <div class="lbl">Recurring expenses</div>
+        <div class="card"><div class="rowb"><span class="ttl">6 recurring expenses</span><span class="ttl">€1,095/mo</span></div></div>
+        <div class="lbl">Goals</div>
+        <div class="card"><div class="ttl">Emergency fund</div><div class="k">€1,150 left of goal</div><div class="bar"><i style="width:62%"></i></div></div>
+        <div class="card"><div class="ttl">New laptop</div><div class="k">€420 left of goal</div><div class="bar"><i style="width:79%"></i></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="verdict"><strong>Answers the register argument</strong> completely — it is the only option that cannot become a scoreboard, because there is nowhere to put a second figure. <strong>What it costs:</strong> it is the option most open to the charge you raised, that the desktop is a copy of the phone. 480 px of the window is empty on both sides, which reads as calm in a reading app and can read as unfinished in a money app. Editors still push, so the desktop gains nothing over the phone but a rail.</div>
+
+<!-- ─────────────────────────────── C ─────────────────────────────── -->
+<h2>C · Workbench <span class="tag">the width buys context, never figures</span></h2>
+<p class="intro">Two panes, but the right one is <strong>never empty and never a dashboard</strong>. When you have opened something it holds that; when you have not, it holds the one non-numeric thing that screen’s register wants — for Budget, the Learn hook behind what you are looking at. A rule, stated once: <em>the right pane may hold prose, one editor, or one chart — never a second set of figures.</em></p>
+
+<div class="frame">
+  <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp;Sci-Fin</div>
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="pane listpane">
+      <div class="seg"><div class="on">Envelopes</div><div>Categories</div></div>
+      <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+      <div class="lbl">Income</div>
+      <div class="card"><div class="k">Per paycheck (monthly)</div><div class="fig sm">€2,400</div></div>
+      <div class="lbl">Recurring expenses</div>
+      <div class="card"><div class="rowb"><span class="ttl">6 recurring</span><span class="ttl">€1,095/mo</span></div></div>
+      <div class="lbl">Goals</div>
+      <div class="card"><div class="ttl">Emergency fund</div><div class="k">€1,150 left of goal</div><div class="bar"><i style="width:62%"></i></div></div>
+      <div class="card"><div class="ttl">New laptop</div><div class="k">€420 left of goal</div><div class="bar"><i style="width:79%"></i></div></div>
+    </div>
+    <div class="pane detail">
+      <div class="k" style="font-weight:800;letter-spacing:.05em;text-transform:uppercase;font-size:var(--xs);margin-bottom:calc(var(--u)*1.25)">Why this screen looks like this</div>
+      <div class="ttl" style="font-size:var(--lg);margin-bottom:calc(var(--u)*1.25)">Why categories work</div>
+      <div style="font-size:var(--sm);line-height:1.65;color:var(--txt2)">
+        <p style="margin:0 0 12px">People do not treat all money the same. A pound set aside for rent is not felt as the same pound as one left loose, even though nothing about it differs — which is the finding envelope budgeting has always quietly relied on.</p>
+        <p style="margin:0 0 12px">That is why this screen splits one figure into named portions instead of showing you one balance and a target to hit. The portions are the mechanism, not decoration.</p>
+        <p style="margin:0">Nothing here turns red when a portion runs low. A category over its plan is information, not a verdict.</p>
+      </div>
+      <div class="k" style="margin-top:calc(var(--u)*2);font-size:var(--xs)">Mental accounting — Thaler · earmarking and partitioning — Soman &amp; Cheema</div>
+    </div>
+  </div>
+</div>
+
+<div class="verdict"><strong>Answers the register argument</strong> by writing the constraint into the layout itself: the pane that width creates is reserved for prose, one editor or one chart, so “every figure at once” is structurally unavailable rather than merely discouraged. It is also the only option where the width does something the phone genuinely cannot. <strong>What it costs:</strong> Learn currently has four bodies unwritten (§4.5 waits on the research audit), so on day one the default right pane has little to show; and it needs a per-screen answer for what sits there — Budget gets the hook, Activity the ledger, Settings the spoke, Reports nothing.</p>
+<p style="margin:12px 0 0;padding-top:12px;border-top:1px solid rgba(255,255,255,.18)"><strong>Added 2026-09-23, after measuring:</strong> the prose above is the best case — it assumes §4.5’s bodies exist. Even so, this right pane is only <strong>42.5% filled at 1100×760, 21.8% at 1920×1080 and 14.7% at 2560×1440</strong>, the emptiest content pane of the six at every size. C led the first fitness on an assumed “uses the width” score of 1.00; measured, it comes last. <strong>C is withdrawn.</strong> Its one durable idea — that the screen can say why it looks like this — survives as a card at the foot of the column, which needs no pane and no reservation rule.</p></div>
+
+<!-- ─────────────────────────────── D ─────────────────────────────── -->
+<h2>D · At scale <span class="tag">the width buys size</span></h2>
+<p class="intro">One column, no panes, everything rendered at the factor the phone rule would give this width — <strong>u 8 → 13px, pad 14 → 23px</strong>. Charts and lists use the room; type keeps its measure cap so prose never runs 1100px wide. This is the option that makes “proportional to the window” literally true on the desktop.</p>
+
+<div class="frame">
+  <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp;Sci-Fin</div>
+  <div class="win scaled">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="pane wide">
+      <div class="seg" style="max-width:520px"><div class="on">Envelopes</div><div>Categories</div></div>
+      <div class="card"><div class="k">Savings</div><div class="fig" style="font-size:38px">€4,470</div></div>
+      <div class="note" style="max-width:70ch">The app’s core functions depend on this figure being real. Quick-add whenever you’re ready — no rush.</div>
+      <div class="lbl">Income</div>
+      <div class="card"><div class="k">Per paycheck (monthly)</div><div class="fig sm" style="font-size:25px">€2,400</div></div>
+      <div class="lbl">Recurring expenses</div>
+      <div class="card"><div class="rowb"><span class="ttl">6 recurring expenses</span><span class="ttl">€1,095/mo</span></div></div>
+      <div class="lbl">Goals</div>
+      <div class="card"><div class="rowb"><span class="ttl">Emergency fund</span><span class="k">€1,150 left of goal</span></div><div class="bar"><i style="width:62%"></i></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="verdict"><strong>Answers the register argument</strong> the same way B does — one column, nothing added. <strong>What it costs:</strong> it is the least desktop-native of the six; a large window becomes a large phone, and someone who maximises to 1920px gets very large furniture unless a ceiling is set after all. It pairs with the scale decision you already took for phones (“no ceiling”) and would extend it upward; A, B and C all imply a ceiling near 1.0–1.5 instead.</div>
+
+<!-- ─────────────────────────────── E ─────────────────────────────── -->
+<h2>E · Envelopes and Categories together <span class="tag">added 2026-09-23, at your suggestion</span></h2>
+<p class="intro">On the phone these have to be two screens behind §4.3’s segmented control. On the desktop they need not be: both columns, no control, each headed. The width buys <strong>a screen the phone cannot have at all</strong> — this is the first option where the desktop and the phone differ in <em>information architecture</em> rather than in layout.</p>
+<p class="intro" style="opacity:.82">Stated plainly because you should be overruling it knowingly rather than by accident: this is the exact example §4.8 used to argue against a desktop shell — <em>“use the width to show more at once — Envelopes and Categories side by side rather than behind §4.3’s segmented control.”</em> The mockup is the fairest way to test whether that worry survives the real figures, so it is drawn with them: Eating out is genuinely over its plan, and §2.1’s tick-and-hatch is doing its job rather than being described.</p>
+
+<div class="frame">
+  <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp;Sci-Fin</div>
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="pane" style="width:506px;flex:none;border-right:1px solid var(--bord)">
+      <div class="lbl">Envelopes</div>
+      <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+      <div class="note">The app’s core functions depend on this figure being real. Quick-add whenever you’re ready — no rush.</div>
+      <div class="lbl">Income</div>
+      <div class="card"><div class="k">Per paycheck (monthly)</div><div class="fig sm">€2,400</div><div class="k" style="margin-top:5px">€2,400 received so far this month</div></div>
+      <div class="lbl">Recurring expenses</div>
+      <div class="card"><div class="rowb"><span class="ttl">6 recurring expenses</span><span class="ttl">€1,095/mo</span></div></div>
+      <div class="lbl">Goals</div>
+      <div class="card"><div class="ttl">Emergency fund</div><div class="k">€1,150 left of goal</div><div class="bar"><i style="width:62%"></i></div></div>
+      <div class="card"><div class="ttl">New laptop</div><div class="k">€420 left of goal</div><div class="bar"><i style="width:79%"></i></div></div>
+    </div>
+    <div class="pane" style="flex:1">
+      <div class="lbl">Categories</div>
+      <div class="card"><div class="k">Spent this month</div><div class="fig">€520.95</div><div class="k" style="margin-top:5px">of €970 set aside across five categories</div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Groceries</span><span class="k">€149.15 of €400</span></div><div class="bar"><i style="width:37%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Transport</span><span class="k">€49 of €120</span></div><div class="bar"><i style="width:41%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Eating out</span><span class="k">€206.40 of €150</span></div>
+        <div class="bar" style="position:relative;background:var(--surf2)">
+          <i style="width:72.7%"></i>
+          <span style="position:absolute;left:72.7%;right:0;top:0;bottom:0;background:repeating-linear-gradient(45deg,var(--bordStrong) 0 2px,transparent 2px 5px);border-radius:0 99px 99px 0"></span>
+          <span style="position:absolute;left:72.7%;top:-3px;bottom:-3px;width:2px;background:var(--txt)"></span>
+        </div>
+      </div>
+      <div class="card"><div class="rowb"><span class="ttl">Utilities</span><span class="k">€92.40 of €200</span></div><div class="bar"><i style="width:46%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Fun</span><span class="k">€24 of €100</span></div><div class="bar"><i style="width:24%"></i></div></div>
+      <div class="card flat" style="text-align:center;color:var(--txt2);font-weight:600;border:1.5px dashed var(--bordStrong);background:transparent">+ New category</div>
+    </div>
+  </div>
+</div>
+
+<div class="verdict"><strong>What the mockup shows, against §4.8’s worry.</strong> The scoreboard risk is real but narrower than the sentence assumed: what makes a status-board is <em>comparison-to-target with a verdict attached</em>, and the right column does carry five of those at once. What it does not carry is the verdict — nothing is red, Eating out over its plan reads as a hatched overrun and a tick rather than a failure, and there is no aggregate “you are X% on track”. My honest read is that the objection lands at about half strength: side-by-side does make the screen denser and more comparative than the phone, and the §2.1 encoding is doing more work here than anywhere else in the app. Whether that is acceptable is a judgement about the app’s voice, which is yours.</p>
+<p style="margin:12px 0 0"><strong>What it costs elsewhere:</strong> it takes both columns on Budget, so it cannot be combined with C’s reserved context pane at this width — Budget would need three columns of ~337px each, narrower than a phone, which I would not recommend. E and C are therefore alternatives on the Budget tab, even though E could sit happily alongside C’s rule on Activity, Learn and Settings.</p>
+<p style="margin:12px 0 0;padding-top:12px;border-top:1px solid rgba(255,255,255,.18)"><strong>Added 2026-09-23, after the survey:</strong> that last observation is what the previous version of this sheet built its recommendation on — “E on Budget, C’s rule elsewhere”. <strong>It is withdrawn.</strong> Scored against the surveyed field the combination ranks 56th of 180, below every option drawn here, and the reason is not the density charge above but the fact that it forks three things from the phone build at once. See <em>What I would pick</em> below.</p></div>
+
+<!-- ─────────────────────────────── F ─────────────────────────────── -->
+<h2>F · Data sidebar <span class="tag">added 2026-09-23, from the survey</span></h2>
+<p class="intro">What five of the seven surveyed apps actually do, translated into Sci-Fin’s palette and the parity fixture’s figures. The left edge stops being five icons and becomes a <strong>240px column carrying the destinations by name and the two figures that never change context</strong>. The width buys <strong>standing orientation</strong> — you always know where you stand without the main pane having to say so, and §4.3’s segmented control survives untouched.</p>
+<p class="intro" style="opacity:.82">Drawn rather than installed, deliberately: running HomeBank or Money Manager Ex would not have answered the only question that matters here, which is whether a data sidebar reads calm or busy <em>in this palette</em>. Geometry is taken from the measurement, not invented — sidebar 240, main 860, content centred at 640 because that is what Actual does inside its 860.</p>
+<p class="intro" style="opacity:.82">Judge it knowing the cost: those two figures are on screen on <em>all five tabs</em>, not just Budget. That is a heavier version of exactly the charge E is convicted of below, and it is why F scores where it does despite being the shape the field actually converged on.</p>
+
+<div class="frame">
+  <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp;Sci-Fin</div>
+  <div class="win">
+    <div style="width:240px;flex:none;background:var(--bg);border-right:1px solid var(--bordStrong);padding:calc(var(--u)*2) calc(var(--u)*1.5);box-sizing:border-box;overflow:hidden">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="padding:9px 11px;border-radius:10px;background:var(--surf);color:var(--acc);font-weight:800;font-size:var(--sm)"><span style="opacity:.75;font-weight:400;margin-right:9px">▢</span>Budget</div>
+        <div style="padding:9px 11px;border-radius:10px;color:var(--txt2);font-weight:600;font-size:var(--sm)"><span style="opacity:.6;font-weight:400;margin-right:9px">▤</span>Activity</div>
+        <div style="padding:9px 11px;border-radius:10px;color:var(--txt2);font-weight:600;font-size:var(--sm)"><span style="opacity:.6;font-weight:400;margin-right:9px">◯</span>Learn</div>
+        <div style="padding:9px 11px;border-radius:10px;color:var(--txt2);font-weight:600;font-size:var(--sm)"><span style="opacity:.6;font-weight:400;margin-right:9px">▥</span>Reports</div>
+        <div style="padding:9px 11px;border-radius:10px;color:var(--txt2);font-weight:600;font-size:var(--sm)"><span style="opacity:.6;font-weight:400;margin-right:9px">⚙</span>Settings</div>
+      </div>
+      <div style="height:1px;background:var(--bord);margin:calc(var(--u)*2.25) 2px"></div>
+      <div class="lbl" style="margin-top:0">Savings</div>
+      <div class="fig sm" style="margin:0 2px">€4,470</div>
+      <div class="lbl">Spent this month</div>
+      <div class="fig sm" style="margin:0 2px">€520.95</div>
+      <div class="k" style="margin:4px 2px 0">of €970 set aside</div>
+      <div class="bar" style="margin:calc(var(--u)*1.25) 2px 0"><i style="width:53.7%"></i></div>
+    </div>
+    <div class="pane" style="flex:1;display:flex;justify-content:center">
+      <div style="width:640px">
+        <div class="seg"><div>Envelopes</div><div class="on">Categories</div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Groceries</span><span class="k">€149.15 of €400</span></div><div class="bar"><i style="width:37%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Transport</span><span class="k">€49 of €120</span></div><div class="bar"><i style="width:41%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Eating out</span><span class="k">€206.40 of €150</span></div>
+          <div class="bar" style="position:relative;background:var(--surf2)">
+            <i style="width:72.7%"></i>
+            <span style="position:absolute;left:72.7%;right:0;top:0;bottom:0;background:repeating-linear-gradient(45deg,var(--bordStrong) 0 2px,transparent 2px 5px);border-radius:0 99px 99px 0"></span>
+            <span style="position:absolute;left:72.7%;top:-3px;bottom:-3px;width:2px;background:var(--txt)"></span>
+          </div>
+        </div>
+        <div class="card"><div class="rowb"><span class="ttl">Utilities</span><span class="k">€92.40 of €200</span></div><div class="bar"><i style="width:46%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Fun</span><span class="k">€24 of €100</span></div><div class="bar"><i style="width:24%"></i></div></div>
+        <div class="card flat" style="text-align:center;color:var(--txt2);font-weight:600;border:1.5px dashed var(--bordStrong);background:transparent">+ New category</div>
+        <div class="note" style="margin-top:calc(var(--u)*2)">Eating out is over its plan by €56.40. The tick marks where the plan sat; the hatching is what went past it.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="verdict"><strong>Where the field went, and why Sci-Fin may still not want to follow.</strong> This is the modal answer — five of the seven surveyed apps put data, not icons, in the left column, and it scores the best prior-art term of any option here by a wide margin (0.52 against 0.24–0.27 for everything else). It is also the only option that makes the rail question concrete rather than theoretical. <strong>What it costs:</strong> the two standing figures never leave the screen, so Activity, Learn, Reports and Settings all gain a permanent second set of figures they do not need — which is the density charge, applied to five tabs rather than one. That is the whole of the gap between its prior-art strength and its rank of 44.</div>
+
+<!-- ─────────────────────────────── comparison ─────────────────────────────── -->
+<h2>Side by side</h2>
+<table>
+<tr><th>&nbsp;</th><th>A · Reflow</th><th>B · Centred</th><th>C · Workbench</th><th>D · At scale</th><th>E · Both views</th><th>F · Data sidebar</th></tr>
+<tr><th>What the width buys</th><td>navigation</td><td>margin</td><td>context</td><td>size</td><td>a screen the phone can’t have</td><td>standing orientation</td></tr>
+<tr><th>Extra figures on screen</th><td class="y">none</td><td class="y">none</td><td class="y">none, by rule</td><td class="y">none</td><td class="n">yes — five category rows, on Budget only</td><td class="n">yes — two, on all five tabs</td></tr>
+<tr><th>Same shape on every tab</th><td class="n">no — Reports and Learn are single-pane exceptions</td><td class="y">yes</td><td class="n">no — Reports stays single-pane</td><td class="y">yes</td><td class="n">no — only Budget has two views to pair</td><td class="y">yes — the sidebar is constant</td></tr>
+<tr><th>Distinct from the phone</th><td>somewhat</td><td class="n">barely</td><td class="y">clearly</td><td>in size only</td><td class="y">most — differs in IA, not just layout</td><td class="y">clearly — the phone has no room for it</td></tr>
+<tr><th>Implies a scale ceiling of</th><td>≈1.0</td><td>1.0</td><td>≈1.0–1.2</td><td>none, or a high one</td><td>≈1.0</td><td>≈1.0</td></tr>
+<tr><th>Work to build</th><td class="y">none — it exists</td><td>small</td><td class="n">largest — needs a per-screen rule for the right pane</td><td>small, once dp_purge lands</td><td>medium — a Budget-only desktop layout</td><td>medium — one new shell, then every tab inherits it</td></tr>
+<tr><th>Depends on unfinished work</th><td>no</td><td>no</td><td class="n">yes — §4.5's Learn bodies</td><td>no</td><td class="y">no</td><td class="y">no</td></tr>
+<tr><th>Fixes the 15 Sept two-pane defect</th><td class="n">no, must be repaired</td><td class="y">n/a — no second pane</td><td class="n">no, must be repaired</td><td class="y">n/a</td><td class="n">no, must be repaired</td><td class="y">n/a — one main pane</td></tr>
+<tr><th>Where the editors go</th><td>the right pane</td><td>push</td><td>the right pane</td><td>push</td><td class="n">push, or a dialog — both columns are taken</td><td>inline in the main pane</td></tr>
+<tr><th>Surveyed apps with this shell <span style="opacity:.7;font-weight:400">(of 7)</span></th><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="y">5</td></tr>
+<tr><th>Main pane actually filled <span style="opacity:.7;font-weight:400">— measured, 1100×760</span></th><td>60.2%</td><td>84.9%</td><td class="n">42.5%</td><td class="y">87.5%</td><td>81.0 / 74.2%</td><td>74.4%</td></tr>
+<tr><th>…filled at <span style="opacity:.7;font-weight:400">1920×1080</span></th><td class="n">38.4%</td><td>57.1%</td><td class="n">21.8%</td><td>58.8%</td><td>54.4 / 49.9%</td><td>50.0%</td></tr>
+<tr><th>…filled at <span style="opacity:.7;font-weight:400">2560×1440</span></th><td class="n">28.8%</td><td class="n">42.8%</td><td class="n">14.7%</td><td class="n">44.1%</td><td class="n">40.8 / 37.4%</td><td class="n">37.5%</td></tr>
+<tr><th>Fitness <span style="opacity:.7;font-weight:400">— revised, measured fill</span></th><td>0.777 · 3rd</td><td>0.813 · 2nd</td><td class="n">0.679 · 6th</td><td class="y"><strong>0.816 · 1st</strong></td><td>0.709 · 5th</td><td>0.715 · 4th</td></tr>
+<tr><th><span style="opacity:.7;font-weight:400">…what it was before measuring</span></th><td style="opacity:.6">0.787 · 2nd</td><td style="opacity:.6">0.787 · 3rd</td><td style="opacity:.6">0.810 · <strong>1st</strong></td><td style="opacity:.6">0.787 · 4th</td><td style="opacity:.6">0.707 · 6th</td><td style="opacity:.6">0.719 · 5th</td></tr>
+</table>
+<p class="intro" style="margin-top:10px;opacity:.82">The <strong>E + C synthesis</strong> recommended in the first version of this sheet is not a column above because it is not competitive under either fitness: 0.703 then, <strong>0.600 now</strong> — last of seven both times.</p>
+
+<h2>How much of the window is actually filled <span class="tag">measured 2026-09-23, after a correct objection</span></h2>
+<p class="intro">The fitness above originally awarded C’s <em>reserved right pane</em> a flat 1.00 for “uses the width”. That was an assumption standing in for a measurement, and it was wrong. Measuring the rendered frames — leaf content only, so a stretched flex wrapper cannot fake a full pane — gives the three rows now in the table. <strong>C’s right pane is the emptiest content pane of any option at every size</strong>: 42.5% at the app’s own window, 21.8% at 1920×1080, and <strong>14.7% at 2560×1440</strong>. A reserved pane is not a used pane.</p>
+<p class="intro">Correcting that one term moves C from <strong>1st to 6th</strong>. D and B rise to the top, but only just, and they finish <strong>0.816 against 0.813</strong> — a tie. D takes 98.9% of 4,000 random reweightings purely because it weakly dominates B by that 0.003; the sensitivity figure looks decisive and is not. What the measurement establishes firmly is which options are <em>bad</em>, not which is best.</p>
+
+<h3>The scale ceiling, measured under the rule that text does not scale</h3>
+<p class="intro"><strong>§2.5, as settled on 2026-09-23: the screen factor multiplies <code>u</code>, <code>pad</code>, <code>gap</code> and icon sizes, and nothing else.</strong> Text is OS-only — the window may not override it — and radii and strokes came off the screen axis in the same decision. Frame D already obeys this: it scales <code>u</code> 8→13px and <code>pad</code> 14→23px while all seven type tokens stay at their root values.</p>
+<p class="intro">Sweeping D’s ceiling with only the spacing on the axis gives the table below. It is worth stating what it kills: an earlier version of this section reported 95.9% fill at 1.5× and 93.9% uncapped. <strong>Those numbers were produced by scaling the type ramp with the window, which the rule forbids.</strong> With text held at 16px they do not survive.</p>
+<table>
+<tr><th>Scale ceiling</th><th><code>u</code></th><th>Base text</th><th>Fill at 1920×1080</th><th>Fill at 2560×1440</th></tr>
+<tr><th>1.0× <span style="opacity:.7;font-weight:400">(≈ option B)</span></th><td>8px</td><td>16px</td><td class="n">46.6%</td><td class="n">35.0%</td></tr>
+<tr><th>1.5×</th><td>12px</td><td>16px</td><td class="n">56.4%</td><td class="n">42.3%</td></tr>
+<tr><th>1.625× <span style="opacity:.7;font-weight:400">(= D as drawn)</span></th><td>13px</td><td>16px</td><td>58.8%</td><td class="n">44.1%</td></tr>
+<tr><th>2.0×</th><td>16px</td><td>16px</td><td>66.1%</td><td class="n">49.6%</td></tr>
+<tr><th>2.5×</th><td>20px</td><td>16px</td><td>75.8%</td><td class="n">56.9%</td></tr>
+<tr><th>3.0× <span style="opacity:.7;font-weight:400">(implausible — 24px gutters)</span></th><td>24px</td><td>16px</td><td>85.5%</td><td class="n">64.1%</td></tr>
+</table>
+<div class="verdict" style="margin-top:14px"><strong>The honest conclusion, which no option escapes: spacing alone cannot fill a maximised window.</strong> Even at a frankly implausible <code>u</code> of 24px — triple the phone’s gutters — a 2560×1440 window is still only 64% full. Because text may not grow, a card’s height is dominated by a term the window is not allowed to touch, so padding it out hits diminishing returns long before the screen is full. One person’s budget simply does not contain enough to fill a 27-inch display, and no arrangement of it will.
+<p style="margin:12px 0 0">Two consequences. First, <strong>the ceiling is a minor decision, not the major one</strong> — over the whole plausible range 1.0×–2.0× the fill at 1920 moves from 46.6% to 66.1%, and every value in it leaves the window substantially empty. Second, <strong>fullscreen fill should not be what picks between these options</strong>, because none of them solve it; what it does do is disqualify the option that is worst at the size the app actually opens at. That is still C, at 42.5%.</p></div>
+
+<h2>Information, not ink <span class="tag">the criterion that actually decides it</span></h2>
+<p class="intro">Everything above measures <strong>ink</strong> — how much of the window is covered. That is the wrong proxy, and the objection that exposed it is simple: <em>a card at twice the spacing covers twice the pixels and tells you exactly the same thing.</em> Scoring fill rewards filling space with larger furniture, which is the opposite of what a wide window is for. Counting what is actually <em>conveyed</em> in the same 1100 × 760 window — money figures plus progress bars, both of which carry a value a person can read — reverses the ranking:</p>
+<table>
+<tr><th>&nbsp;</th><th>E · Both views</th><th>F · Data sidebar</th><th>A · Reflow</th><th>B · Centred</th><th>C · Workbench</th><th>D · At scale</th></tr>
+<tr><th>Money figures</th><td class="y">18</td><td>14</td><td>8</td><td>6</td><td>5</td><td class="n">4</td></tr>
+<tr><th>Progress bars</th><td class="y">7</td><td>6</td><td>3</td><td>2</td><td>2</td><td class="n">1</td></tr>
+<tr><th><strong>Information atoms</strong></th><td class="y"><strong>25</strong></td><td>20</td><td>11</td><td>8</td><td>7</td><td class="n"><strong>5</strong></td></tr>
+<tr><th>Ink fill at 1100×760</th><td>77.6%</td><td>74.4%</td><td>60.2%</td><td>84.9%</td><td class="n">42.5%</td><td class="y">87.5%</td></tr>
+<tr><th>Atoms per unit of ink</th><td class="y">highest</td><td>high</td><td>middling</td><td>low</td><td>low</td><td class="n">lowest</td></tr>
+</table>
+<div class="verdict" style="margin-top:14px"><strong>D, which the previous revision recommended, conveys the least information of all six options.</strong> It ranked first on fill precisely because it spends the most space per unit of information. E carries <strong>five times</strong> D's information in <em>less</em> ink. Re-scored on information rather than fill, C and D are eliminated under every weighting tried, and E, A and F finish within 0.02 of each other — a dead heat rather than a winner.
+<p style="margin:12px 0 0">One term decides the rest: <code>figures_density</code>, which encodes §2.4's objection to many figures at once, penalises E at 0.72 and cancels its information advantage almost exactly. Sweeping that weight from 0.176 to 0 never lets E finish first — F overtakes it on prior art — but E never leaves second or third either. <strong>The arithmetic does not choose here.</strong> It has been corrected twice already, and what remains of it encodes a reading of §2.4 rather than anything measured.</p></div>
+
+<h2>Decision: E <span class="tag">chosen 2026-09-23, on information efficiency</span></h2>
+<div class="verdict">
+<p style="margin:0 0 12px"><strong>I withdraw “E on Budget, C’s rule elsewhere”.</strong> It was the recommendation in the previous version of this sheet and the survey does not support it. Scored against the field it comes 56th of 180 feasible structures, below every option drawn here, and it beats plain C under <strong>0% of 4,000 random reweightings</strong> of the six fitness components. That is not a close call I can argue around by re-weighting.</p>
+<p style="margin:0 0 12px">The argument I made for it still stands as an <em>observation</em> — Budget really is the only tab in §4.2’s table with two co-equal views of one thing, and the other four really are list-pushes-to-detail. What I got wrong was the price. I costed it as “editors must push or use a dialog”. The real cost is that E+C <strong>forks three things from the phone build at once</strong> — side-by-side Budget, reserved right pane, dialog editors — where C forks one. That penalty (−0.044 weighted) is larger than the figure-density penalty (−0.056 against a much smaller base) that §4.8’s objection was actually about. And the prior-art term did not rescue it: it scored E+C <em>below</em> C, because the one app that ships side-by-side pairs it with a data sidebar and inline editors, not a rail and dialogs.</p>
+<p style="margin:0 0 12px"><strong>And I withdraw C as well.</strong> It was the pick for about as long as it took to measure it. C won the first fitness on a term I had assumed rather than measured — a reserved pane scored as a used pane. It is not one: at 2560×1440 it is <strong>85.3% empty</strong>, the worst of the six at every size tested. Reserving half the window for content that has not been written yet is the weakest thing on this sheet, not the strongest.</p>
+<p style="margin:0 0 12px"><strong>And D is withdrawn in turn.</strong> I recommended it one revision ago on the strength of ink fill. On the criterion that matters it is the worst option on the sheet: four money figures and one bar, against E’s eighteen and seven. Filling a window with larger cards and larger bars is not using the width, it is padding it.</p>
+<p style="margin:0 0 12px"><strong>The decision is E — Envelopes and Categories together — taken on information efficiency.</strong> It shows the most of any option, 25 atoms against D’s 5, in <em>less</em> ink than D uses, and it is the only option where the extra width carries extra meaning rather than extra spacing. It is also the only one whose advantage grows rather than evaporates as the window grows, because two columns of real content scale with the space where one column of enlarged furniture does not.</p>
+<p style="margin:0 0 12px"><strong>What is being accepted, knowingly.</strong> §4.8 named this exact arrangement as its argument <em>against</em> a desktop shell, and the <code>figures_density</code> term scores E at 0.72 where every single-view option scores 1.00. That cost is real and it is being taken deliberately, on two grounds the survey supplies. First, <strong>KMyMoney</strong> proves density and verdict are separable — the widest, most figure-dense budget layout surveyed carries no over/under colour coding at all. Second, <strong>Actual</strong> shows what the failure actually looks like when it happens: red on overspent envelopes, green on “every euro assigned” — colour attached to a verdict. §2.1’s prohibition is therefore not a nicety under E, it is the single load-bearing constraint. Density without valence is a dense screen; density with valence is the scoreboard §2.2 and §2.4 exist to prevent.</p>
+<p style="margin:0 0 12px"><strong>The Learn hook survives — as a card, not a pane.</strong> C’s actual good idea was that the Budget screen should be able to say <em>why it looks like this</em>. Nothing about that required half the window; it required a card at the foot of the column. Kept that way it costs one component, needs no per-screen reservation rule, and stops blocking on §4.5’s four unwritten bodies — the dependency that made C the slowest option to build disappears with the pane.</p>
+<p style="margin:0 0 12px"><strong>What E settles, and what it does not.</strong> E is an answer to <em>Budget</em>. It is the only tab in §4.2’s table with two co-equal views of one thing, so the pairing does not generalise — and the four remaining tabs are now unanswered, because C was carrying them in the withdrawn synthesis and C is gone. Activity, Learn, Reports and Settings are list-pushes-to-detail; the honest default for them is A’s reflow, which costs nothing because it already exists, with Reports staying single-pane and wide as §4.8 already excepted. That should be confirmed rather than assumed.</p>
+<p style="margin:0"><strong>Three things stay open under E.</strong> <strong>(1) Where editors go — now largely answered.</strong> KMyMoney, installed and walked on 2026-09-23, puts its ledger editor in a <strong>persistent bottom strip beneath the list</strong>, tabbed by entry kind. That is a fourth option alongside push, dialog and right pane, and it is the one that fits E: E consumes both <em>columns</em> but leaves the <em>vertical</em> axis free, so an editor can sit along the bottom without disturbing either view. §4.8 rule 3 (sheets become dialogs) should lapse in favour of it. <strong>(2) The rail.</strong> Zero of seven surveyed apps use an icon rail and five use a 240px data sidebar — and that question is <em>orthogonal</em> to E, not settled by it. E with F’s sidebar is a live combination that would raise the information count further still; it is worth drawing before the rail is taken for granted. <strong>(3) The scale ceiling</strong>, which the measurements show is a small decision: across 1.0×–2.0× a 1920 window moves only from 46.6% to 66.1% full, because text may not scale.</p>
+</div>
+
+<h2>Scored by the purpose-built engines <span class="tag">2026-09-23 — replacing the hand-rolled fitness</span></h2>
+<p class="intro">Everything above this point was scored with fitness components written by hand for the occasion, which is how the first two errors got in. This section replaces them with the engines that exist for the job — <code>designkit register</code> (the layout/register scorer §4.2's patterns come from) and <code>craftkit ui</code> (measured contrast, type scale, spacing rhythm, shape language). Both ran against the full HS+DE portfolio rather than the local-search fallback.</p>
+
+<h3>The register engine, Budget screen — tone 0.35, referent <code>fixed-target</code></h3>
+<table>
+<tr><th>Budget variant</th><th>Pattern the engine chose</th><th>register_fit</th><th>medium_fit</th><th>fitness</th></tr>
+<tr><th>E — both views, 7 sections</th><td>f-pattern</td><td class="n">0.835</td><td class="y">0.965</td><td>0.851</td></tr>
+<tr><th>A / B / D — envelopes only</th><td>ambient-reflection</td><td class="y">0.955</td><td>0.830</td><td>0.859</td></tr>
+<tr><th>F — sidebar + categories</th><td class="y"><strong>habit-loop</strong></td><td class="y">0.955</td><td>0.830</td><td>0.859</td></tr>
+</table>
+<div class="verdict" style="margin-top:14px"><strong>Two things this settles that hand-written scorers could not.</strong> The engine independently reproduces §2.4’s penalty on E — 0.835 against 0.955 — so that objection is real and is not an artefact of how I framed it. But E recovers the whole of it on <code>medium_fit</code>, because an f-pattern suits a content-heavy screen where ambient-reflection does not, and the net gap is <strong>0.008</strong>. A third tie.
+<p style="margin:12px 0 0">The sharper result: <strong>only F lands on <code>habit-loop</code>, which is the pattern §4.2 itself assigns to Budget.</strong> E scores as an f-pattern, the single-view options as ambient-reflection. That is the strongest argument for F anywhere on this sheet, and it did not come from the survey or from me — it came from the scorer that §4.2’s own vocabulary is built on.</p></div>
+
+<h3>craftkit found a real defect — in this sheet, not in the app</h3>
+<p class="intro">The audit flagged a WCAG AA failure in <em>every</em> frame: <code>#6b6b70</code> on <code>#ebebe9</code> at <strong>4.44:1</strong>, under the 4.5 body-text line. The cause was drift: this sheet’s <code>--txt2</code> had become <code>#6B6B70</code> where <code>Tokens.kt</code> ships <code>66666B</code>. The shipping colour passes at <strong>4.78:1</strong>. <strong>Fixed</strong> — every token here now matches <code>Palettes.slateLight</code> exactly. It is worth stating plainly because every fill percentage, atom count and contrast figure on this sheet was measured off that artefact.</p>
+<p class="intro">After the fix, <strong>frame E audits cleanest of the six</strong>: zero errors, and the tightest system — three spacing values and four radii, against eight and six for A and F. A second flag, <code>txt3</code> at 2.4–3.3:1, is a non-finding: §2.5 already confines <code>txt3</code> to placeholders and <code>TokenContrastTest.kt</code> enforces it against a two-site whitelist.</p>
+
+<h3>The survey’s “data sidebar” count was wrong</h3>
+<p class="intro">§2 of the survey recorded “five of seven use a data sidebar”. That collapsed two different shells. <strong>Fava, measured at 1100×760, uses a 160px <em>text-nav</em> sidebar</strong> — sixteen named destinations, no icons, no figures — as do Money Manager Ex, Firefly III and Maybe. <strong>Only Actual puts live balances there.</strong> So F as drawn copies Actual specifically, not the field; the field’s real consensus is narrower, and it is only <em>“do not use an icon rail”</em>, which still stands at <strong>0 of 9</strong>.</p>
+<div class="verdict" style="margin-top:12px"><strong>Correction — the sentence that stood here was wrong.</strong> It claimed Fava was a second counterexample to §4.8, showing “density without verdict”. The measurement behind it queried table figures and silently excluded the chart, which is SVG. Re-measured:
+<p style="margin:10px 0 0">• <strong>Figures carry no valence</strong> — negatives render <code>rgb(204,204,204)</code> like everything else. Sign gets no colour. That part holds.<br>
+• <strong>The chart carries 47 distinct fills across the whole hue circle</strong> (0–353°), 7 in the red band and 5 in the green. Category identifiers rather than a good/bad encoding — but 47 colours breaches §2.5’s one-accent-per-theme regardless.<br>
+• <strong>The verdict is in the language, not the colour.</strong> The screen is titled <em>Income Statement</em> and leads with <em>Net Profit −103,335.53</em>, beside <em>Balance Sheet</em> and <em>Trial Balance</em>. That is performance accounting — a screen whose job is to tell you whether you did well. §2.2/§2.4 rule out that framing, and neutral colour does not rescue it.</p>
+<p style="margin:10px 0 0"><strong>Fava is therefore not a register model for this app.</strong> It supports one narrow claim — <em>sign need not be coloured</em> — and on register it is closer to what §4.8 feared than to a rebuttal of it.</p>
+<p style="margin:10px 0 0"><strong>And that weakens the claim E was accepted on.</strong> “Width and verdict are independent” now rests on KMyMoney alone, which is documentation evidence — its handbook not <em>describing</em> colour coding is not the same as observing it has none. Not disproven: Actual’s red/green is still demonstrably a YNAB-inherited method choice rather than a consequence of width. But not established either. <strong>It should be treated as an open question rather than a finding</strong>, and it was doing load-bearing work in the decision to accept E’s density.</p></div>
+
+<h2>KMyMoney, installed and walked <span class="tag">2026-09-23 — all screens, not just Budget</span></h2>
+<p class="intro">Sections above described KMyMoney from its documentation and its Budgets view alone. It was then installed from <code>download.kde.org</code>, driven at 1100&nbsp;×&nbsp;760, walked across every destination, and removed. <strong>The single-screen reading was wrong.</strong></p>
+<table>
+<tr><th>Destination</th><th>Structure</th></tr>
+<tr><th>Inizio (home)</th><td>scrolling dashboard; stacked sections; two columns <em>inside</em> a section</td></tr>
+<tr><th>Conti · Categorie</th><td>single full-width tree, filter bar along the bottom, one aggregate bottom-right — <strong>the same screen twice</strong></td></tr>
+<tr><th>Transazioni pianificate</th><td>single full-width table, “new” button top-left, filter top-right</td></tr>
+<tr><th>Registri (ledger)</th><td class="y">list on top, <strong>persistent inline editor strip at the bottom</strong>, tabbed by entry kind</td></tr>
+<tr><th>Budget</th><td>three panes — list <strong>427</strong> | tree <strong>282</strong> over assignments <strong>235</strong>, in a <strong>531</strong> column; sidebar 107</td></tr>
+<tr><th>Report</th><td>a tree of report types; each result <strong>opens in a new tab</strong></td></tr>
+<tr><th>Previsione</th><td>parameter strip on top, <strong>tabbed results</strong> below, split into two columns</td></tr>
+<tr><th>In uscita</th><td>table plus a <strong>vertical action-button column on the right</strong></td></tr>
+</table>
+<div class="verdict" style="margin-top:14px"><strong>Seven destinations, at least six layouts, and no rule connecting them.</strong> Lists, editors and the use of width are re-decided on every screen. From Budget alone it looks like a considered three-pane design; walked in full, that view is one of seven ad-hoc answers. This is what an app looks like when the layout rule is never written down once — and it is an argument for §4.8 stating one explicitly, which is what C’s reservation rule was reaching for even though C’s own proportions were wrong.
+<p style="margin:12px 0 0"><strong>The Budget proportions are wrong in an instructive way.</strong> The budget <em>list</em> — one or two rows for almost every user — takes <strong>39% of the window</strong>, while the whole working area gets 531px and must split three ways vertically. Width allocated by <em>category of content</em> rather than by <em>quantity</em>: the same error as scoring a reserved pane at a flat 1.00 without measuring its fill.</p>
+<p style="margin:12px 0 0"><strong>Two ideas survive the walk.</strong> The bottom editor strip (see the open questions below, which it answers). And the Budgets view’s <code>Periodo</code> radio group — Mensile / Annuale / Individuale — reshaping the editor beneath it, so a category’s budget is one monthly figure, one yearly figure, or twelve individual months in the same panel. The second is a <em>feature</em> idea, not a layout, and does not bear on A–F.</p></div>
+
+<h2>Actual Budget walked, every screen <span class="tag">2026-09-23 — the same walk as KMyMoney</span></h2>
+<p class="intro">Nine screens, driven at 1100&nbsp;×&nbsp;760 in the public demo and measured from the DOM. Against KMyMoney's seven screens and six improvised layouts, this is the clearest structural contrast in the survey.</p>
+<table>
+<tr><th>Screen</th><th>Sidebar</th><th>Main</th><th>Inner measure</th></tr>
+<tr><th>Budget</th><td>240</td><td>860</td><td>table ~636, <strong>centred</strong></td></tr>
+<tr><th>Reports</th><td>240</td><td>860</td><td>widget grid 829, scrolls to 1195</td></tr>
+<tr><th>Account register</th><td>240</td><td>860</td><td>849, scrolls to 6324</td></tr>
+<tr><th>Schedules · Payees · Rules · Tags</th><td>240</td><td>860</td><td>820 inset</td></tr>
+<tr><th>Settings</th><td>240</td><td>860</td><td class="y"><strong>530, centred</strong></td></tr>
+</table>
+<div class="verdict" style="margin-top:14px"><strong>The shell never changes — 240 / 860 on all nine.</strong> What changes is the <em>inner measure</em>, and it changes by <strong>kind of content</strong>: tables take 820–849, the budget table takes 636, and Settings takes 530 centred — a reading measure, not a table measure. The sidebar is fixed rather than proportional: when the viewport dropped to 815px mid-walk it stayed at exactly 240 and the main pane absorbed the whole loss.
+<p style="margin:12px 0 0"><strong>That is a third formulation neither C nor E proposed.</strong> Not <em>reserve a pane</em>, not <em>pair two views</em> — <strong>fix the shell and vary the measure</strong>. Fava independently lands in the same family (160px text-nav sidebar, one main pane), which makes it the modal answer among the apps that are actually pleasant to use. And Actual's Settings measure of 530 centred is almost exactly candidate <strong>B</strong>'s answer, applied to one screen rather than to the whole app — B scored mid-table as a whole-app strategy, but as a per-content-type rule it is what the best-regarded app in the survey ships.</p>
+<p style="margin:12px 0 0"><strong>Editing is inline, in the cell.</strong> Clicking a category turns the cell itself into a combobox with a contextual dropdown of categories and their balances. There are now four observed answers to “where do editors go”: inline in the cell (Actual), a persistent bottom strip (KMyMoney's ledger), a modal dialog (most of KMyMoney, Money Manager Ex), and push to a detail screen (Sci-Fin's phone build).</p>
+<p style="margin:12px 0 0"><strong>Stated straight, without reopening the decision:</strong> E's two columns are a departure from what both modern apps do — under this rule Budget would keep §4.3's segmented control and spend the width on a wider measure, which is closer to A or B. E stands; it is your call and the information-efficiency argument for it is unaffected. But two things are adoptable <em>under</em> E regardless: the measure rule (tables wide, prose and settings ~530 centred) stated once in §4.8, which is the part of C worth keeping after C was withdrawn; and inline editing, which strengthens the case for letting §4.8 rule 3 lapse.</p></div>
+
+<h2>GnuCash and Money Manager EX, installed and walked <span class="tag">2026-09-23 — completing the set</span></h2>
+<p class="intro">Both installed from their official GitHub releases, driven at 1100&nbsp;×&nbsp;760, walked and removed. Both are current releases, unlike KMyMoney's 2022 build.</p>
+
+<h3>GnuCash 5.16 — one shell, per-tab toolbars</h3>
+<p class="intro">No sidebar anywhere: a tabbed notebook with one full-width pane per tab, and tabs accumulate (accounts → a register → each report). <strong>What changes per screen is the toolbar, not the layout.</strong> Accounts gets Nuovo/Modifica/Elimina; a register gets Duplica/Inserisci/Vuota/Trasferimento/Riconcilia; a report gets <strong>Indietro / Avanti / Ricarica / Stop / Esporta / Stampa</strong> — browser navigation. Editing is <strong>inline in the row</strong>, as in Actual. Accounts and registers carry a summary bar at the foot; report tabs drop it.</p>
+<div class="verdict"><strong>GnuCash's report tab is the clearest emptiness failure in the whole survey.</strong> The report renders as a narrow left-aligned document occupying roughly <strong>470 of 1084px</strong>, with no centring and no second pane — worse than anything measured in Actual, and a direct caution for any option that renders prose or a chart into a wide pane without setting a measure.</div>
+
+<h3>Money Manager EX 1.9.4 — one shell, one reused list template</h3>
+<p class="intro">Navigatore panel <strong>~197</strong> | workspace <strong>~891</strong>. The dashboard is a two-column grid (accounts table | chart plus totals) under a summary strip. <strong>Tutte le Transazioni and Conti Bancari are the same template twice</strong> — identical filter strip, columns and bottom action row. Editing is <strong>modal dialogs</strong>, and report configuration is a large modal too. Two oddities worth recording: the chart legend uses green for income and red for expenses, and <strong>the Budget screen's empty state is the in-app manual</strong>, rendered in place with back/forward — the screen with nothing to show teaches you what it is for.</p>
+
+<h3>The four desktop apps, on discipline</h3>
+<table>
+<tr><th>App</th><th>Shell</th><th>What varies per screen</th><th>Editing</th></tr>
+<tr><th>Actual</th><td>fixed 240 / 860</td><td class="y">the <strong>inner measure</strong> — 849 tables, 636 budget, 530 settings</td><td>inline in the cell</td></tr>
+<tr><th>GnuCash</th><td>tabbed notebook, one full-width pane</td><td class="y">the <strong>toolbar</strong></td><td>inline in the row</td></tr>
+<tr><th>Money Manager EX</th><td>nav ~197 + workspace ~891</td><td class="y">little — one list template reused</td><td>modal dialogs</td></tr>
+<tr><th>KMyMoney</th><td class="n">none held constant</td><td class="n"><strong>the entire layout</strong> — six across seven screens</td><td>dialogs, plus one bottom strip</td></tr>
+</table>
+<div class="verdict" style="margin-top:14px"><strong>Three of the four hold a shell constant and vary exactly one thing.</strong> Actual varies the measure, GnuCash varies the toolbar, MMEX varies almost nothing. KMyMoney varies everything, and is the one that reads as incoherent. That is the survey's clearest structural result, and it does not favour any particular option — it is a constraint on <em>all</em> of them: <strong>§4.8 should name the constant, and name the one thing allowed to vary.</strong> Whichever of A–F is built, that sentence is what keeps it from drifting into KMyMoney's condition.</div>
+
+<h2>What is still open under each</h2>
+<p class="intro">Three things follow whichever you pick, and I have not decided any of them for you. The survey moved two of them.</p>
+<table>
+<tr><th>Open question</th><th>Where it stood</th><th>What the survey says</th></tr>
+<tr><th>The <strong>desktop scale ceiling</strong></th><td>Was an implication of each option, not a decision. The phone was settled at “no ceiling”.</td><td>No surveyed app exposes a scale factor, so there is still no prior art. The measurements now price it, and the price is <strong>low</strong>: because text may not scale, the whole plausible range 1.0×–2.0× moves a 1920 window only from 46.6% to 66.1% full. <strong>Still open, but it is a small decision, not the large one</strong> — an earlier draft of this row said the opposite, on figures that had wrongly scaled the text.</td></tr>
+<tr><th>Does <strong>§4.8 rule 3</strong> survive — sheets become dialogs?</th><td>Only B and D made it unambiguous.</td><td>Weakly supported at best: two of the evidenced apps use dialogs, two edit inline, one pushes. The fitness prefers <strong>inline</strong> — +0.008 over push and +0.019 over dialog — and dialogs cost a phone fork. I would let rule 3 lapse in favour of inline editing.</td></tr>
+<tr><th>Do the <strong>five destinations</strong> stay a rail?</th><td>§4.1 fixes it today, and A–E all took it for granted.</td><td class="y"><strong>This is the finding that changed most.</strong> Zero of seven surveyed apps use an icon rail; five use a 240px-class data sidebar. The rail still wins the fitness, but by 0.0205 — and only because the always-visible balances a sidebar implies are penalised as density. <strong>F exists to make this decidable by looking rather than by arguing.</strong></td></tr>
+</table>
+<p class="intro" style="margin-top:14px">Full survey, sources and the scorer that produced every number above: <code>design/desktop-prior-art-2026-09-23.md</code>. Nothing here has been written into <code>scifinspec.md</code> — §4.8 will record only its own conclusion, once you have picked one.</p>
+
+</body>
+</html>

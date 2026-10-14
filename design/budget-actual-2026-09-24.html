@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sci-Fin — Budget as the build actually renders it</title>
+<style>
+  :root{--bg:#F5F5F4;--surf:#FFFFFF;--surf2:#EBEBE9;--bord:#DCDCD9;--bordStrong:#8C8C8D;
+        --txt:#26262A;--txt2:#66666B;--txt3:#9D9DA1;--acc:#5B6670;--onAcc:#FFFFFF;
+        --u:8px;--pad:14px;--gap:8px;
+        --xs:13.5px;--sm:14.8px;--base:16px;--lg:19.7px;--xl:22.2px;--xxl:27px;
+        --rsm:8px;--rmd:12px;--rlg:14px;--M:458px}
+  body{margin:0;background:#8a8a8a;font-family:"Segoe UI",system-ui,sans-serif;color:#fff;padding:26px}
+  h1{font-size:23px;margin:0 0 6px;font-weight:700}
+  h2{font-size:18px;margin:34px 0 4px;font-weight:700}
+  p.intro{max-width:80ch;line-height:1.6;font-size:15px;opacity:.94;margin:0 0 10px}
+  .rule{max-width:80ch;background:rgba(0,0,0,.2);border-radius:10px;padding:14px 18px;margin:14px 0 0;line-height:1.6;font-size:14.5px}
+  .warn{max-width:80ch;background:#6b2f2f;border-radius:10px;padding:14px 18px;margin:0 0 14px;line-height:1.6;font-size:14.5px}
+  code{background:rgba(0,0,0,.25);padding:1px 5px;border-radius:4px;font-size:13px}
+  table{border-collapse:collapse;margin:14px 0 0;font-size:14px;background:rgba(0,0,0,.14);border-radius:8px;overflow:hidden}
+  th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid rgba(255,255,255,.14)}
+  th{font-weight:700;background:rgba(0,0,0,.18)}
+  td.y{color:#cfe8cf} td.n{color:#e8cfcf}
+  .cap{font-size:13px;opacity:.86;margin:12px 0 4px;font-weight:600}
+  .scaler{overflow:hidden;margin:0 0 4px}
+  .frame{transform-origin:top left;border-radius:8px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.36)}
+  .chrome{height:31px;background:#f3f3f3;border-bottom:1px solid #e3e3e3;display:flex;align-items:center;font-size:12px;color:#1a1a1a}
+  .chrome .tb{flex:1;display:flex;align-items:center;gap:8px;padding-left:11px}
+  .chrome .mark{width:16px;height:16px;border-radius:3px;background:var(--acc)}
+  .chrome .wc{display:flex;align-self:stretch}
+  .chrome .wc span{width:46px;display:flex;align-items:center;justify-content:center;font-size:10px}
+  .win{background:var(--bg);display:flex;color:var(--txt);height:721px}
+  .rail{width:88px;flex:none;background:var(--bg);border-right:1px solid var(--bordStrong);
+        padding:var(--gap) 4px;display:flex;flex-direction:column;gap:4px}
+  .rail div{padding:10px 2px;text-align:center;font-size:var(--xs);color:var(--txt2);font-weight:600;border-radius:var(--u)}
+  .rail div.on{color:var(--acc);font-weight:600;background:rgba(91,102,112,.12)}
+  .rail div b{display:block;font-size:20px;font-weight:400;margin-bottom:3px;opacity:.75}
+  .content{flex:1;display:flex;justify-content:center;overflow:hidden;min-width:0}
+  .page{flex:1;min-width:0;overflow-y:auto;padding:var(--pad);box-sizing:border-box}
+  .colblock{flex:none;display:flex;gap:16px}
+  .colblock > .page{width:var(--M);flex:none}
+  .page::-webkit-scrollbar{width:9px}
+  .page::-webkit-scrollbar-thumb{background:#c2c2c0;border-radius:99px}
+  .empty{background:repeating-linear-gradient(45deg,rgba(140,140,141,.16) 0 6px,transparent 6px 12px)}
+
+  .titlerow{display:flex;align-items:center;gap:7px;margin-bottom:11px}
+  .titlerow .t{font-size:var(--lg);font-weight:700}
+  .seg{display:flex;background:var(--surf2);border-radius:var(--rmd);padding:3px;margin-bottom:10px}
+  .seg>div{flex:1;text-align:center;padding:9px 2px;border-radius:var(--rsm);font-weight:600;color:var(--txt2);font-size:var(--sm)}
+  .seg>div.on{background:var(--surf);color:var(--txt)}
+  .surface{background:var(--surf);border-radius:var(--rlg);padding:12px 12px;margin-bottom:10px}
+  .flat{background:var(--surf2);border-radius:var(--rlg);padding:10px 12px;margin-bottom:6px}
+  .seclbl{color:var(--txt2);font-size:var(--xs);font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin:0 0 6px}
+  .k{color:var(--txt2);font-size:var(--sm);font-weight:600}
+  .cap2{color:var(--txt2);font-size:var(--xs);margin:0 0 8px 2px}
+  .amt{font-size:var(--xl);font-weight:800;line-height:1.15}
+  .big{font-size:var(--xxl);font-weight:800;line-height:1.1}
+  .ttl{font-weight:600;font-size:var(--base)}
+  .rowb{display:flex;justify-content:space-between;align-items:center;gap:var(--gap)}
+  .link{color:var(--acc);font-size:var(--xs);font-weight:700;text-decoration:underline;margin:0 0 6px 2px}
+  /* §2.1's bar: 5dp tall, micro radius, accent fill, hatch past the reference, tick at it */
+  .bar{height:5px;background:var(--surf2);border-radius:3px;overflow:hidden;margin-top:3px;position:relative}
+  .bar i{display:block;height:100%;background:var(--acc);border-radius:3px}
+  .bar .hatch{position:absolute;top:0;bottom:0;right:0;background:repeating-linear-gradient(135deg,rgba(91,102,112,.85) 0 3px,transparent 3px 6px)}
+  .bar .tick{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--txt)}
+  .prow{background:var(--surf);border-radius:var(--rlg);padding:10px 12px;margin-bottom:var(--gap)}
+  .prow .head{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+  .prow .qa{margin-left:auto;border:1.5px solid var(--acc);color:var(--acc);border-radius:var(--rsm);
+            padding:3px 9px;font-size:var(--xs);font-weight:700}
+  .add{border:1.5px dashed var(--bordStrong);border-radius:var(--rlg);padding:11px;text-align:center;
+       color:var(--txt2);font-weight:600;font-size:var(--sm);margin-bottom:var(--gap)}
+  .disc{background:var(--surf);border-radius:var(--rmd);padding:10px 12px;margin-bottom:10px;
+        box-shadow:inset 0 0 0 999px rgba(91,102,112,.14)}
+  .note{background:var(--surf2);border-radius:var(--rlg);padding:10px 12px;color:var(--txt2);
+        font-size:var(--sm);line-height:1.5;margin-bottom:var(--gap)}
+  .ico{font-size:15px;opacity:.7}
+</style>
+</head>
+<body>
+
+<h1>Budget, as the build actually renders it</h1>
+
+<div class="warn">
+<strong>Everything I drew before this was inaccurate, in a way that mattered.</strong> <code>BudgetScreen.kt:75-79</code> shows a title row, then a <strong>segmented control</strong>, then <em>one</em> of Envelopes or Categories — never both. My earlier sheets put both on screen at once and silently dropped the title row, the segmented control, the catch-up card, the learn link, the &ldquo;received so far&rdquo; caption, the recurring disclosure note and the whole Goals section. That made the two-column idea look like &ldquo;split an existing two-pane screen&rdquo; when it is really &ldquo;<strong>replace the segmented control</strong>&rdquo; — a far bigger claim, and one that has to be argued rather than assumed.
+</div>
+
+<p class="intro">These frames are rebuilt from the composables and filled from <code>prototype-seed.json</code> and its <code>figures</code> block: Savings €3,067, income €1,450 <em>biweekly</em>, six recurring expenses totalling <strong>€1,364/mo</strong> (car insurance 600÷12 = 50, pest control 90÷2 = 45 — which confirms the €1,364 correction and the earlier €1,095 was wrong), goals Emergency fund 1050/2200, Trip to Lisbon 400/900 and Someday fund with no target, and four categories of which <strong>two are over plan</strong>. The window is <strong>1084 × 721</strong>, the real client area from §14.5.1.</p>
+
+<h2>1 · Today — Envelopes, full width, no cap</h2>
+<div class="cap">The current build: segmented control, one view, content at the full 995.</div>
+<div class="scaler" style="height:489px"><div class="frame" style="width:1084px;transform:scale(0.65)">
+  <div class="chrome"><div class="tb"><span class="mark"></span>Sci-Fin</div><div class="wc"><span>&#9472;</span><span>&#9744;</span><span>&#10005;</span></div></div>
+  <div class="win">
+    <div class="rail"><div class="on"><b>&#9635;</b>Budget</div><div><b>&#9636;</b>Activity</div><div><b>&#9675;</b>Learn</div><div><b>&#9641;</b>Reports</div><div><b>&#9881;</b>Settings</div></div>
+    <div class="content"><div class="page">
+      <div class="titlerow"><span class="ico">&#128091;</span><span class="t">Budget</span></div>
+      <div class="seg"><div class="on">Envelopes</div><div>Categories</div></div>
+      <div class="surface"><div class="k">Savings</div><div class="big">€3,067.00</div></div>
+      <div class="link">Why split money into categories?</div>
+      <div class="seclbl">Income</div>
+      <div class="surface"><div class="k">&#128181;&nbsp; Per paycheck (biweekly)</div><div class="amt">€1,450.00</div></div>
+      <div class="cap2">€1,450.00 received so far this month</div>
+      <div class="seclbl">Recurring expenses</div>
+      <div class="flat"><div class="rowb"><span class="ttl">&#128260;&nbsp; 6 recurring expenses</span>
+        <span style="text-align:right"><span class="ttl">€1,364.00/mo</span><br><span style="font-size:var(--xs);color:var(--txt2)">View all →</span></span></div></div>
+      <div class="disc"><div class="rowb"><span style="font-size:var(--sm);font-weight:700">€1,364.00 recurring · €1,450.00 income this month</span><span>›</span></div></div>
+      <div class="seclbl">Goals</div>
+      <div class="prow"><div class="head"><span class="ico">&#128091;</span><span class="ttl">Emergency fund</span><span class="qa">+ Quick-add</span></div>
+        <div class="bar"><i style="width:47.7%"></i></div><div class="cap2" style="margin-top:5px">€1,150.00 left of goal</div>
+        <div class="link" style="margin:0">Why naming this helps</div></div>
+      <div class="prow"><div class="head"><span class="ico">&#128091;</span><span class="ttl">Trip to Lisbon</span><span class="qa">+ Quick-add</span></div>
+        <div class="bar"><i style="width:44.4%"></i></div><div class="cap2" style="margin-top:5px">€500.00 left of goal</div></div>
+      <div class="prow"><div class="head"><span class="ico">&#128176;</span><span class="ttl">Someday fund</span><span class="qa">+ Quick-add</span></div>
+        <div class="cap2" style="margin:4px 0 0">€0.00 saved · no target</div></div>
+      <div class="add">+ New goal</div>
+    </div></div>
+  </div>
+</div></div>
+
+<h2>2 · Today — Categories, the other half of the segmented control</h2>
+<div class="cap">Same screen, other tab. Two of four categories are over plan — the tick and hatch, never a colour change.</div>
+<div class="scaler" style="height:489px"><div class="frame" style="width:1084px;transform:scale(0.65)">
+  <div class="chrome"><div class="tb"><span class="mark"></span>Sci-Fin</div><div class="wc"><span>&#9472;</span><span>&#9744;</span><span>&#10005;</span></div></div>
+  <div class="win">
+    <div class="rail"><div class="on"><b>&#9635;</b>Budget</div><div><b>&#9636;</b>Activity</div><div><b>&#9675;</b>Learn</div><div><b>&#9641;</b>Reports</div><div><b>&#9881;</b>Settings</div></div>
+    <div class="content"><div class="page">
+      <div class="titlerow"><span class="ico">&#128091;</span><span class="t">Budget</span></div>
+      <div class="seg"><div>Envelopes</div><div class="on">Categories</div></div>
+      <div class="surface"><div class="k">Spent this month</div><div class="amt">€655.00</div></div>
+      <div class="prow"><div class="head"><span class="ico">&#128722;</span><span class="ttl">Groceries</span><span class="qa">+ Quick-add</span></div>
+        <div class="bar"><i style="width:85.7%"></i><span class="hatch" style="left:85.7%"></span><span class="tick" style="left:85.7%"></span></div>
+        <div class="cap2" style="margin-top:5px">€50.00 past plan</div>
+        <div class="link" style="margin:0">Why nothing here turns red</div></div>
+      <div class="prow"><div class="head"><span class="ico">&#127860;</span><span class="ttl">Dining out</span><span class="qa">+ Quick-add</span></div>
+        <div class="bar"><i style="width:72.7%"></i><span class="hatch" style="left:72.7%"></span><span class="tick" style="left:72.7%"></span></div>
+        <div class="cap2" style="margin-top:5px">€45.00 past plan</div>
+        <div class="link" style="margin:0">Why nothing here turns red</div></div>
+      <div class="prow"><div class="head"><span class="ico">&#128652;</span><span class="ttl">Transport</span><span class="qa">+ Quick-add</span></div>
+        <div class="bar"><i style="width:60%"></i></div><div class="cap2" style="margin-top:5px">€60.00 left of plan</div></div>
+      <div class="prow"><div class="head"><span class="ico">&#128161;</span><span class="ttl">Entertainment</span><span class="qa">+ Quick-add</span></div>
+        <div class="bar"><i style="width:50%"></i></div><div class="cap2" style="margin-top:5px">€50.00 left of plan</div></div>
+      <div class="add">+ New category</div>
+      <div class="note">&ldquo;Spent&rdquo; is directly editable and quick-add-incremented. Deriving it automatically from real transactions is a future direction, not committed to a timeline.</div>
+    </div></div>
+  </div>
+</div></div>
+
+<h2>3 · The proposal — two columns at the measure, no segmented control</h2>
+<div class="cap">Both views at once, each one measure (458) wide, the 932 block centred in 995 with 63 hatched. This is what replacing the segmented control would mean.</div>
+<div class="scaler" style="height:489px"><div class="frame" style="width:1084px;transform:scale(0.65)">
+  <div class="chrome"><div class="tb"><span class="mark"></span>Sci-Fin</div><div class="wc"><span>&#9472;</span><span>&#9744;</span><span>&#10005;</span></div></div>
+  <div class="win">
+    <div class="rail"><div class="on"><b>&#9635;</b>Budget</div><div><b>&#9636;</b>Activity</div><div><b>&#9675;</b>Learn</div><div><b>&#9641;</b>Reports</div><div><b>&#9881;</b>Settings</div></div>
+    <div class="content empty"><div class="colblock">
+      <div class="page">
+        <div class="titlerow"><span class="ico">&#128091;</span><span class="t">Budget</span></div>
+        <div class="seclbl">Envelopes</div>
+        <div class="surface"><div class="k">Savings</div><div class="big">€3,067.00</div></div>
+        <div class="link">Why split money into categories?</div>
+        <div class="seclbl">Income</div>
+        <div class="surface"><div class="k">&#128181;&nbsp; Per paycheck (biweekly)</div><div class="amt">€1,450.00</div></div>
+        <div class="cap2">€1,450.00 received so far this month</div>
+        <div class="seclbl">Recurring expenses</div>
+        <div class="flat"><div class="rowb"><span class="ttl">&#128260;&nbsp; 6 recurring expenses</span>
+          <span style="text-align:right"><span class="ttl">€1,364.00/mo</span><br><span style="font-size:var(--xs);color:var(--txt2)">View all →</span></span></div></div>
+        <div class="disc"><div class="rowb"><span style="font-size:var(--sm);font-weight:700">€1,364.00 recurring · €1,450.00 income</span><span>›</span></div></div>
+        <div class="seclbl">Goals</div>
+        <div class="prow"><div class="head"><span class="ico">&#128091;</span><span class="ttl">Emergency fund</span><span class="qa">+ Quick-add</span></div>
+          <div class="bar"><i style="width:47.7%"></i></div><div class="cap2" style="margin-top:5px">€1,150.00 left of goal</div></div>
+        <div class="prow"><div class="head"><span class="ico">&#128091;</span><span class="ttl">Trip to Lisbon</span><span class="qa">+ Quick-add</span></div>
+          <div class="bar"><i style="width:44.4%"></i></div><div class="cap2" style="margin-top:5px">€500.00 left of goal</div></div>
+        <div class="prow"><div class="head"><span class="ico">&#128176;</span><span class="ttl">Someday fund</span><span class="qa">+ Quick-add</span></div>
+          <div class="cap2" style="margin:4px 0 0">€0.00 saved · no target</div></div>
+        <div class="add">+ New goal</div>
+      </div>
+      <div class="page">
+        <div class="titlerow" style="visibility:hidden"><span class="t">&nbsp;</span></div>
+        <div class="seclbl">Categories</div>
+        <div class="surface"><div class="k">Spent this month</div><div class="amt">€655.00</div></div>
+        <div class="prow"><div class="head"><span class="ico">&#128722;</span><span class="ttl">Groceries</span><span class="qa">+ Quick-add</span></div>
+          <div class="bar"><i style="width:85.7%"></i><span class="hatch" style="left:85.7%"></span><span class="tick" style="left:85.7%"></span></div>
+          <div class="cap2" style="margin-top:5px">€50.00 past plan</div>
+          <div class="link" style="margin:0">Why nothing here turns red</div></div>
+        <div class="prow"><div class="head"><span class="ico">&#127860;</span><span class="ttl">Dining out</span><span class="qa">+ Quick-add</span></div>
+          <div class="bar"><i style="width:72.7%"></i><span class="hatch" style="left:72.7%"></span><span class="tick" style="left:72.7%"></span></div>
+          <div class="cap2" style="margin-top:5px">€45.00 past plan</div>
+          <div class="link" style="margin:0">Why nothing here turns red</div></div>
+        <div class="prow"><div class="head"><span class="ico">&#128652;</span><span class="ttl">Transport</span><span class="qa">+ Quick-add</span></div>
+          <div class="bar"><i style="width:60%"></i></div><div class="cap2" style="margin-top:5px">€60.00 left of plan</div></div>
+        <div class="prow"><div class="head"><span class="ico">&#128161;</span><span class="ttl">Entertainment</span><span class="qa">+ Quick-add</span></div>
+          <div class="bar"><i style="width:50%"></i></div><div class="cap2" style="margin-top:5px">€50.00 left of plan</div></div>
+        <div class="add">+ New category</div>
+        <div class="note">&ldquo;Spent&rdquo; is directly editable and quick-add-incremented. Deriving it automatically from real transactions is a future direction, not committed to a timeline.</div>
+      </div>
+    </div></div>
+  </div>
+</div></div>
+
+<h2>What the accurate rebuild measures</h2>
+<table>
+<tr><th>Frame</th><th>Column(s)</th><th>Content needs</th><th>Window has</th><th>Hidden</th><th>Bar</th></tr>
+<tr><th>1 · Envelopes, today</th><td>987</td><td>863</td><td>721</td><td class="n"><strong>142px · 16%</strong></td><td class="n">926 wide, <strong>185:1</strong></td></tr>
+<tr><th>2 · Categories, today</th><td>987</td><td>743</td><td>721</td><td>22px · 3%</td><td class="n">926 wide, <strong>185:1</strong></td></tr>
+<tr><th>3 · Two columns at 458</th><td class="y">458 + 458</td><td>815 / 735</td><td>721</td><td>94px / 14px</td><td class="y">397 wide, <strong>79:1</strong></td></tr>
+</table>
+<div class="rule">
+<p style="margin:0 0 10px"><strong>&ldquo;The app&apos;s content is cut&rdquo; is not a mockup artefact — it is the shipped app at its own default window.</strong> The Envelopes view needs 863px and the client area is 721, so <strong>142px — 16% of the screen — is below the fold before anyone touches anything</strong>. It is reachable by scrolling, but the Goals section and &ldquo;New goal&rdquo; are never visible together with Savings.</p>
+<p style="margin:0 0 10px"><strong>And the bar is already at 185:1 today.</strong> I had presented 194:1 as what a hypothetical stretched column <em>would</em> do. It is not hypothetical: at the default window the shipped bar is 926dp long and 5dp tall. The distortion the measure cap was meant to prevent is the current state, not a risk.</p>
+<p style="margin:0"><strong>The two-column proposal improves both</strong> — bar to 79:1, near the phone&apos;s 62:1, and hidden content from 142px to 94px — but it is not free: it <strong>removes the segmented control</strong>, which is a §4.3 change, not a §4.8 one. That is the decision, stated properly for the first time in this series.</p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,25 @@
+Daylight light  bg=#f4f4f2  surf=#f2fbf7  surf2=#e3ece8  bord=#d2ded9  bordStrong=#667670  txt=#22211d  txt2=#64635e  txt3=#acaba5  acc=#2d5448  accH=#1d4438  onAcc=#ffffff
+      txt/bg 14.63  txt/surf 15.28  txt/surf2 13.37  txt2/bg 5.47  txt2/surf 5.71  txt2/surf2 5.00  acc/bg 7.71  acc/surf 8.05  acc/surf2 7.05  onAcc/acc 8.49  bordStrong/surf 4.54  bordStrong/bg 4.34   [surf/bg dE 4.5, surf2/surf dE 3.1, acc drift dE 3.4]
+Daylight dark   bg=#17181a  surf=#1f2321  surf2=#272e2b  bord=#2e3834  bordStrong=#67766f  txt=#e9e7e1  txt2=#9a9893  txt3=#5b5954  acc=#92c3af  accH=#7fb09d  onAcc=#17181a
+      txt/bg 14.37  txt/surf 12.86  txt/surf2 11.23  txt2/bg 6.16  txt2/surf 5.52  txt2/surf2 4.82  acc/bg 9.01  acc/surf 8.06  acc/surf2 7.04  onAcc/acc 9.01  bordStrong/surf 3.33  bordStrong/bg 3.72   [surf/bg dE 5.1, surf2/surf dE 3.7, acc drift dE 3.2]
+Tallow & Tome light  bg=#f4f4f2  surf=#fef7f3  surf2=#f5e6de  bord=#e3d8d2  bordStrong=#7c6e67  txt=#1e1712  txt2=#6a615b  txt3=#b2a9a2  acc=#5e3e2c  accH=#4d2e1d  onAcc=#ffffff
+      txt/bg 16.07  txt/surf 16.70  txt/surf2 14.54  txt2/bg 5.49  txt2/surf 5.70  txt2/surf2 4.97  acc/bg 8.66  acc/surf 9.00  acc/surf2 7.84  onAcc/acc 9.54  bordStrong/surf 4.63  bordStrong/bg 4.45   [surf/bg dE 3.4, surf2/surf dE 4.7, acc drift dE 0.0]
+Tallow & Tome dark   bg=#17181a  surf=#25211b  surf2=#322b21  bord=#3a352d  bordStrong=#787065  txt=#d8d6d3  txt2=#9a9894  txt3=#5b5957  acc=#dfcfb7  accH=#cbbca4  onAcc=#17181a
+      txt/bg 12.25  txt/surf 11.04  txt/surf2 9.63  txt2/bg 6.17  txt2/surf 5.56  txt2/surf2 4.85  acc/bg 11.63  acc/surf 10.48  acc/surf2 9.15  onAcc/acc 11.63  bordStrong/surf 3.28  bordStrong/bg 3.64   [surf/bg dE 6.6, surf2/surf dE 4.1, acc drift dE 0.0]
+Swiss Blue light  bg=#f4f4f2  surf=#f5f9fe  surf2=#e1eaf7  bord=#d5dbe5  bordStrong=#6a727d  txt=#131313  txt2=#636363  txt3=#ababab  acc=#1d3557  accH=#0e2646  onAcc=#ffffff
+      txt/bg 16.87  txt/surf 17.57  txt/surf2 15.32  txt2/bg 5.46  txt2/surf 5.68  txt2/surf2 4.95  acc/bg 11.22  acc/surf 11.69  acc/surf2 10.19  onAcc/acc 12.36  bordStrong/surf 4.60  bordStrong/bg 4.42   [surf/bg dE 3.8, surf2/surf dE 4.8, acc drift dE 0.0]
+Swiss Blue dark   bg=#17181a  surf=#1d2227  surf2=#252e36  bord=#30363d  bordStrong=#69737d  txt=#f2f2ef  txt2=#999997  txt3=#5a5a57  acc=#90bdeb  accH=#7daad7  onAcc=#17181a
+      txt/bg 15.84  txt/surf 14.29  txt/surf2 12.30  txt2/bg 6.22  txt2/surf 5.62  txt2/surf2 4.83  acc/bg 9.02  acc/surf 8.14  acc/surf2 7.00  onAcc/acc 9.02  bordStrong/surf 3.32  bordStrong/bg 3.68   [surf/bg dE 3.9, surf2/surf dE 4.2, acc drift dE 8.9]
+Serene Dusk light  bg=#f4f4f2  surf=#fff5fc  surf2=#f2e5ef  bord=#e1d7df  bordStrong=#796d76  txt=#383137  txt2=#686067  txt3=#b0a7af  acc=#5e4459  accH=#4d3448  onAcc=#ffffff
+      txt/bg 11.47  txt/surf 11.86  txt/surf2 10.36  txt2/bg 5.52  txt2/surf 5.70  txt2/surf2 4.98  acc/bg 7.79  acc/surf 8.06  acc/surf2 7.04  onAcc/acc 8.58  bordStrong/surf 4.63  bordStrong/bg 4.47   [surf/bg dE 7.2, surf2/surf dE 3.7, acc drift dE 6.4]
+Serene Dusk dark   bg=#17181a  surf=#252024  surf2=#332931  bord=#3a3339  bordStrong=#796d76  txt=#e7e1e5  txt2=#9c969a  txt3=#5d585b  acc=#d2adca  accH=#bf9ab7  onAcc=#17181a
+      txt/bg 13.79  txt/surf 12.44  txt/surf2 10.85  txt2/bg 6.13  txt2/surf 5.53  txt2/surf2 4.82  acc/bg 8.94  acc/surf 8.06  acc/surf2 7.04  onAcc/acc 8.94  bordStrong/surf 3.25  bordStrong/bg 3.61   [surf/bg dE 5.4, surf2/surf dE 4.9, acc drift dE 2.2]
+    val daylightLight = Palette(hex("F4F4F2"), hex("F2FBF7"), hex("E3ECE8"), hex("D2DED9"), hex("667670"), hex("22211D"), hex("64635E"), hex("ACABA5"), hex("2D5448"), hex("1D4438"), hex("FFFFFF"))
+    val daylightDark = Palette(hex("17181A"), hex("1F2321"), hex("272E2B"), hex("2E3834"), hex("67766F"), hex("E9E7E1"), hex("9A9893"), hex("5B5954"), hex("92C3AF"), hex("7FB09D"), hex("17181A"))
+    val tallowTomeLight = Palette(hex("F4F4F2"), hex("FEF7F3"), hex("F5E6DE"), hex("E3D8D2"), hex("7C6E67"), hex("1E1712"), hex("6A615B"), hex("B2A9A2"), hex("5E3E2C"), hex("4D2E1D"), hex("FFFFFF"))
+    val tallowTomeDark = Palette(hex("17181A"), hex("25211B"), hex("322B21"), hex("3A352D"), hex("787065"), hex("D8D6D3"), hex("9A9894"), hex("5B5957"), hex("DFCFB7"), hex("CBBCA4"), hex("17181A"))
+    val swissBlueLight = Palette(hex("F4F4F2"), hex("F5F9FE"), hex("E1EAF7"), hex("D5DBE5"), hex("6A727D"), hex("131313"), hex("636363"), hex("ABABAB"), hex("1D3557"), hex("0E2646"), hex("FFFFFF"))
+    val swissBlueDark = Palette(hex("17181A"), hex("1D2227"), hex("252E36"), hex("30363D"), hex("69737D"), hex("F2F2EF"), hex("999997"), hex("5A5A57"), hex("90BDEB"), hex("7DAAD7"), hex("17181A"))
+    val sereneDuskLight = Palette(hex("F4F4F2"), hex("FFF5FC"), hex("F2E5EF"), hex("E1D7DF"), hex("796D76"), hex("383137"), hex("686067"), hex("B0A7AF"), hex("5E4459"), hex("4D3448"), hex("FFFFFF"))
+    val sereneDuskDark = Palette(hex("17181A"), hex("252024"), hex("332931"), hex("3A3339"), hex("796D76"), hex("E7E1E5"), hex("9C969A"), hex("5D585B"), hex("D2ADCA"), hex("BF9AB7"), hex("17181A"))
+8 palettes, 0 failing pair(s)

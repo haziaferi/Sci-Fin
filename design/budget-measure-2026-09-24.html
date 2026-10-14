@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sci-Fin — Budget: density held by the measure</title>
+<style>
+  :root{--bg:#F5F5F4;--surf:#FFFFFF;--surf2:#EBEBE9;--bord:#DCDCD9;--bordStrong:#8C8C8D;
+        --txt:#26262A;--txt2:#66666B;--txt3:#9D9DA1;--acc:#5B6670;--onAcc:#FFFFFF;--u:8px;--r:14px;
+        /* MD text scale: base 16, ramp ratios from typeRamp() */
+        --base:16px;--xs:13.5px;--sm:14.8px;--lg:19.7px;--xxl:27px;--M:458px}
+  .xl{--base:24px;--xs:20.3px;--sm:22.2px;--lg:29.5px;--xxl:40.6px;--M:686px}
+  body{margin:0;background:#8a8a8a;font-family:"Segoe UI",system-ui,sans-serif;color:#fff;padding:26px}
+  h1{font-size:23px;margin:0 0 6px;font-weight:700}
+  h2{font-size:18px;margin:34px 0 4px;font-weight:700}
+  p.intro{max-width:80ch;line-height:1.6;font-size:15px;opacity:.94;margin:0 0 10px}
+  .rule{max-width:80ch;background:rgba(0,0,0,.2);border-radius:10px;padding:14px 18px;margin:14px 0 0;line-height:1.6;font-size:14.5px}
+  code{background:rgba(0,0,0,.25);padding:1px 5px;border-radius:4px;font-size:13px}
+  table{border-collapse:collapse;margin:14px 0 0;font-size:14px;background:rgba(0,0,0,.14);border-radius:8px;overflow:hidden}
+  th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid rgba(255,255,255,.14)}
+  th{font-weight:700;background:rgba(0,0,0,.18)}
+  td.y{color:#cfe8cf} td.n{color:#e8cfcf}
+  .cap{font-size:13px;opacity:.86;margin:12px 0 4px;font-weight:600}
+  .scaler{overflow:hidden;margin:0 0 4px}
+  .frame{transform-origin:top left;border-radius:8px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.36)}
+  .win{background:var(--bg);display:flex;color:var(--txt);height:470px}
+  .rail{width:88px;flex:none;background:var(--bg);border-right:1px solid var(--bordStrong);
+        padding:calc(var(--u)*1.5) 0;display:flex;flex-direction:column;gap:2px}
+  .rail div{padding:calc(var(--u)*1) 0;text-align:center;font-size:var(--xs);color:var(--txt2);font-weight:600}
+  .rail div.on{color:var(--acc);font-weight:800}
+  .rail div b{display:block;font-size:16px;font-weight:400;margin-bottom:2px;opacity:.75}
+  .content{flex:1;display:flex;justify-content:center;overflow:hidden;min-width:0}
+  .empty{background:repeating-linear-gradient(45deg,rgba(140,140,141,.16) 0 6px,transparent 6px 12px)}
+  /* the block is N columns of exactly the measure, with a gap; never wider, never stretched */
+  .block{flex:none;display:flex;gap:16px;background:var(--bg)}
+  .block > div{width:var(--M);flex:none;overflow-y:auto;overflow-x:hidden;
+               padding:calc(var(--u)*1.5) 0;box-sizing:border-box}
+  .block > div::-webkit-scrollbar{width:9px}
+  .block > div::-webkit-scrollbar-thumb{background:#c2c2c0;border-radius:99px}
+  .card{background:var(--surf);border-radius:var(--r);padding:calc(var(--u)*1.1) calc(var(--u)*1.5);margin-bottom:var(--u)}
+  .card.tight{padding:calc(var(--u)*0.7) calc(var(--u)*1.5);margin-bottom:4px}
+  .lbl{color:var(--txt2);font-size:var(--xs);font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin:0 0 6px}
+  .lbl.mt{margin-top:14px}
+  .fig{font-size:var(--xxl);font-weight:800;line-height:1.1}
+  .fig.sm{font-size:var(--lg)}
+  .k{color:var(--txt2);font-size:var(--sm)}
+  .ttl{font-weight:700;font-size:var(--base)}
+  .rowb{display:flex;justify-content:space-between;align-items:center;gap:var(--u)}
+  /* the bar: 5px tall, ALWAYS -- it is the element the measure exists to protect */
+  .bar{height:5px;background:var(--surf2);border-radius:99px;overflow:hidden;margin-top:6px}
+  .bar i{display:block;height:100%;background:var(--acc);border-radius:99px}
+  .stretch{background:#6b2f2f;border-radius:8px;padding:10px 14px;margin:8px 0 2px;font-size:13px;max-width:80ch}
+</style>
+</head>
+<body>
+
+<h1>Budget — density held by the measure</h1>
+<p class="intro">The rule is no longer about panes. It is about <strong>what happens to an element when you stretch it</strong>. <code>Progress.kt:45</code> builds the category bar as <code>fillMaxWidth()</code> with a fixed <code>height(5.dp)</code> and <strong>no maximum</strong>, so widening a column does not scale the bar — it changes the bar's aspect ratio without limit, until a proportion reads as a hairline.</p>
+
+<div class="stretch">
+<strong>The bar, stretched.</strong> Height 5dp throughout; only the width changes. Phone ≈ 62:1 is the shape it was designed as.
+<div style="margin-top:10px">
+  <div style="font-size:12px;opacity:.85;margin-bottom:2px">308px — phone, 62:1</div>
+  <div style="width:308px;height:5px;background:#EBEBE9;border-radius:99px;overflow:hidden"><i style="display:block;height:100%;width:37%;background:#5B6670;border-radius:99px"></i></div>
+  <div style="font-size:12px;opacity:.85;margin:8px 0 2px">434px — the measure, 87:1</div>
+  <div style="width:434px;height:5px;background:#EBEBE9;border-radius:99px;overflow:hidden"><i style="display:block;height:100%;width:37%;background:#5B6670;border-radius:99px"></i></div>
+  <div style="font-size:12px;opacity:.85;margin:8px 0 2px">971px — a single column at the current window, 194:1</div>
+  <div style="width:971px;height:5px;background:#EBEBE9;border-radius:99px;overflow:hidden"><i style="display:block;height:100%;width:37%;background:#5B6670;border-radius:99px"></i></div>
+</div>
+</div>
+
+<p class="intro" style="margin-top:14px">All three encode the same 37%. The third is not a fuller bar, it is a longer one — and at 194:1 the eye reads a line, not a quantity. That is the density argument made visible, and it is why the column must stop growing.</p>
+
+<div class="rule">
+<p style="margin:0 0 10px"><strong>The number is already in the build, and it is not 530.</strong> <code>Controls.kt:137</code> defines <code>measureCap</code> as <code>base × 0.55 × 52</code> — <strong>52 characters</strong>, which is <strong>458dp</strong> at the default text size. It is derived from §2.5's own ramp, not borrowed from another app, and it <em>grows with the OS text setting</em>: at XL it is 686dp. My earlier proposal of 530, taken from Actual Budget, is withdrawn — the build had a better-founded number all along. What is new is applying it to <strong>the column</strong>, not only to prose.</p>
+<p style="margin:0 0 6px"><strong>The rule, entirely in existing tokens:</strong> a column is <strong>one measure wide, never more</strong>. The content area holds as many columns as fit at <code>N × M + (N−1) × gap</code>. Extra width is left empty and the block centres. Nothing stretches, ever.</p>
+<p style="margin:0"><strong>Why this fixes the threshold problem.</strong> With M = 458, two columns need 932 of content. The app's current window gives 995 — so <strong>the split is the default</strong>, not something you have to drag the window to reach. With the borrowed 530 it needed 1076, which the default window missed.</p>
+</div>
+
+<h2>1 · Narrow — one column at the measure, centred</h2>
+<div class="cap">client 700 — content 611; one column at <strong>458</strong>, 153 left empty. The bar stays at its designed shape.</div>
+<div class="scaler" style="height:330px"><div class="frame" style="width:700px;transform:scale(0.7)">
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content empty"><div class="block">
+      <div>
+        <div class="lbl">Envelopes</div>
+        <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+        <div class="card"><div class="rowb"><span class="ttl">6 recurring expenses</span><span class="ttl">€1,364/mo</span></div></div>
+        <div class="lbl mt">Categories</div>
+        <div class="card"><div class="rowb"><span class="ttl">Groceries</span><span class="k">€149.15 of €400</span></div><div class="bar"><i style="width:37%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Transport</span><span class="k">€49 of €120</span></div><div class="bar"><i style="width:41%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Eating out</span><span class="k">€206.40 of €150</span></div><div class="bar"><i style="width:100%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Utilities</span><span class="k">€92.40 of €200</span></div><div class="bar"><i style="width:46%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Fun</span><span class="k">€24 of €100</span></div><div class="bar"><i style="width:24%"></i></div></div>
+      </div>
+    </div></div>
+  </div>
+</div></div>
+
+<h2>2 · The app's current window — two columns, by default</h2>
+<div class="cap">client 1084 — content 995 ≥ 932, so <strong>two columns of 458</strong>; 63 empty, recurring unwrapped</div>
+<div class="scaler" style="height:306px"><div class="frame" style="width:1084px;transform:scale(0.65)">
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content empty"><div class="block">
+      <div>
+        <div class="lbl">Envelopes</div>
+        <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+        <div class="card"><div class="k">Per paycheck (monthly)</div><div class="fig sm">€2,400</div></div>
+        <div class="lbl mt">Recurring expenses</div>
+        <div class="card tight"><div class="rowb"><span class="ttl">Rent</span><span class="k">€950 · monthly</span></div></div>
+        <div class="card tight"><div class="rowb"><span class="ttl">Car loan payment</span><span class="k">€260 · monthly</span></div></div>
+        <div class="card tight"><div class="rowb"><span class="ttl">Car insurance</span><span class="k">€600 · yearly</span></div></div>
+        <div class="card tight"><div class="rowb"><span class="ttl">Phone bill</span><span class="k">€45 · monthly</span></div></div>
+        <div class="card tight"><div class="rowb"><span class="ttl">Pest control</span><span class="k">€90 · bimonthly</span></div></div>
+        <div class="card tight"><div class="rowb"><span class="ttl">Streaming service</span><span class="k">€14 · monthly</span></div></div>
+        <div class="card" style="margin-top:8px"><div class="rowb"><span class="k">Monthly equivalent</span><span class="ttl">€1,364/mo</span></div></div>
+      </div>
+      <div>
+        <div class="lbl">Categories</div>
+        <div class="card"><div class="k">Spent this month</div><div class="fig">€520.95</div><div class="k" style="margin-top:4px">of €970 across five categories</div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Groceries</span><span class="k">€149.15 of €400</span></div><div class="bar"><i style="width:37%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Transport</span><span class="k">€49 of €120</span></div><div class="bar"><i style="width:41%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Eating out</span><span class="k">€206.40 of €150</span></div><div class="bar"><i style="width:100%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Utilities</span><span class="k">€92.40 of €200</span></div><div class="bar"><i style="width:46%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Fun</span><span class="k">€24 of €100</span></div><div class="bar"><i style="width:24%"></i></div></div>
+      </div>
+    </div></div>
+  </div>
+</div></div>
+
+<h2>3 · Wide — the block centres, and a third column would fit</h2>
+<div class="cap">client 1800 — content 1711; two columns leave <strong>779 empty</strong>. Three columns of 458 plus two gaps is 1406, which fits — see the note below.</div>
+<div class="scaler" style="height:259px"><div class="frame" style="width:1800px;transform:scale(0.55)">
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content empty"><div class="block">
+      <div>
+        <div class="lbl">Envelopes</div>
+        <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+        <div class="card"><div class="k">Per paycheck (monthly)</div><div class="fig sm">€2,400</div></div>
+        <div class="lbl mt">Recurring expenses</div>
+        <div class="card tight"><div class="rowb"><span class="ttl">Rent</span><span class="k">€950 · monthly</span></div></div>
+        <div class="card tight"><div class="rowb"><span class="ttl">Car loan payment</span><span class="k">€260 · monthly</span></div></div>
+        <div class="card tight"><div class="rowb"><span class="ttl">Car insurance</span><span class="k">€600 · yearly</span></div></div>
+        <div class="card tight"><div class="rowb"><span class="ttl">Phone bill</span><span class="k">€45 · monthly</span></div></div>
+        <div class="card tight"><div class="rowb"><span class="ttl">Pest control</span><span class="k">€90 · bimonthly</span></div></div>
+        <div class="card tight"><div class="rowb"><span class="ttl">Streaming service</span><span class="k">€14 · monthly</span></div></div>
+      </div>
+      <div>
+        <div class="lbl">Categories</div>
+        <div class="card"><div class="k">Spent this month</div><div class="fig">€520.95</div><div class="k" style="margin-top:4px">of €970 across five categories</div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Groceries</span><span class="k">€149.15 of €400</span></div><div class="bar"><i style="width:37%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Transport</span><span class="k">€49 of €120</span></div><div class="bar"><i style="width:41%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Eating out</span><span class="k">€206.40 of €150</span></div><div class="bar"><i style="width:100%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Utilities</span><span class="k">€92.40 of €200</span></div><div class="bar"><i style="width:46%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Fun</span><span class="k">€24 of €100</span></div><div class="bar"><i style="width:24%"></i></div></div>
+      </div>
+    </div></div>
+  </div>
+</div></div>
+
+<h2>4 · The same window at XL text — the measure grows, so a column is lost</h2>
+<div class="cap">client 1084, text at XL — the measure becomes <strong>686</strong>, two would need 1388, content is 995, so <strong>one column</strong>. Larger text means fewer columns, automatically.</div>
+<div class="scaler" style="height:306px"><div class="frame xl" style="width:1084px;transform:scale(0.65)">
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content empty"><div class="block">
+      <div>
+        <div class="lbl">Envelopes</div>
+        <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+        <div class="card"><div class="rowb"><span class="ttl">6 recurring expenses</span><span class="ttl">€1,364/mo</span></div></div>
+        <div class="lbl mt">Categories</div>
+        <div class="card"><div class="rowb"><span class="ttl">Groceries</span><span class="k">€149.15 of €400</span></div><div class="bar"><i style="width:37%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Transport</span><span class="k">€49 of €120</span></div><div class="bar"><i style="width:41%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Eating out</span><span class="k">€206.40 of €150</span></div><div class="bar"><i style="width:100%"></i></div></div>
+      </div>
+    </div></div>
+  </div>
+</div></div>
+
+<div class="rule">
+<p style="margin:0 0 10px"><strong>What this rule costs and what it buys.</strong></p>
+<table style="margin:0 0 12px">
+<tr><th>content</th><th>columns</th><th>empty</th><th>bar aspect</th></tr>
+<tr><td>611</td><td>1 × 458</td><td>153</td><td class="y">87:1</td></tr>
+<tr><td>995 — today's window</td><td class="y">2 × 458</td><td>63</td><td class="y">87:1</td></tr>
+<tr><td>1711</td><td>2 × 458</td><td class="n">779</td><td class="y">87:1</td></tr>
+<tr><td>1711, three columns</td><td>3 × 458</td><td class="y">305</td><td class="y">87:1</td></tr>
+<tr><td colspan="4" style="opacity:.8">— for comparison, the withdrawn rule that let one column grow —</td></tr>
+<tr><td>995, stretched</td><td>1 × 995</td><td class="y">0</td><td class="n">194:1</td></tr>
+</table>
+<p style="margin:0 0 10px"><strong>The bar's aspect ratio is constant in every row but the last.</strong> That is the whole point: the window changes how many columns there are, never how stretched an element is. Density is held by construction.</p>
+<p style="margin:0 0 10px"><strong>A defect this drawing exposes, in the build not the mockup.</strong> The aspect ratio is constant across <em>window</em> sizes, which is the whole aim — but not across <em>text</em> sizes. The measure grows with the text setting (458 at MD, 686 at XL) while <code>Progress.kt:51</code> fixes the bar at <code>height(5.dp)</code>, a bare literal that grows with nothing. Measured in frame 4: <strong>132:1 at XL against 87:1 at MD</strong>. The people who most need large text get the most distorted bars. The fix follows from the same ramp: the bar height should be <code>base × 0.3125</code> — 5dp at MD, 7.5dp at XL — which holds the aspect at 87:1 on both. It is also an instance of the known &ldquo;no dp literals under <code>ui/</code>&rdquo; rule that §2.5&apos;s scale pass already owes.</p>
+<p style="margin:0"><strong>The one thing still open: the third column.</strong> At 1711 a third column of 458 fits with 305 to spare, which would cut the empty space from 779 to 305. Budget only has two <em>sections</em>, so a third column would have to hold something — Categories flowing into two columns, or Goals promoted out of Envelopes. That is a content decision, not a layout one, and it is not made here.</p>
+</div>
+
+</body>
+</html>

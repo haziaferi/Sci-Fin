@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sci-Fin — Budget, split or not</title>
+<style>
+  :root{--bg:#F5F5F4;--surf:#FFFFFF;--surf2:#EBEBE9;--bord:#DCDCD9;--bordStrong:#8C8C8D;
+        --txt:#26262A;--txt2:#66666B;--txt3:#9D9DA1;--acc:#5B6670;--onAcc:#FFFFFF;
+        --xs:13.5px;--sm:14.8px;--base:16px;--lg:19.7px;--xxl:27px;--u:8px;--r:14px}
+  body{margin:0;background:#8a8a8a;font-family:"Segoe UI",system-ui,sans-serif;color:#fff;padding:26px}
+  h1{font-size:23px;margin:0 0 6px;font-weight:700}
+  h2{font-size:18px;margin:34px 0 4px;font-weight:700}
+  p.intro{max-width:80ch;line-height:1.6;font-size:15px;opacity:.94;margin:0 0 10px}
+  .rule{max-width:80ch;background:rgba(0,0,0,.2);border-radius:10px;padding:14px 18px;margin:14px 0 0;line-height:1.6;font-size:14.5px}
+  code{background:rgba(0,0,0,.25);padding:1px 5px;border-radius:4px;font-size:13px}
+  table{border-collapse:collapse;margin:14px 0 0;font-size:14px;background:rgba(0,0,0,.14);border-radius:8px;overflow:hidden}
+  th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid rgba(255,255,255,.14)}
+  th{font-weight:700;background:rgba(0,0,0,.18)}
+  td.y{color:#cfe8cf} td.n{color:#e8cfcf}
+  .cap{font-size:13px;opacity:.86;margin:12px 0 4px;font-weight:600}
+  .scaler{overflow:hidden;margin:0 0 4px}
+  .frame{transform-origin:top left;border-radius:8px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.36)}
+  .win{background:var(--bg);display:flex;color:var(--txt);height:430px}
+  .rail{width:88px;flex:none;background:var(--bg);border-right:1px solid var(--bordStrong);
+        padding:calc(var(--u)*1.5) 0;display:flex;flex-direction:column;gap:2px}
+  .rail div{padding:calc(var(--u)*1) 0;text-align:center;font-size:var(--xs);color:var(--txt2);font-weight:600}
+  .rail div.on{color:var(--acc);font-weight:800}
+  .rail div b{display:block;font-size:16px;font-weight:400;margin-bottom:2px;opacity:.75}
+  .content{flex:1;display:flex;overflow:hidden}
+  .pane{overflow-y:auto;overflow-x:hidden;padding:calc(var(--u)*1.5);box-sizing:border-box}
+  .pane::-webkit-scrollbar,.m::-webkit-scrollbar{width:9px}
+  .pane::-webkit-scrollbar-thumb,.m::-webkit-scrollbar-thumb{background:#c2c2c0;border-radius:99px}
+  .pane::-webkit-scrollbar-track,.m::-webkit-scrollbar-track{background:transparent}
+  .half{flex:1 1 0;min-width:0}
+  .half+.half{border-left:1px solid var(--bord)}
+  .measure{flex:1;display:flex;justify-content:center;overflow:hidden;min-width:0}
+  .mwrap{flex:1;display:flex;justify-content:center;overflow-y:auto;overflow-x:hidden;min-width:0}
+  .m{width:530px;max-width:100%;padding:calc(var(--u)*1.5) 0;box-sizing:border-box}
+  .empty{background:repeating-linear-gradient(45deg,rgba(140,140,141,.16) 0 6px,transparent 6px 12px)}
+  .card{background:var(--surf);border-radius:var(--r);padding:calc(var(--u)*1.1) calc(var(--u)*1.4);margin-bottom:var(--u)}
+  .lbl{color:var(--txt2);font-size:var(--xs);font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin:0 0 6px}
+  .lbl.mt{margin-top:14px}
+  .fig{font-size:var(--xxl);font-weight:800;line-height:1.1}
+  .fig.sm{font-size:var(--lg)}
+  .k{color:var(--txt2);font-size:var(--sm)}
+  .ttl{font-weight:700;font-size:var(--base)}
+  .rowb{display:flex;justify-content:space-between;align-items:center;gap:var(--u)}
+  .bar{height:9px;background:var(--surf2);border-radius:99px;overflow:hidden;margin-top:6px}
+  .bar i{display:block;height:100%;background:var(--acc);border-radius:99px}
+  .scrollnote{font-size:12px;color:var(--txt3);font-weight:600;padding:2px 0 6px}
+</style>
+</head>
+<body>
+
+<h1>Budget — split, or one column like the rest?</h1>
+<p class="intro">The scoring could not separate these: <strong>0.785 against 0.776</strong>, and across all 1771 weightings the unsplit policy wins 43.3% against the split policy's 31.1% — a difference inside the noise of how the weights are chosen. Every other question is settled. This one comes down to what you can see at once, so here it is drawn rather than scored.</p>
+<p class="intro">Both columns below carry <strong>identical content</strong> — the same five envelope and category items — and the same fixed 88px rail. The only difference is the rule applied to the content area. Both panes <strong>scroll</strong>, as every measured app does — nothing is unreachable in either option. The number that separates them is therefore not what is hidden but <strong>how far you must scroll to reach the last category</strong>, measured below.</p>
+
+<h2>A · Divide — <code>content ÷ 2</code>, collapsing at a floor</h2>
+<p class="intro">Two co-equal columns, each half the content area, dropping to one column when a column would fall below 368. Obsidian's mechanism; §4.8's existing "named exception".</p>
+
+<div class="cap">client 700 — content 611; a column would be 305 &lt; 368 → <strong>collapses to one</strong>; <strong>145px</strong> of scrolling to reach Fun</div>
+<div class="scaler" style="height:302px"><div class="frame" style="width:700px;transform:scale(0.7)">
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content"><div class="pane half">
+      <div class="lbl">Envelopes</div>
+      <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+      <div class="card"><div class="k">Per paycheck (monthly)</div><div class="fig sm">€2,400</div></div>
+      <div class="card"><div class="rowb"><span class="ttl">6 recurring expenses</span><span class="ttl">€1,095/mo</span></div></div>
+      <div class="lbl mt">Categories</div>
+      <div class="card"><div class="rowb"><span class="ttl">Groceries</span><span class="k">€149.15 of €400</span></div><div class="bar"><i style="width:37%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Transport</span><span class="k">€49 of €120</span></div><div class="bar"><i style="width:41%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Eating out</span><span class="k">€206.40 of €150</span></div><div class="bar"><i style="width:100%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Utilities</span><span class="k">€92.40 of €200</span></div><div class="bar"><i style="width:46%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Fun</span><span class="k">€24 of €100</span></div><div class="bar"><i style="width:24%"></i></div></div>
+    </div></div>
+  </div>
+</div></div>
+
+<div class="cap">client 1084 — <strong>497 | 498</strong>; <strong>nothing to scroll</strong>, both sections whole</div>
+<div class="scaler" style="height:280px"><div class="frame" style="width:1084px;transform:scale(0.65)">
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content">
+      <div class="pane half">
+        <div class="lbl">Envelopes</div>
+        <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+        <div class="card"><div class="k">Per paycheck (monthly)</div><div class="fig sm">€2,400</div></div>
+        <div class="card"><div class="rowb"><span class="ttl">6 recurring expenses</span><span class="ttl">€1,095/mo</span></div></div>
+      </div>
+      <div class="pane half">
+        <div class="lbl">Categories</div>
+        <div class="card"><div class="rowb"><span class="ttl">Groceries</span><span class="k">€149.15 of €400</span></div><div class="bar"><i style="width:37%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Transport</span><span class="k">€49 of €120</span></div><div class="bar"><i style="width:41%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Eating out</span><span class="k">€206.40 of €150</span></div><div class="bar"><i style="width:100%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Utilities</span><span class="k">€92.40 of €200</span></div><div class="bar"><i style="width:46%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Fun</span><span class="k">€24 of €100</span></div><div class="bar"><i style="width:24%"></i></div></div>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<div class="cap">client 1800 — <strong>855 | 856</strong>; <strong>nothing to scroll</strong>, nothing empty</div>
+<div class="scaler" style="height:237px"><div class="frame" style="width:1800px;transform:scale(0.55)">
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content">
+      <div class="pane half">
+        <div class="lbl">Envelopes</div>
+        <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+        <div class="card"><div class="k">Per paycheck (monthly)</div><div class="fig sm">€2,400</div></div>
+        <div class="card"><div class="rowb"><span class="ttl">6 recurring expenses</span><span class="ttl">€1,095/mo</span></div></div>
+      </div>
+      <div class="pane half">
+        <div class="lbl">Categories</div>
+        <div class="card"><div class="rowb"><span class="ttl">Groceries</span><span class="k">€149.15 of €400</span></div><div class="bar"><i style="width:37%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Transport</span><span class="k">€49 of €120</span></div><div class="bar"><i style="width:41%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Eating out</span><span class="k">€206.40 of €150</span></div><div class="bar"><i style="width:100%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Utilities</span><span class="k">€92.40 of €200</span></div><div class="bar"><i style="width:46%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Fun</span><span class="k">€24 of €100</span></div><div class="bar"><i style="width:24%"></i></div></div>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<h2>B · One column, capped at the measure — like every other destination</h2>
+<p class="intro">Budget behaves exactly like Learn and Settings: one column, capped at 530, centred above it. §4.8's "named exception" is dropped. The hatching marks content area the rule leaves empty.</p>
+
+<div class="cap">client 700 — content 611, capped to 530 centred; <strong>125px</strong> of scrolling, 81 empty</div>
+<div class="scaler" style="height:302px"><div class="frame" style="width:700px;transform:scale(0.7)">
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content empty"><div class="mwrap"><div class="m" style="background:var(--bg)">
+      <div class="lbl">Envelopes</div>
+      <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+      <div class="card"><div class="k">Per paycheck (monthly)</div><div class="fig sm">€2,400</div></div>
+      <div class="card"><div class="rowb"><span class="ttl">6 recurring expenses</span><span class="ttl">€1,095/mo</span></div></div>
+      <div class="lbl mt">Categories</div>
+      <div class="card"><div class="rowb"><span class="ttl">Groceries</span><span class="k">€149.15 of €400</span></div><div class="bar"><i style="width:37%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Transport</span><span class="k">€49 of €120</span></div><div class="bar"><i style="width:41%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Eating out</span><span class="k">€206.40 of €150</span></div><div class="bar"><i style="width:100%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Utilities</span><span class="k">€92.40 of €200</span></div><div class="bar"><i style="width:46%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Fun</span><span class="k">€24 of €100</span></div><div class="bar"><i style="width:24%"></i></div></div>
+    </div></div></div>
+  </div>
+</div></div>
+
+<div class="cap">client 1084 — 530 centred; <strong>465 empty</strong>, and still <strong>125px</strong> of scrolling</div>
+<div class="scaler" style="height:280px"><div class="frame" style="width:1084px;transform:scale(0.65)">
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content empty"><div class="mwrap"><div class="m" style="background:var(--bg)">
+      <div class="lbl">Envelopes</div>
+      <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+      <div class="card"><div class="k">Per paycheck (monthly)</div><div class="fig sm">€2,400</div></div>
+      <div class="card"><div class="rowb"><span class="ttl">6 recurring expenses</span><span class="ttl">€1,095/mo</span></div></div>
+      <div class="lbl mt">Categories</div>
+      <div class="card"><div class="rowb"><span class="ttl">Groceries</span><span class="k">€149.15 of €400</span></div><div class="bar"><i style="width:37%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Transport</span><span class="k">€49 of €120</span></div><div class="bar"><i style="width:41%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Eating out</span><span class="k">€206.40 of €150</span></div><div class="bar"><i style="width:100%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Utilities</span><span class="k">€92.40 of €200</span></div><div class="bar"><i style="width:46%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Fun</span><span class="k">€24 of €100</span></div><div class="bar"><i style="width:24%"></i></div></div>
+    </div></div></div>
+  </div>
+</div></div>
+
+<div class="cap">client 1800 — still 530; <strong>1181 empty</strong>, and still <strong>125px</strong> of scrolling — <strong>widening the window never reduces it</strong></div>
+<div class="scaler" style="height:237px"><div class="frame" style="width:1800px;transform:scale(0.55)">
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content empty"><div class="mwrap"><div class="m" style="background:var(--bg)">
+      <div class="lbl">Envelopes</div>
+      <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+      <div class="card"><div class="k">Per paycheck (monthly)</div><div class="fig sm">€2,400</div></div>
+      <div class="card"><div class="rowb"><span class="ttl">6 recurring expenses</span><span class="ttl">€1,095/mo</span></div></div>
+      <div class="lbl mt">Categories</div>
+      <div class="card"><div class="rowb"><span class="ttl">Groceries</span><span class="k">€149.15 of €400</span></div><div class="bar"><i style="width:37%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Transport</span><span class="k">€49 of €120</span></div><div class="bar"><i style="width:41%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Eating out</span><span class="k">€206.40 of €150</span></div><div class="bar"><i style="width:100%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Utilities</span><span class="k">€92.40 of €200</span></div><div class="bar"><i style="width:46%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Fun</span><span class="k">€24 of €100</span></div><div class="bar"><i style="width:24%"></i></div></div>
+    </div></div></div>
+  </div>
+</div></div>
+
+<h2>What separates them</h2>
+<table>
+<tr><th>At client…</th><th>A · divide</th><th>B · one column, capped</th></tr>
+<tr><th>700</th><td>one column at 611, <strong>145px</strong> scroll</td><td class="y">one column at 530, 81 empty, <strong>125px</strong> scroll</td></tr>
+<tr><th>1084</th><td class="y"><strong>0px</strong> scroll, 0 empty</td><td><strong>125px</strong> scroll, 465 empty</td></tr>
+<tr><th>1800</th><td class="y"><strong>0px</strong> scroll, 0 empty</td><td><strong>125px</strong> scroll, 1181 empty</td></tr>
+<tr><th>Rule count</th><td class="n">three mechanisms, one a named exception</td><td class="y">two mechanisms, no exceptions</td></tr>
+<tr><th>Attested in</th><td>Obsidian (1 of 4)</td><td>Notion, VS&nbsp;Code (2 of 4)</td></tr>
+</table>
+
+<div class="rule">
+<p style="margin:0 0 10px"><strong>The question, as narrowly as it can be put — and it is narrower than the first draft of this sheet claimed.</strong> That draft drew a red “below the fold” line, which implied content was lost. It is not: both options scroll, like every app measured. Measured properly, B costs <strong>125px of scrolling</strong> — about two cards — and that figure is <em>constant</em>: widening the window from 1084 to 1800 adds 716px of empty space and removes none of it. A removes the scroll entirely above the floor, at the price of a rule that applies to exactly one destination.</p>
+<p style="margin:0"><strong>So the honest trade is 125px of permanent scroll against one extra layout rule</strong>, and that is a much smaller gap than “below the fold” made it look. The thing no measurement can weigh is whether seeing envelopes and categories <em>together</em> is what Budget is for. If the side-by-side view is the point of the screen, A earns its exception. If Budget is a list you scroll like any other, two cards of scrolling is not worth a third mechanism, and B is right.</p>
+</div>
+
+</body>
+</html>

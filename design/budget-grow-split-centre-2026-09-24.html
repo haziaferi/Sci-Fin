@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sci-Fin — Budget: grow, split, centre</title>
+<style>
+  :root{--bg:#F5F5F4;--surf:#FFFFFF;--surf2:#EBEBE9;--bord:#DCDCD9;--bordStrong:#8C8C8D;
+        --txt:#26262A;--txt2:#66666B;--txt3:#9D9DA1;--acc:#5B6670;--onAcc:#FFFFFF;
+        --xs:13.5px;--sm:14.8px;--base:16px;--lg:19.7px;--xxl:27px;--u:8px;--r:14px}
+  body{margin:0;background:#8a8a8a;font-family:"Segoe UI",system-ui,sans-serif;color:#fff;padding:26px}
+  h1{font-size:23px;margin:0 0 6px;font-weight:700}
+  h2{font-size:18px;margin:34px 0 4px;font-weight:700}
+  p.intro{max-width:80ch;line-height:1.6;font-size:15px;opacity:.94;margin:0 0 10px}
+  .rule{max-width:80ch;background:rgba(0,0,0,.2);border-radius:10px;padding:14px 18px;margin:14px 0 0;line-height:1.6;font-size:14.5px}
+  code{background:rgba(0,0,0,.25);padding:1px 5px;border-radius:4px;font-size:13px}
+  table{border-collapse:collapse;margin:14px 0 0;font-size:14px;background:rgba(0,0,0,.14);border-radius:8px;overflow:hidden}
+  th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid rgba(255,255,255,.14)}
+  th{font-weight:700;background:rgba(0,0,0,.18)}
+  td.y{color:#cfe8cf}
+  .cap{font-size:13px;opacity:.86;margin:12px 0 4px;font-weight:600}
+  .phase{display:inline-block;background:rgba(255,255,255,.18);border-radius:99px;padding:1px 9px;font-size:12px;font-weight:700;margin-right:7px}
+  .scaler{overflow:hidden;margin:0 0 4px}
+  .frame{transform-origin:top left;border-radius:8px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.36)}
+  .win{background:var(--bg);display:flex;color:var(--txt);height:470px}
+  .rail{width:88px;flex:none;background:var(--bg);border-right:1px solid var(--bordStrong);
+        padding:calc(var(--u)*1.5) 0;display:flex;flex-direction:column;gap:2px}
+  .rail div{padding:calc(var(--u)*1) 0;text-align:center;font-size:var(--xs);color:var(--txt2);font-weight:600}
+  .rail div.on{color:var(--acc);font-weight:800}
+  .rail div b{display:block;font-size:16px;font-weight:400;margin-bottom:2px;opacity:.75}
+  .content{flex:1;display:flex;justify-content:center;overflow:hidden;min-width:0}
+  .empty{background:repeating-linear-gradient(45deg,rgba(140,140,141,.16) 0 6px,transparent 6px 12px)}
+  /* phase 1: one column, takes the whole content area */
+  .one{flex:1;min-width:0;overflow-y:auto;overflow-x:hidden;padding:calc(var(--u)*1.5);box-sizing:border-box;background:var(--bg)}
+  /* phase 2: a fixed 1076 block, centred, split into two 530 columns */
+  .two{width:1076px;flex:none;display:flex;gap:16px;background:var(--bg)}
+  .two > div{width:530px;flex:none;overflow-y:auto;overflow-x:hidden;padding:calc(var(--u)*1.5) 0;box-sizing:border-box}
+  .one::-webkit-scrollbar,.two > div::-webkit-scrollbar{width:9px}
+  .one::-webkit-scrollbar-thumb,.two > div::-webkit-scrollbar-thumb{background:#c2c2c0;border-radius:99px}
+  .card{background:var(--surf);border-radius:var(--r);padding:calc(var(--u)*1.1) calc(var(--u)*1.4);margin-bottom:var(--u)}
+  .card.tight{padding:calc(var(--u)*0.75) calc(var(--u)*1.4);margin-bottom:4px}
+  .lbl{color:var(--txt2);font-size:var(--xs);font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin:0 0 6px}
+  .lbl.mt{margin-top:14px}
+  .fig{font-size:var(--xxl);font-weight:800;line-height:1.1}
+  .fig.sm{font-size:var(--lg)}
+  .k{color:var(--txt2);font-size:var(--sm)}
+  .ttl{font-weight:700;font-size:var(--base)}
+  .rowb{display:flex;justify-content:space-between;align-items:center;gap:var(--u)}
+  .bar{height:9px;background:var(--surf2);border-radius:99px;overflow:hidden;margin-top:6px}
+  .bar i{display:block;height:100%;background:var(--acc);border-radius:99px}
+  .unwrap{outline:2px solid #6f8f6f;outline-offset:3px;border-radius:var(--r)}
+</style>
+</head>
+<body>
+
+<h1>Budget — grow, then split, then centre</h1>
+<p class="intro">A third rule, neither A nor B from the previous sheet: <strong>the column grows with the window while there is only one of it; when the content area is wide enough for two, it splits; after that it stops growing and the pair stays centred.</strong> And because splitting creates vertical room in the left column, the collapsed <em>&ldquo;6 recurring expenses&rdquo;</em> summary <strong>unwraps</strong> into its six items rather than leaving that room empty.</p>
+<p class="intro">Drawn with the seed's real recurring expenses (<code>prototype-seed.json</code>): Rent 950, Car loan 260, Car insurance 600 yearly, Phone bill 45, Pest control 90 bimonthly, Streaming 14 — a monthly equivalent of <strong>€1,364</strong>. The earlier sheets carried €1,095/mo, which does not match this fixture and is corrected here.</p>
+
+<div class="rule">
+<p style="margin:0 0 8px"><strong>The rule in three phases</strong>, with <code>content = client − 89</code>:</p>
+<p style="margin:0 0 6px"><span class="phase">1</span><strong>content &lt; 1076</strong> — one column, filling the whole content area. It grows as the window grows. Recurring expenses stays collapsed to one row.</p>
+<p style="margin:0 0 6px"><span class="phase">2</span><strong>content ≥ 1076</strong> — two columns of 530 with a 16 gap. Recurring expenses <strong>unwraps</strong> to six rows.</p>
+<p style="margin:0"><span class="phase">3</span><strong>beyond that</strong> — the 1076 block stays 1076 and <strong>centres</strong>. Extra width is left empty, exactly as the settled measure-cap rule does for Learn and Settings.</p>
+</div>
+
+<h2>Phase 1 — one column, growing</h2>
+
+<div class="cap">client 700 — content 611, one column at <strong>611</strong>, recurring collapsed</div>
+<div class="scaler" style="height:330px"><div class="frame" style="width:700px;transform:scale(0.7)">
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content"><div class="one">
+      <div class="lbl">Envelopes</div>
+      <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+      <div class="card"><div class="k">Per paycheck (monthly)</div><div class="fig sm">€2,400</div></div>
+      <div class="card"><div class="rowb"><span class="ttl">6 recurring expenses</span><span class="ttl">€1,364/mo</span></div></div>
+      <div class="lbl mt">Categories</div>
+      <div class="card"><div class="rowb"><span class="ttl">Groceries</span><span class="k">€149.15 of €400</span></div><div class="bar"><i style="width:37%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Transport</span><span class="k">€49 of €120</span></div><div class="bar"><i style="width:41%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Eating out</span><span class="k">€206.40 of €150</span></div><div class="bar"><i style="width:100%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Utilities</span><span class="k">€92.40 of €200</span></div><div class="bar"><i style="width:46%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Fun</span><span class="k">€24 of €100</span></div><div class="bar"><i style="width:24%"></i></div></div>
+    </div></div>
+  </div>
+</div></div>
+
+<div class="cap">client 1084 — the app's <em>current</em> window. content 995, still under 1076, so one column at <strong>995</strong></div>
+<div class="scaler" style="height:306px"><div class="frame" style="width:1084px;transform:scale(0.65)">
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content"><div class="one">
+      <div class="lbl">Envelopes</div>
+      <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+      <div class="card"><div class="k">Per paycheck (monthly)</div><div class="fig sm">€2,400</div></div>
+      <div class="card"><div class="rowb"><span class="ttl">6 recurring expenses</span><span class="ttl">€1,364/mo</span></div></div>
+      <div class="lbl mt">Categories</div>
+      <div class="card"><div class="rowb"><span class="ttl">Groceries</span><span class="k">€149.15 of €400</span></div><div class="bar"><i style="width:37%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Transport</span><span class="k">€49 of €120</span></div><div class="bar"><i style="width:41%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Eating out</span><span class="k">€206.40 of €150</span></div><div class="bar"><i style="width:100%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Utilities</span><span class="k">€92.40 of €200</span></div><div class="bar"><i style="width:46%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Fun</span><span class="k">€24 of €100</span></div><div class="bar"><i style="width:24%"></i></div></div>
+    </div></div>
+  </div>
+</div></div>
+
+<h2>Phase 2 — two columns, and the unwrap</h2>
+<p class="intro">The green outline marks what changed: the one-row summary becomes six rows, which is what stops the left column from being mostly empty beside a five-item Categories column.</p>
+
+<div class="cap">client 1165 — content 1076, exactly the threshold. Two columns of <strong>530</strong>, nothing empty, recurring <strong>unwrapped</strong></div>
+<div class="scaler" style="height:306px"><div class="frame" style="width:1165px;transform:scale(0.65)">
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content"><div class="two">
+      <div>
+        <div class="lbl">Envelopes</div>
+        <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+        <div class="card"><div class="k">Per paycheck (monthly)</div><div class="fig sm">€2,400</div></div>
+        <div class="lbl mt">Recurring expenses</div>
+        <div class="unwrap">
+          <div class="card tight"><div class="rowb"><span class="ttl">Rent</span><span class="k">€950 · monthly</span></div></div>
+          <div class="card tight"><div class="rowb"><span class="ttl">Car loan payment</span><span class="k">€260 · monthly</span></div></div>
+          <div class="card tight"><div class="rowb"><span class="ttl">Car insurance</span><span class="k">€600 · yearly</span></div></div>
+          <div class="card tight"><div class="rowb"><span class="ttl">Phone bill</span><span class="k">€45 · monthly</span></div></div>
+          <div class="card tight"><div class="rowb"><span class="ttl">Pest control</span><span class="k">€90 · bimonthly</span></div></div>
+          <div class="card tight"><div class="rowb"><span class="ttl">Streaming service</span><span class="k">€14 · monthly</span></div></div>
+        </div>
+        <div class="card" style="margin-top:8px"><div class="rowb"><span class="k">Monthly equivalent</span><span class="ttl">€1,364/mo</span></div></div>
+      </div>
+      <div>
+        <div class="lbl">Categories</div>
+        <div class="card"><div class="k">Spent this month</div><div class="fig">€520.95</div><div class="k" style="margin-top:4px">of €970 set aside across five categories</div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Groceries</span><span class="k">€149.15 of €400</span></div><div class="bar"><i style="width:37%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Transport</span><span class="k">€49 of €120</span></div><div class="bar"><i style="width:41%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Eating out</span><span class="k">€206.40 of €150</span></div><div class="bar"><i style="width:100%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Utilities</span><span class="k">€92.40 of €200</span></div><div class="bar"><i style="width:46%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Fun</span><span class="k">€24 of €100</span></div><div class="bar"><i style="width:24%"></i></div></div>
+      </div>
+    </div></div>
+  </div>
+</div></div>
+
+<h2>Phase 3 — capped and centred</h2>
+
+<div class="cap">client 1800 — content 1711. The block stays <strong>1076</strong> and centres; <strong>635 left empty</strong>, hatched</div>
+<div class="scaler" style="height:259px"><div class="frame" style="width:1800px;transform:scale(0.55)">
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content empty"><div class="two">
+      <div>
+        <div class="lbl">Envelopes</div>
+        <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+        <div class="card"><div class="k">Per paycheck (monthly)</div><div class="fig sm">€2,400</div></div>
+        <div class="lbl mt">Recurring expenses</div>
+        <div class="unwrap">
+          <div class="card tight"><div class="rowb"><span class="ttl">Rent</span><span class="k">€950 · monthly</span></div></div>
+          <div class="card tight"><div class="rowb"><span class="ttl">Car loan payment</span><span class="k">€260 · monthly</span></div></div>
+          <div class="card tight"><div class="rowb"><span class="ttl">Car insurance</span><span class="k">€600 · yearly</span></div></div>
+          <div class="card tight"><div class="rowb"><span class="ttl">Phone bill</span><span class="k">€45 · monthly</span></div></div>
+          <div class="card tight"><div class="rowb"><span class="ttl">Pest control</span><span class="k">€90 · bimonthly</span></div></div>
+          <div class="card tight"><div class="rowb"><span class="ttl">Streaming service</span><span class="k">€14 · monthly</span></div></div>
+        </div>
+        <div class="card" style="margin-top:8px"><div class="rowb"><span class="k">Monthly equivalent</span><span class="ttl">€1,364/mo</span></div></div>
+      </div>
+      <div>
+        <div class="lbl">Categories</div>
+        <div class="card"><div class="k">Spent this month</div><div class="fig">€520.95</div><div class="k" style="margin-top:4px">of €970 set aside across five categories</div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Groceries</span><span class="k">€149.15 of €400</span></div><div class="bar"><i style="width:37%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Transport</span><span class="k">€49 of €120</span></div><div class="bar"><i style="width:41%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Eating out</span><span class="k">€206.40 of €150</span></div><div class="bar"><i style="width:100%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Utilities</span><span class="k">€92.40 of €200</span></div><div class="bar"><i style="width:46%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Fun</span><span class="k">€24 of €100</span></div><div class="bar"><i style="width:24%"></i></div></div>
+      </div>
+    </div></div>
+  </div>
+</div></div>
+
+<div class="rule">
+<p style="margin:0 0 10px"><strong>Two consequences worth deciding on, both visible above.</strong></p>
+<p style="margin:0 0 10px"><strong>1 · The app's current window is on the wrong side of the threshold.</strong> At client 1084 the content is 995, under 1076, so this rule gives <em>one column</em> at the size the app opens at today. The split would only appear once the window is dragged past client 1165. If the split should be the default, either the threshold drops — split as soon as two columns of the 368 floor fit, at content 752, with the columns then growing from 368 up to 530 before centring — or the app's default window grows.</p>
+<p style="margin:0"><strong>2 · The unwrap changes what the screen is.</strong> Collapsed, the row says <em>6 recurring expenses · €1,364/mo</em>; unwrapped it lists Rent, Car loan, Car insurance, Phone bill, Pest control and Streaming with their cadences. That is a real gain in a wide window — but it means the same destination shows different information at different window sizes, which no rule so far has done. Worth being deliberate about rather than getting for free.</p>
+</div>
+
+</body>
+</html>

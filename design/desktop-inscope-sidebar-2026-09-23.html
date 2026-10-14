@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sci-Fin — the five destinations, drawn with a 240px sidebar (§4.8)</title>
+<style>
+  :root{--bg:#F5F5F4;--surf:#FFFFFF;--surf2:#EBEBE9;--bord:#DCDCD9;--bordStrong:#8C8C8D;
+        --txt:#26262A;--txt2:#66666B;--txt3:#9D9DA1;--acc:#5B6670;--onAcc:#FFFFFF;
+        --xs:13.5px;--sm:14.8px;--base:16px;--md:17.2px;--lg:19.7px;--xl:22.2px;--xxl:27px;
+        --u:8px;--pad:14px;--gap:8px;--r:14px}
+  body{margin:0;background:#8a8a8a;font-family:"Segoe UI",system-ui,sans-serif;color:#fff;padding:28px}
+  h1{font-size:23px;margin:0 0 6px;font-weight:700}
+  h2{font-size:18px;margin:40px 0 4px;font-weight:700}
+  p.intro{max-width:78ch;line-height:1.6;font-size:15px;opacity:.94;margin:0 0 10px}
+  .rule{max-width:78ch;background:rgba(0,0,0,.2);border-radius:10px;padding:14px 18px;margin:14px 0 0;
+        line-height:1.6;font-size:14.5px}
+  .tag{display:inline-block;background:rgba(255,255,255,.16);border-radius:99px;padding:2px 10px;
+       font-size:12.5px;font-weight:600;margin-left:8px;vertical-align:middle}
+  table{border-collapse:collapse;margin:14px 0 0;font-size:14px;background:rgba(0,0,0,.14);border-radius:8px;overflow:hidden}
+  th,td{padding:9px 13px;text-align:left;vertical-align:top;border-bottom:1px solid rgba(255,255,255,.14)}
+  th{font-weight:700;background:rgba(0,0,0,.18)}
+  td.y{color:#cfe8cf}
+
+  .frame{width:1100px;margin:12px 0 0;border-radius:10px;overflow:hidden;box-shadow:0 16px 50px rgba(0,0,0,.4)}
+  /* Windows 11's own titlebar. This is OS chrome, not Sci-Fin's, so it does not take the
+     app palette. 31px measured on this machine: SM_CYCAPTION 23 + SM_CYSIZEFRAME 4 +
+     SM_CXPADDEDBORDER 4. Main.kt:57 opens a decorated Window(), so this bar is real and
+     the app never paints it. It is drawn ABOVE the 1100x760 below, which is the CLIENT area. */
+  .chrome{height:31px;background:#f3f3f3;border-bottom:1px solid #e3e3e3;display:flex;align-items:center;
+          font-size:12px;color:#1a1a1a;font-weight:400}
+  .chrome .tb{flex:1;display:flex;align-items:center;gap:8px;padding-left:11px}
+  .chrome .mark{width:16px;height:16px;border-radius:3px;background:var(--acc);flex:none}
+  .chrome .wc{display:flex;align-self:stretch}
+  .chrome .wc span{width:46px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#1a1a1a}
+  .chrome .wc span.cl{font-size:11px}
+  .win{width:1100px;height:760px;background:var(--bg);display:flex;color:var(--txt)}
+  /* the one change in this file: 88px of glyphs becomes 240px of names. The markup
+     below is untouched -- same class, same five divs, same order, same content. */
+  .rail{width:240px;flex:none;box-sizing:border-box;background:var(--bg);border-right:1px solid var(--bordStrong);
+        padding:calc(var(--u)*2) calc(var(--u)*1.5);display:flex;flex-direction:column;gap:calc(var(--u)*.25)}
+  .rail div{padding:calc(var(--u)*1.25) calc(var(--u)*1.5);border-radius:10px;display:flex;align-items:center;
+            gap:calc(var(--u)*1.5);font-size:var(--base);color:var(--txt2);font-weight:600}
+  .rail div.on{color:var(--acc);font-weight:800;background:var(--surf)}
+  .rail div b{font-size:17px;font-weight:400;opacity:.75;width:20px;text-align:center;flex:none}
+
+  .content{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .body{flex:1;overflow:hidden;display:flex}
+  .pane{overflow:hidden;padding:calc(var(--u)*2);box-sizing:border-box}
+  .split{width:430px;flex:none;border-right:1px solid var(--bord)}
+  .measure{flex:1;display:flex;justify-content:center;overflow:hidden}
+  .m530{width:530px;padding:calc(var(--u)*2) 0;box-sizing:border-box}
+  .wide{flex:1;padding:calc(var(--u)*2) calc(var(--u)*2.5);box-sizing:border-box}
+
+  .card{background:var(--surf);border-radius:var(--r);padding:calc(var(--u)*1.5) calc(var(--u)*1.75);margin-bottom:var(--gap)}
+  .card.flat{background:var(--surf2)}
+  .lbl{color:var(--txt2);font-size:var(--xs);font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+       margin:calc(var(--u)*1.5) 0 calc(var(--u)*.75)}
+  .lbl:first-child{margin-top:0}
+  .fig{font-size:var(--xxl);font-weight:800;line-height:1.1}
+  .fig.sm{font-size:var(--lg)}
+  .k{color:var(--txt2);font-size:var(--sm)}
+  .ttl{font-weight:700;font-size:var(--base)}
+  .rowb{display:flex;justify-content:space-between;align-items:center;gap:var(--gap)}
+  .bar{height:calc(var(--u)*1.25);background:var(--surf2);border-radius:99px;overflow:hidden;margin-top:calc(var(--u)*.75)}
+  .bar i{display:block;height:100%;background:var(--acc);border-radius:99px}
+  .note{background:var(--surf2);border-radius:var(--r);padding:calc(var(--u)*1.25) calc(var(--u)*1.5);
+        color:var(--txt2);font-size:var(--sm);line-height:1.5;margin-bottom:var(--gap)}
+  .seg{display:flex;background:var(--surf2);border-radius:12px;padding:3px;margin-bottom:var(--gap)}
+  .seg>div{flex:1;text-align:center;padding:9px 2px;border-radius:8px;font-weight:700;color:var(--txt2);font-size:var(--sm)}
+  .seg>div.on{background:var(--surf);color:var(--txt)}
+  .btn{display:inline-block;padding:9px 15px;border-radius:12px;font-weight:700;font-size:var(--sm);
+       border:1.5px solid var(--acc);color:var(--acc)}
+  .tbl{width:100%;border-collapse:collapse;background:transparent;margin:0}
+  .tbl th{background:transparent;color:var(--txt2);font-size:var(--xs);font-weight:800;letter-spacing:.04em;
+          text-transform:uppercase;padding:0 0 calc(var(--u)*.75);border-bottom:1px solid var(--bord)}
+  .tbl td{padding:calc(var(--u)*1.1) 0;border-bottom:1px solid var(--bord);font-size:var(--sm);color:var(--txt);vertical-align:middle}
+  .tbl td.r,.tbl th.r{text-align:right}
+  .chart{height:190px;background:var(--surf);border-radius:var(--r);position:relative;overflow:hidden;margin-bottom:var(--gap)}
+  .chart svg{position:absolute;inset:0;width:100%;height:100%}
+  /* the editor strip, from KMyMoney's Registri: list above, editor below, never a column */
+  .strip{flex:none;border-top:1.5px solid var(--bordStrong);background:var(--surf);
+         padding:calc(var(--u)*1.5) calc(var(--u)*2);box-sizing:border-box}
+  .field{background:var(--surf2);border-radius:10px;padding:8px 11px;font-size:var(--sm);color:var(--txt)}
+  .fgrid{display:flex;gap:var(--gap);align-items:flex-end}
+  .fgrid>div{flex:1}
+</style>
+</head>
+<body>
+
+<div style="max-width:78ch;background:#6b2f2f;border-radius:10px;padding:14px 18px;margin:0 0 18px;
+     line-height:1.6;font-size:14.5px">
+<strong>Withdrawn in framing, 2026-09-24.</strong> These frames are drawn at one window size, as though the
+app had a fixed 1100&nbsp;&times;&nbsp;760. It does not &mdash; the window is resizable, and &sect;2.5 already
+says every measurement is continuous in window width. <strong>Read every number here as one sample of a
+rule, not as a constant:</strong> 506&nbsp;|&nbsp;505 is what &ldquo;divide the content in two&rdquo; gives at
+one width; 530 centred is what &ldquo;hold a measure and centre it&rdquo; gives at one width. The rules, measured
+from four shipping apps under a two-axis resize sweep, are in
+<code>design/desktop-prior-art-2026-09-23.md</code> &sect;15. The geometry below was measured correctly and the
+comparisons between options still hold &mdash; every option was sampled at the same size. What does not hold is
+treating any single figure as the answer.
+</div>
+
+<h1>The same five, with a 240px sidebar</h1>
+<p class="intro">The same six frames as the decided sheet, with one thing changed: the <strong>88px icon rail becomes a 240px sidebar with the destinations named</strong>. Nothing else was edited. The six navigation blocks are byte-identical between the two files — same class, same five entries, same glyphs — and only the CSS rule behind them differs. The earlier sheet claimed &ldquo;every frame here would accept a 240px sidebar; nothing else in the layout would change.&rdquo; This file is that claim carried out, so it can be checked rather than believed.</p>
+
+<div class="rule">
+<p style="margin:0 0 10px"><strong>The rule is unchanged</strong> — only the number in its first clause moves. Three of the four surveyed apps hold a shell constant and vary exactly one thing; the fourth varies everything and is the one that reads as incoherent. So §4.8 still has to name both halves:</p>
+<p style="margin:0 0 10px"><strong>The constant:</strong> a <strong>240px sidebar</strong> naming five destinations, and one content area of <strong>860px</strong>. That pair is not derived — it is <em>exactly</em> what Actual Budget measures at in a 1100px window, sidebar 240, content 860. Nothing else is permanent.</p>
+<p style="margin:0 0 10px"><strong>The one thing that varies: the measure.</strong> Tables and charts take the full content width; prose and settings take <strong>530 centred</strong>. That is Actual's rule, measured — 849 for tables, 530 for Settings — and it is the part of the withdrawn option C that survives.</p>
+<p style="margin:0"><strong>The one named exception:</strong> Budget splits into two columns, because it is the only destination in §4.2's table with two co-equal views of one thing. Naming it as an exception is what keeps it from becoming a precedent.</p>
+</div>
+
+<!-- ─────────────────────────────── 1 · Budget ─────────────────────────────── -->
+<h2>1 · Budget <span class="tag">the named exception — two columns</span></h2>
+<p class="intro">Envelopes 430 | Categories 430 — 860 halves evenly, where 1011 could only give 506 | 505. The only screen that splits, and §4.3's segmented control is gone because both of its views are present at once.</p>
+
+<div class="frame">
+  <div class="chrome"><div class="tb"><span class="mark"></span>Sci-Fin</div><div class="wc"><span>&#9472;</span><span>&#9744;</span><span class="cl">&#10005;</span></div></div>
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content"><div class="body">
+      <div class="pane split">
+        <div class="lbl">Envelopes</div>
+        <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+        <div class="note">The app's core functions depend on this figure being real. Quick-add whenever you're ready — no rush.</div>
+        <div class="lbl">Income</div>
+        <div class="card"><div class="k">Per paycheck (monthly)</div><div class="fig sm">€2,400</div><div class="k" style="margin-top:5px">€2,400 received so far this month</div></div>
+        <div class="lbl">Recurring expenses</div>
+        <div class="card"><div class="rowb"><span class="ttl">6 recurring expenses</span><span class="ttl">€1,095/mo</span></div></div>
+        <div class="lbl">Goals</div>
+        <div class="card"><div class="ttl">Emergency fund</div><div class="k">€1,150 left of goal</div><div class="bar"><i style="width:62%"></i></div></div>
+        <div class="card"><div class="ttl">New laptop</div><div class="k">€420 left of goal</div><div class="bar"><i style="width:79%"></i></div></div>
+      </div>
+      <div class="pane" style="flex:1">
+        <div class="lbl">Categories</div>
+        <div class="card"><div class="k">Spent this month</div><div class="fig">€520.95</div><div class="k" style="margin-top:5px">of €970 set aside across five categories</div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Groceries</span><span class="k">€149.15 of €400</span></div><div class="bar"><i style="width:37%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Transport</span><span class="k">€49 of €120</span></div><div class="bar"><i style="width:41%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Eating out</span><span class="k">€206.40 of €150</span></div>
+          <div class="bar" style="position:relative;background:var(--surf2)">
+            <i style="width:72.7%"></i>
+            <span style="position:absolute;left:72.7%;right:0;top:0;bottom:0;background:repeating-linear-gradient(45deg,var(--bordStrong) 0 2px,transparent 2px 5px);border-radius:0 99px 99px 0"></span>
+            <span style="position:absolute;left:72.7%;top:-3px;bottom:-3px;width:2px;background:var(--txt)"></span>
+          </div>
+        </div>
+        <div class="card"><div class="rowb"><span class="ttl">Utilities</span><span class="k">€92.40 of €200</span></div><div class="bar"><i style="width:46%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Fun</span><span class="k">€24 of €100</span></div><div class="bar"><i style="width:24%"></i></div></div>
+        <div class="card flat" style="text-align:center;color:var(--txt2);font-weight:600;border:1.5px dashed var(--bordStrong);background:transparent">+ New category</div>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────── 2 · Budget, editing ─────────────────────────────── -->
+<h2>2 · Budget, editing <span class="tag">the editor strip, not a dialog</span></h2>
+<p class="intro">The open question under a two-column Budget was where an editor goes when both columns are taken. KMyMoney's ledger answers it: <strong>a strip along the bottom</strong>. E consumes the horizontal axis and leaves the vertical one free, so the editor costs neither column. This is the same frame with Eating out selected.</p>
+
+<div class="frame">
+  <div class="chrome"><div class="tb"><span class="mark"></span>Sci-Fin</div><div class="wc"><span>&#9472;</span><span>&#9744;</span><span class="cl">&#10005;</span></div></div>
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content">
+      <div class="body">
+        <div class="pane split">
+          <div class="lbl">Envelopes</div>
+          <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+          <div class="lbl">Income</div>
+          <div class="card"><div class="k">Per paycheck (monthly)</div><div class="fig sm">€2,400</div></div>
+          <div class="lbl">Recurring expenses</div>
+          <div class="card"><div class="rowb"><span class="ttl">6 recurring expenses</span><span class="ttl">€1,095/mo</span></div></div>
+          <div class="lbl">Goals</div>
+          <div class="card"><div class="ttl">Emergency fund</div><div class="k">€1,150 left of goal</div><div class="bar"><i style="width:62%"></i></div></div>
+        </div>
+        <div class="pane" style="flex:1">
+          <div class="lbl">Categories</div>
+          <div class="card"><div class="rowb"><span class="ttl">Groceries</span><span class="k">€149.15 of €400</span></div><div class="bar"><i style="width:37%"></i></div></div>
+          <div class="card"><div class="rowb"><span class="ttl">Transport</span><span class="k">€49 of €120</span></div><div class="bar"><i style="width:41%"></i></div></div>
+          <div class="card" style="outline:2px solid var(--acc);outline-offset:1px">
+            <div class="rowb"><span class="ttl">Eating out</span><span class="k">€206.40 of €150</span></div>
+            <div class="bar" style="position:relative;background:var(--surf2)">
+              <i style="width:72.7%"></i>
+              <span style="position:absolute;left:72.7%;right:0;top:0;bottom:0;background:repeating-linear-gradient(45deg,var(--bordStrong) 0 2px,transparent 2px 5px);border-radius:0 99px 99px 0"></span>
+              <span style="position:absolute;left:72.7%;top:-3px;bottom:-3px;width:2px;background:var(--txt)"></span>
+            </div>
+          </div>
+          <div class="card"><div class="rowb"><span class="ttl">Utilities</span><span class="k">€92.40 of €200</span></div><div class="bar"><i style="width:46%"></i></div></div>
+          <div class="card"><div class="rowb"><span class="ttl">Fun</span><span class="k">€24 of €100</span></div><div class="bar"><i style="width:24%"></i></div></div>
+        </div>
+      </div>
+      <div class="strip">
+        <div class="lbl" style="margin-top:0">Eating out</div>
+        <div class="fgrid">
+          <div><div class="k" style="margin-bottom:5px">Set aside each month</div><div class="field">€150.00</div></div>
+          <div><div class="k" style="margin-bottom:5px">Name</div><div class="field">Eating out</div></div>
+          <div style="flex:none"><span class="btn" style="background:var(--acc);color:var(--onAcc)">Save</span></div>
+          <div style="flex:none"><span class="btn">Cancel</span></div>
+        </div>
+        <div class="k" style="margin-top:calc(var(--u)*1.25)">Over its plan by €56.40 this month. The tick marks where the plan sat; the hatching is what went past it.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────── 3 · Activity ─────────────────────────────── -->
+<h2>3 · Activity <span class="tag">one pane · table measure, full width</span></h2>
+<p class="intro">Accounts and the log, in the sections the build already has. A table, so it takes the whole content width — and at a 240px sidebar that width <em>is</em> Actual's 860, which is where the measured 849-of-860 register figure came from in the first place.</p>
+
+<div class="frame">
+  <div class="chrome"><div class="tb"><span class="mark"></span>Sci-Fin</div><div class="wc"><span>&#9472;</span><span>&#9744;</span><span class="cl">&#10005;</span></div></div>
+  <div class="win">
+    <div class="rail"><div><b>▢</b>Budget</div><div class="on"><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content"><div class="body"><div class="wide">
+      <div class="lbl">Accounts</div>
+      <table class="tbl">
+        <tr><th>Account</th><th>Kind</th><th class="r">Balance</th></tr>
+        <tr><td>Everyday</td><td class="k">Current</td><td class="r">€2,140.55</td></tr>
+        <tr><td>Savings</td><td class="k">Savings</td><td class="r">€4,470.00</td></tr>
+        <tr><td>Car loan</td><td class="k">Loan · Fixed · 6.40% APR</td><td class="r">€8,320.00 owed</td></tr>
+      </table>
+      <div style="margin-top:calc(var(--u)*1.75)"><span class="btn">Add account</span>&nbsp;&nbsp;<span class="btn">Import a statement</span>&nbsp;<span class="k">CSV or OFX</span></div>
+
+      <div class="lbl" style="margin-top:calc(var(--u)*2.5)">Log</div>
+      <table class="tbl">
+        <tr><th>Date</th><th>Payee</th><th>Category</th><th>Account</th><th class="r">Amount</th></tr>
+        <tr><td class="k">23 Sep</td><td>Lidl</td><td class="k">Groceries</td><td class="k">Everyday</td><td class="r">€38.20</td></tr>
+        <tr><td class="k">22 Sep</td><td>Caffè Verdi</td><td class="k">Eating out</td><td class="k">Everyday</td><td class="r">€6.40</td></tr>
+        <tr><td class="k">22 Sep</td><td>Trenitalia</td><td class="k">Transport</td><td class="k">Everyday</td><td class="r">€12.00</td></tr>
+        <tr><td class="k">21 Sep</td><td>Enel</td><td class="k">Utilities</td><td class="k">Everyday</td><td class="r">€46.20</td></tr>
+        <tr><td class="k">20 Sep</td><td>Payday</td><td class="k">Income</td><td class="k">Everyday</td><td class="r">€2,400.00</td></tr>
+        <tr><td class="k">19 Sep</td><td>Lidl</td><td class="k">Groceries</td><td class="k">Everyday</td><td class="r">€51.95</td></tr>
+      </table>
+    </div></div></div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────── 4 · Learn ─────────────────────────────── -->
+<h2>4 · Learn <span class="tag">one pane · prose measure, 530 centred</span></h2>
+<p class="intro">Five topics and the calculators, exactly as the build lists them. Prose, so the measure is 530 centred rather than 860 wide — the answer GnuCash's report tab gets wrong, and the one Actual's Settings gets right.</p>
+
+<div class="frame">
+  <div class="chrome"><div class="tb"><span class="mark"></span>Sci-Fin</div><div class="wc"><span>&#9472;</span><span>&#9744;</span><span class="cl">&#10005;</span></div></div>
+  <div class="win">
+    <div class="rail"><div><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div class="on"><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content"><div class="body"><div class="measure"><div class="m530">
+      <div class="lbl">Topics</div>
+      <div class="card"><div class="ttl">Why nothing turns red</div></div>
+      <div class="card"><div class="ttl">Why naming a goal helps</div></div>
+      <div class="card"><div class="ttl">Why categories work</div></div>
+      <div class="card"><div class="ttl">Financial well-being over adherence</div></div>
+      <div class="card"><div class="ttl">Credit scores, and what this app doesn't do</div></div>
+      <div class="lbl">Calculators</div>
+      <div class="card"><div class="ttl">What a loan actually costs</div></div>
+      <div class="card"><div class="ttl">What financing this one thing costs</div><div class="k" style="margin-top:4px">Putting a purchase on a card</div></div>
+      <div class="card"><div class="ttl">Compare financing against saving</div></div>
+    </div></div></div></div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────── 5 · Reports ─────────────────────────────── -->
+<h2>5 · Reports <span class="tag">one pane · charts, full width</span></h2>
+<p class="intro">§4.8 already excepted Reports as single-pane and wide, and the measure rule agrees: a chart is not prose.</p>
+
+<div class="frame">
+  <div class="chrome"><div class="tb"><span class="mark"></span>Sci-Fin</div><div class="wc"><span>&#9472;</span><span>&#9744;</span><span class="cl">&#10005;</span></div></div>
+  <div class="win">
+    <div class="rail"><div><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div class="on"><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content"><div class="body"><div class="wide">
+      <div class="lbl">Income vs Expenses · this month</div>
+      <div class="chart">
+        <svg viewBox="0 0 900 190" preserveAspectRatio="none">
+          <line x1="0" y1="150" x2="900" y2="150" stroke="#DCDCD9" stroke-width="1.5"/>
+          <rect x="120" y="40" width="120" height="110" fill="#5B6670"/>
+          <rect x="300" y="86" width="120" height="64" fill="#8C8C8D"/>
+          <text x="180" y="172" font-size="14" fill="#66666B" text-anchor="middle">Income</text>
+          <text x="360" y="172" font-size="14" fill="#66666B" text-anchor="middle">Spending</text>
+          <text x="180" y="30" font-size="14" fill="#26262A" text-anchor="middle" font-weight="700">€2,400.00</text>
+          <text x="360" y="76" font-size="14" fill="#26262A" text-anchor="middle" font-weight="700">€1,616.00</text>
+        </svg>
+      </div>
+      <div class="card"><div class="k">This month's net outflow</div><div class="fig sm">€1,616.00</div></div>
+      <div class="lbl">Savings vs. Owed</div>
+      <div class="card"><div class="rowb"><span class="ttl">Savings</span><span class="ttl">€4,470.00</span></div><div class="bar"><i style="width:35%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Owed</span><span class="ttl">€8,320.00</span></div><div class="bar"><i style="width:65%"></i></div></div>
+      <div class="lbl">Buffer</div>
+      <div class="card"><div class="k">Age of Money</div><div class="fig sm">2.8 months</div>
+        <div class="k" style="margin-top:5px">Hide how long this would cover you</div></div>
+    </div></div></div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────── 6 · Settings ─────────────────────────────── -->
+<h2>6 · Settings <span class="tag">one pane · 530 centred, as Actual measures it</span></h2>
+<p class="intro">The sections the build already has. 530 centred is not a guess — it is what Actual gives its own Settings inside an 860px pane, and with a 240px sidebar that pane is no longer merely comparable to Actual's, it is the same width. This frame and Learn are the two that lose <strong>no width at all</strong>: the measure is 530 in both files, measured. What changes is where it sits — x=330 with the rail, x=405 with the sidebar, 75px further right, with 330px of slack instead of 481.</p>
+
+<div class="frame">
+  <div class="chrome"><div class="tb"><span class="mark"></span>Sci-Fin</div><div class="wc"><span>&#9472;</span><span>&#9744;</span><span class="cl">&#10005;</span></div></div>
+  <div class="win">
+    <div class="rail"><div><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div class="on"><b>⚙</b>Settings</div></div>
+    <div class="content"><div class="body"><div class="measure"><div class="m530">
+      <div class="lbl">Profiles</div>
+      <div class="card"><div class="rowb"><span class="ttl">Alex</span><span class="k">Switch →</span></div></div>
+      <div class="lbl">Income</div>
+      <div class="card"><div class="rowb"><span class="ttl">Per-paycheck amount</span><span class="k">€2,400</span></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Cadence</span><span class="k">Monthly</span></div></div>
+      <div class="lbl">Appearance &amp; accessibility</div>
+      <div class="card"><div class="rowb"><span class="ttl">Look</span><span class="k">Auto</span></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Density</span><span class="k">Comfortable</span></div><div class="k" style="margin-top:4px">Spacing between rows</div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Low-distraction mode</span><span class="k">Off</span></div><div class="k" style="margin-top:4px">Hides decorative detail</div></div>
+      <div class="lbl">Data &amp; backup</div>
+      <div class="card"><div class="rowb"><span class="ttl">Export a backup</span><span class="k">Last export: 23 September 2026</span></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Restore backup</span><span class="k">Choose a backup file</span></div></div>
+    </div></div></div></div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────── what this commits to ─────────────────────────────── -->
+<h2>What these six frames commit to</h2>
+<table>
+<tr><th>Destination</th><th>Panes</th><th>Measure</th><th>Where editors go</th></tr>
+<tr><th>Budget</th><td class="y">two — 430 | 430</td><td>both columns full</td><td class="y">bottom strip</td></tr>
+<tr><th>Activity</th><td>one</td><td>full 860 — it is a table</td><td>inline in the row</td></tr>
+<tr><th>Learn</th><td>one</td><td class="y">530 centred — it is prose</td><td>n/a</td></tr>
+<tr><th>Reports</th><td>one</td><td>full 860 — charts</td><td>n/a</td></tr>
+<tr><th>Settings</th><td>one</td><td class="y">530 centred</td><td>inline in the row</td></tr>
+</table>
+
+<h2>What the sidebar costs, destination by destination</h2>
+<p class="intro">The sidebar takes 151px from the content area (1011&nbsp;→&nbsp;860). That is not spread evenly, because the measure rule already decides how much width each destination was using. Two of the five do not notice it at all.</p>
+<table>
+<tr><th>Destination</th><th>With the 88px rail</th><th>With the 240px sidebar</th><th>Cost</th></tr>
+<tr><th>Learn</th><td>530 at x=330, 481 slack</td><td>530 at x=405, 330 slack</td><td class="y"><strong>no width</strong> — shifts 75px right</td></tr>
+<tr><th>Settings</th><td>530 at x=330, 481 slack</td><td>530 at x=405, 330 slack</td><td class="y"><strong>no width</strong> — shifts 75px right</td></tr>
+<tr><th>Budget</th><td>506 | 505</td><td>430 | 430</td><td>−76 and −75 per column</td></tr>
+<tr><th>Activity</th><td>971 of table</td><td>820 of table</td><td>−151 across five columns</td></tr>
+<tr><th>Reports</th><td>971 of chart</td><td>820 of chart</td><td>−151, bars only</td></tr>
+</table>
+<p class="intro" style="margin-top:12px">So the whole cost falls on three screens, and on two of those it is a table and a bar chart absorbing a narrower plot — not content being dropped. What it buys is that the five destinations are <strong>readable words rather than five glyphs</strong>, permanently, with no hover and no learning. That is the trade in one line: <strong>151px of chart and table width, for never having to guess what ▥ means.</strong></p>
+<p class="intro">The one place it is a real loss is Budget, the named exception, where the split is the reason the screen exists. 430 is still wider than the 368px list pane §4.1 fixes today, so nothing is squeezed below what the spec already accepts.</p>
+
+<h2>Fill does not decide this one</h2>
+<p class="intro">Taking 151px away ought to make every screen visibly denser. It does not — and since &ldquo;fill the space&rdquo; was the criterion that produced three wrong recommendations in this survey, it is worth measuring rather than assuming. Both files were scored with <em>one identical script</em>: leaf elements only, their area over the body's area, so the two columns can be compared to each other.</p>
+<table>
+<tr><th>Destination</th><th>88px rail</th><th>240px sidebar</th><th>Change</th></tr>
+<tr><th>Budget</th><td>33.9%</td><td>32.8%</td><td>−1.1</td></tr>
+<tr><th>Budget, editing</th><td>37.4%</td><td>36.2%</td><td>−1.2</td></tr>
+<tr><th>Activity</th><td>57.7%</td><td>56.6%</td><td>−1.1</td></tr>
+<tr><th>Reports</th><td>26.3%</td><td>25.2%</td><td>−1.1</td></tr>
+<tr><th>Learn</th><td>16.1%</td><td>17.7%</td><td class="y">+1.6</td></tr>
+<tr><th>Settings</th><td>12.6%</td><td>13.6%</td><td class="y">+1.0</td></tr>
+</table>
+<p class="intro" style="margin-top:12px">Nothing moves more than <strong>1.6 points in either direction</strong>, and the three wide screens move the &ldquo;wrong&rdquo; way — slightly <em>emptier</em>, not denser. The reason is that almost every element on these screens is a stretch-width block: narrow the pane and the cards, bars and table rows narrow with it, so the proportion they cover barely changes. Only Learn and Settings behave as intuition predicts, and only because their 530 measure is the one thing that does <em>not</em> stretch.</p>
+<p class="intro"><strong>So fill is not an argument here, in either direction.</strong> The decision rests on what the 151px is spent on — five words instead of five glyphs — and on Budget's two columns, which are the only place the width does real work.</p>
+<p class="intro">These figures were re-measured after the titlebar correction below raised the client area from 726 to 760. Every number moved, and <strong>every delta stayed the same to within 0.2</strong> — which is the useful part: the conclusion does not depend on getting the window height exactly right.</p>
+
+<h2>A note on the window itself</h2>
+<p class="intro">These frames wore macOS traffic lights until this revision — a habit, not a decision. <code>Main.kt:57</code> opens a plain decorated <code>Window(title&nbsp;=&nbsp;&ldquo;Sci-Fin&rdquo;)</code>, so the app wears the <strong>native Windows 11 titlebar</strong>: icon and title on the left, minimise, maximise and close on the right. Measured on this machine with <code>GetSystemMetrics</code> — <code>SM_CYCAPTION</code> 23 + <code>SM_CYSIZEFRAME</code> 4 + <code>SM_CXPADDEDBORDER</code> 4 — it is <strong>31px</strong>, and it is now drawn that way.</p>
+<p class="intro">Correcting it surfaced something worth more than the styling. <code>rememberWindowState(width&nbsp;=&nbsp;1100.dp, height&nbsp;=&nbsp;760.dp)</code> sets AWT's <em>outer</em> bounds, which include the decoration — but every sheet in this series has treated 1100&nbsp;×&nbsp;760 as the <strong>client</strong> area. So the app as it runs today has <strong>less room than all six frames assume</strong>: at least 31px less vertically, plus whatever the DWM resize frame takes at the sides, which <code>GetSystemMetrics</code> alone cannot settle.</p>
+<p class="intro">Two things follow. <strong>No comparison in this series changes</strong> — every option was drawn under the same assumption, so rail-versus-sidebar, 506-versus-430 and the fill deltas above are all unaffected. But the <strong>absolute</strong> claims are provisional, including &ldquo;content 860, exactly Actual's 860&rdquo;: if the client area is really 1084 wide, a 240px sidebar leaves 844. Settling it needs one measurement of the running window — the client rect of the real <code>Sci-Fin</code> window, not a system metric — and until that is taken these frames describe a 1100&nbsp;×&nbsp;760 client area that the current <code>WindowState</code> does not actually deliver.</p>
+
+<h2>What does decide it: the OS text size</h2>
+<p class="intro">§2.5 puts the type ramp on the OS axis, not the window axis, and <code>TextScale</code> runs <strong>SM 0.875 → XL 1.5</strong>. A shell that names its destinations has to hold the longest of them at every one of those. The available width is a fixed budget: the glyph and the padding are on the <em>screen</em> axis and do not grow with the text, so all the growth has to come out of the label.</p>
+<p class="intro">Available label width, read off <code>Frame.kt</code> and the sidebar rule in this file: the 88px rail gives <strong>76dp</strong> (88 less <code>u/2</code> twice for the column and <code>u/4</code> twice for the item); a sidebar row gives its width less 81dp of border, padding, 20dp glyph and gap — so <strong>79dp at 160</strong> and <strong>159dp at 240</strong>. The longest label is &ldquo;Settings&rdquo;.</p>
+<table>
+<tr><th>TextScale</th><th>&ldquo;Settings&rdquo; needs</th><th>Rail 88 — has 76</th><th>Sidebar 160 — has 79</th><th>Sidebar 240 — has 159</th></tr>
+<tr><th>SM · 0.875×</th><td>44 / 52dp</td><td class="y">fits</td><td class="y">fits</td><td class="y">fits</td></tr>
+<tr><th>MD · 1.0×</th><td>50 / 59dp</td><td class="y">fits</td><td class="y">fits</td><td class="y">fits</td></tr>
+<tr><th>LG · 1.25×</th><td>63 / 74dp</td><td class="y">fits</td><td class="y">fits</td><td class="y">fits</td></tr>
+<tr><th>XL · 1.5×</th><td>75 / 89dp</td><td>fits by <strong>1dp</strong></td><td><strong>does not fit</strong> — needs 89, has 79</td><td class="y">fits, 70dp spare</td></tr>
+</table>
+<p class="intro" style="margin-top:12px">Two figures per cell because the rail's label is <code>xs</code> (16 × factor × 0.846) and a sidebar row's is <code>base</code> (16 × factor). <strong>160 is the only one of the three that breaks</strong>, and it breaks on &ldquo;Settings&rdquo; — a destination every user visits, and a single word, so wrapping is not available as a rescue. Compose would break it inside the word. That is why there is no 160 frame in this file.</p>
+<p class="intro"><strong>Two honest limits on this table.</strong> The widths are canvas measurements in Segoe UI, which is what Compose Desktop resolves to on Windows but is not the same rasteriser — so the rail's <strong>1dp of headroom at XL is inside my measurement error</strong> and should be confirmed by running the app at XL rather than trusted from here. And that 1dp is the rail's whole margin: step 8's queued &ldquo;System&rdquo; text-size default would let the OS drive the factor past 1.5 — Windows offers up to 2.25× — and above roughly <strong>1.52×</strong> the 88px rail's labels start breaking within the word too. The 240px sidebar is the only one of the three with room for that change.</p>
+
+<div class="rule">
+<p style="margin:0 0 10px"><strong>What this sheet settles and what it does not.</strong> It settles that the swap is cheap: two destinations lose no width at all, and the other three lose width without losing content. It does <em>not</em> settle these, which are still yours:</p>
+<p style="margin:0 0 10px"><strong>1 · Rail or sidebar</strong> — the decision this file exists to let you make, now that both are drawn. The survey evidence points one way: <strong>zero of nine</strong> surveyed apps use an icon rail, and the two best-regarded use a named sidebar at 240 and 160. The counter-evidence is Sci-Fin's own §4.1, which fixes 88 today, and the 151px above. Changing it is a §4.1 amendment, not just a redraw, so it needs your word before anything is coded.</p>
+<p style="margin:0 0 10px"><strong>1b · 160 was considered and is ruled out</strong>, on the measurement in the section above rather than on taste. Fava's sidebar is 160 and would have cost 71px instead of 151 — but it is the only one of the three shells whose labels stop fitting inside Sci-Fin's own text-scale range.</p>
+<p style="margin:0 0 10px"><strong>2 · The scale ceiling.</strong> These are drawn at 1.0×. The measurements say the ceiling is a small decision — across 1.0× to 2.0× a 1920 window moves only from 47% to 66% filled, because text may not scale with the window.</p>
+<p style="margin:0"><strong>3 · Whether the 530 measure is right for this app.</strong> It is Actual's number, measured, not a derivation from §2.5. If Sci-Fin's type ramp wants a different measure, it should be set from the ramp rather than borrowed.</p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,357 @@
+== bluecoins-home-2
+     18,   82  376x69   View           '' 
+     18,  202  376x320  View           '' 
+    106,  209   51x51   View           '' 
+    254,  209   51x51   View           '' 
+     30,  294   51x42   View           '' 
+     80,  295   50x42   View           '' 
+    130,  294   51x42   View           '' 
+    180,  295   50x42   View           '' 
+    230,  294   51x42   View           '' 
+    280,  295   50x42   View           '' 
+    330,  294   51x42   View           '' 
+     30,  336   51x42   View           '' 
+     80,  337   50x42   View           '' 
+    130,  336   51x42   View           '' 
+    180,  337   50x42   View           '' 
+    230,  336   51x42   View           '' 
+    280,  337   50x42   View           '' 
+    330,  336   51x42   View           '' 
+     30,  378   51x42   View           '' 
+     80,  379   50x42   View           '' 
+    130,  378   51x42   View           '' 
+    180,  379   50x42   View           '' 
+    230,  378   51x42   View           '' 
+    280,  379   50x42   View           '' 
+    330,  378   51x42   View           '' 
+     30,  420   51x42   View           '' 
+     80,  421   50x42   View           '' 
+    130,  420   51x42   View           '' 
+    180,  421   50x42   View           '' 
+    230,  420   51x42   View           '' 
+    280,  421   50x42   View           '' 
+    330,  420   51x42   View           '' 
+     30,  462   51x51   View           '' 
+     80,  462   51x51   View           '' 
+    130,  462   51x51   View           '' 
+    180,  462   51x51   View           '' 
+    230,  462   51x51   View           '' 
+    280,  462   51x51   View           '' 
+    330,  462   51x51   View           '' 
+     18,  539  376x270  View           '' 
+    300,  540   43x51   Button         '' 
+    343,  540   51x51   Button         '' 
+      0,    0    0x0    View           '' 
+      0,    0    0x0    Button         '' 
+      0,    0    0x0    Button         '' 
+      4,   90   51x51   Button         '' 
+    306,   91   48x51   View           '' 
+    354,   91   51x51   View           '' 
+    126,  150  110x51   View           '' 
+    236,  150  115x51   View           '' 
+    351,  150   60x51   View           '' 
+    334,  763   60x47   View           '' 
+     96,   31  220x51   View           '' 
+== bluecoins-home
+     18,  219  376x252  View           '' 
+    300,  220   43x51   Button         '' 
+    343,  220   51x51   Button         '' 
+     18,  488  376x291  View           '' 
+    300,  489   43x51   Button         '' 
+    343,  489   51x51   Button         '' 
+     18,  796  376x13   View           '' 
+    106,  809   51x0    View           '' 
+    254,  809   51x0    View           '' 
+      4,   90   51x51   Button         '' 
+    306,   91   48x51   View           '' 
+    354,   91   51x51   View           '' 
+    126,  150  110x51   View           '' 
+    236,  150  115x51   View           '' 
+    351,  150   60x51   View           '' 
+    334,  763   60x47   View           '' 
+     96,   31  220x51   View           '' 
+== bluecoins-transactions
+      0,  256  411x77   View           '' 
+      9,  252   51x51   View           '' 
+      0,  333  411x50   View           '' 
+      9,  330   51x48   View           '' 
+      0,  382  411x68   View           '' 
+      9,  378   51x51   View           '' 
+      0,  496  411x78   View           '' 
+      9,  491   51x51   View           '' 
+      0,  619  411x68   View           '' 
+      9,  615   51x51   View           '' 
+      0,  733  411x68   View           '' 
+      9,  728   51x51   View           '' 
+      0,  801  411x9    View           '' 
+      9,  797   51x13   View           '' 
+      0,    0    0x0    View           '' 
+      0,    0    0x0    View           '' 
+      4,   90   51x51   Button         '' 
+    258,   91   48x51   View           '' 
+    306,   91   48x51   View           '' 
+    354,   91   51x51   View           '' 
+     26,  150  100x51   View           '' 
+    236,  150  115x51   View           '' 
+    351,  150   60x51   View           '' 
+    334,  763   60x47   View           '' 
+     96,   31  220x51   View           '' 
+== buckwheat-budget
+      0,    0  411x122  View           'null' 
+    351,  130   51x51   Button         '' 
+     17,  190  377x193  View           '' 
+      0,  497   43x42   View           '' 
+      0,  539  411x60   View           '' 
+      0,  599  411x60   View           '' 
+      0,  659  411x60   View           '' 
+      0,  720  411x60   View           '' 
+      0,  780  411x30   View           '' 
+== buckwheat-home
+     21,  467   82x82   View           '' 
+    117,  467   82x82   View           '' 
+    212,  467   83x82   View           '' 
+    307,  467   83x82   View           '' 
+     21,  562   83x82   View           '' 
+    117,  562   82x82   View           '' 
+    212,  562   82x82   View           '' 
+     21,  658   83x83   View           '' 
+    117,  658   82x83   View           '' 
+    212,  658   82x83   View           '' 
+     21,  753  178x56   View           '' 
+    212,  753   82x56   View           '' 
+    307,  562   83x247  View           '' 
+      0,    0  411x446  View           '' 
+     26,   42  313x54   View           '' 
+    348,   43   51x51   Button         '' 
+      0,   99  411x273  EditText       '' 
+== cashew-budget
+    354,   32   58x58   Button         '' 
+     14,  208  383x214  View           'Monthly spending\n1.111\xa0$\n rimanenti di 1.364\xa0$\n1 o' 
+    346,  219   41x41   View           '' 
+     14,  422  383x193  View           '' 
+      0,  754  103x55   View           'Home\nScheda 1 di 4' 
+    103,  754  103x55   View           'Transazioni\nScheda 2 di 4' 
+    206,  754  103x55   View           'Budget\nScheda 3 di 4' 
+    309,  754  103x55   View           'Altro\nScheda 4 di 4' 
+    331,  674   64x64   View           'Aggiungi transazione' 
+    354,   32   58x58   Button         '' 
+      0,    0  411x810  View           '' 
+== cashew-home-2
+     10,    0  391x154  View           'Monthly spending\n1.111\xa0$\n rimanenti di 1.364\xa0$\n1 o' 
+    347,    0   40x8    View           '' 
+    401,    0   10x154  View           'Budget' 
+      0,  430  411x59   View           'Train\nBanca\n35\xa0$' 
+     22,  434   50x50   ImageView      '' 
+      0,  489  411x59   View           'Utilities\nBanca\n120\xa0$' 
+     22,  493   50x51   ImageView      '' 
+      0,  548  411x59   View           'Coffee\nBanca\n12\xa0$' 
+     22,  552   50x50   ImageView      '' 
+      0,  607  411x59   View           'Groceries\nBanca\n86\xa0$' 
+     22,  611   50x50   ImageView      '' 
+      0,  666  411x59   View           'Starting balance\nBanca\n1.617\xa0$' 
+     22,  670   50x50   ImageView      '' 
+      0,  725  411x59   View           'Paycheck\nBanca\n1.450\xa0$' 
+     22,  729   50x50   ImageView      '' 
+    102,  791  208x19   View           'Mostra tutte le transazioni' 
+      0,  754  103x55   View           'Home\nScheda 1 di 4' 
+    103,  754  103x55   View           'Transazioni\nScheda 2 di 4' 
+    206,  754  103x55   View           'Budget\nScheda 3 di 4' 
+    309,  754  103x55   View           'Altro\nScheda 4 di 4' 
+    331,  674   64x64   View           'Aggiungi transazione' 
+== cashew-home
+      0,   30  411x58   View           '' 
+     10,  154  119x43   View           'Home' 
+     14,  216  127x98   View           'Banca\n2.814\xa0$\n6 transazioni' 
+    154,  216  126x98   View           'Account' 
+     10,  328  391x197  View           'Monthly spending\n1.111\xa0$\n rimanenti di 1.364\xa0$\n1 o' 
+    347,  339   40x40   View           '' 
+    401,  328   10x197  View           'Budget' 
+      0,  802  411x8    View           'Train\nBanca\n35\xa0$' 
+     22,  806   50x4    ImageView      '' 
+      0,  754  103x55   View           'Home\nScheda 1 di 4' 
+    103,  754  103x55   View           'Transazioni\nScheda 2 di 4' 
+    206,  754  103x55   View           'Budget\nScheda 3 di 4' 
+    309,  754  103x55   View           'Altro\nScheda 4 di 4' 
+    331,  674   64x64   View           'Aggiungi transazione' 
+== goodbudget-accounts
+      0,   91   85x50   TextView       'ENVELOPES' 
+     85,   91  130x50   TextView       'TRANSACTIONS' 
+    215,   91  104x50   TextView       'ACCOUNTS' 
+    319,   91   93x50   TextView       'REPORTS' 
+      9,  265  394x51   Button         'GET UNLIMITED ACCOUNTS! »' 
+    334,  763   60x47   FloatingAction 'fab_add' fab_add
+    317,   35   51x51   TextView       'Fill Envelopes' menu_item_add_funds
+    368,   35   43x51   ImageButton    'Altre opzioni' 
+== goodbudget-envelopes
+      0,   91  107x50   TextView       'ENVELOPES' 
+    107,   91  130x50   TextView       'TRANSACTIONS' 
+    238,   91  104x50   TextView       'ACCOUNTS' 
+    341,   91   70x50   TextView       'REPORTS' 
+    334,  763   60x47   FloatingAction 'fab_add' fab_add
+    317,   35   51x51   TextView       'Fill Envelopes' menu_item_add_funds
+    368,   35   43x51   ImageButton    'Altre opzioni' 
+== ivy-accounts
+    334,   65   52x52   ImageView      'icon' 
+     17,  220  377x197  View           '' 
+    104,  273  203x51   View           '' 
+      0,  776  411x34   View           '' 
+      0,  776  176x34   View           '' 
+    236,  776  176x34   View           '' 
+    176,  748   60x60   ImageView      'circle button' 
+== ivy-home-2
+     26,   52   96x56   View           '' 
+    180,   58  150x51   View           '' 
+     17,  108  377x191  View           '' 
+     38,  232  334x51   View           '' 
+     17,  312  377x368  View           '' 
+    321,  329   52x52   ImageView      'prompt_dismiss' 
+    160,  613  213x51   View           '' 
+     17,  774  377x35   View           '' 
+    343,   52   52x52   ImageView      'icon' 
+      0,  776  411x34   View           '' 
+      0,  776  176x34   View           '' 
+    236,  776  176x34   View           '' 
+    176,  748   60x60   ImageView      'circle button' 
+== ivy-home
+    180,   51  150x51   View           '' 
+     21,  118  272x62   View           '' 
+     17,  206  182x103  View           '' 
+    212,  206  182x103  View           '' 
+     17,  396  377x328  View           '' 
+    321,  416   52x52   ImageView      'prompt_dismiss' 
+     38,  656  334x51   View           '' 
+     17,  737  377x73   View           '' 
+    321,  754   52x22   ImageView      'prompt_dismiss' 
+    343,   52   52x52   ImageView      'icon' 
+      0,  776  411x34   View           '' 
+      0,  776  176x34   View           '' 
+    236,  776  176x34   View           '' 
+    176,  748   60x60   ImageView      'circle button' 
+== mmex-home
+      0,   30   60x60   ImageButton    'Aperto' 
+    300,   35   51x51   Button         'Hide Balances' menu_hide_balances
+    351,   35   60x51   Button         'Ricerca' menu_search
+      6,  757  398x53   FrameLayout    '' 
+    334,  737   60x60   FloatingAction 'TODO' fab
+== monefy-home
+      0,   61   60x60   ImageButton    'Apri esplorazione' 
+    256,   65   52x51   Button         'Ricerca di record' menu_search
+    308,   65   52x51   Button         'Trasferimento' transfer_menu_item
+    360,   65   52x51   Button         'Impostazioni' overflow
+      0,  134  310x20   TextView       'Ottobre' 
+      0,  606  411x69   LinearLayout   'SliderDragView' SliderDragView
+     13,  623   66x34   ImageButton    'leftLinesImageView' leftLinesImageView
+     91,  616  229x47   LinearLayout   'balance_container' balance_container
+    333,  623   66x34   ImageButton    'rightLinesImageView' rightLinesImageView
+      0,  678  206x97   ImageView      'expense_button' expense_button
+    206,  678  206x97   ImageView      'income_button' income_button
+== moneymanager-accounts
+    297,   30   54x47   TextView       '\uf080' faStatsButton
+    352,   30   54x47   TextView       '\uf142' faEditButton
+      0,  136  411x586  ViewGroup      'slSync' slSync
+      0,  192  411x49   LinearLayout   'llAssetRow' llAssetRow
+      0,  296  411x49   LinearLayout   'llAssetRow' llAssetRow
+      0,  400  411x49   LinearLayout   'llAssetRow' llAssetRow
+      0,  782  103x27   LinearLayout   'MenuButton01' MenuButton01
+    103,  782  103x27   LinearLayout   'MenuButton02' MenuButton02
+    206,  782  103x27   LinearLayout   'MenuButton03' MenuButton03
+    309,  782  103x27   ViewGroup      'MenuButton04' MenuButton04
+== moneymanager-stats
+      0,   30   43x47   TextView       '\uf053' monthLeftButton
+     43,   30   62x47   TextView       'ott 2026' titleName
+    105,   30   43x47   TextView       '\uf054' monthRightButton
+    325,   39   72x32   TextView       'Mese  a' tVSearchMenu
+      0,   78  206x43   ToggleButton   'Guadagno  € 3.067,00' tbInButton
+    206,   78  206x43   ToggleButton   'Spesa  € 253,00' tbOutButton
+      0,  455  411x47   LinearLayout   'dataRow' dataRow
+      0,  502  411x47   LinearLayout   'dataRow' dataRow
+      0,  549  411x47   LinearLayout   'dataRow' dataRow
+      0,  782  103x27   LinearLayout   'MenuButton01' MenuButton01
+    103,  782  103x27   LinearLayout   'MenuButton02' MenuButton02
+    206,  782  103x27   LinearLayout   'MenuButton03' MenuButton03
+    309,  782  103x27   ViewGroup      'MenuButton04' MenuButton04
+== moneymanager-transactions
+      0,   30   43x47   TextView       '\uf053' arrowLeftButton
+     43,   30   62x47   TextView       'ott 2026' titleText
+    105,   30   43x47   TextView       '\uf054' arrowRightButton
+    248,   30   54x47   TextView       'Preferiti' faStar
+    302,   30   54x47   TextView       'Cerca' searchBtn
+    357,   30   54x47   TextView       'Filtro' filterButton
+      0,   78  102x40   ToggleButton   'Giornaliero' tbMainDayBtn1
+    102,   78  100x40   ToggleButton   'Calendario' tbMainCalBtn
+    202,   78   79x40   ToggleButton   'Mensile' tbMainMonthBtn
+    281,   78   69x40   ToggleButton   'Totale' tbMainSummaryBtn
+    350,   78   61x40   ToggleButton   'Nota' tbMainMemoBtn
+      0,  170  411x36   ViewGroup      'listTopLayout' listTopLayout
+      0,  206  411x53   ViewGroup      'listMiddleLayout' listMiddleLayout
+      0,  260  411x53   ViewGroup      'listMiddleLayout' listMiddleLayout
+      0,  313  411x53   ViewGroup      'listMiddleLayout' listMiddleLayout
+      0,  366  411x53   ViewGroup      'listMiddleLayout' listMiddleLayout
+      0,  420  411x53   ViewGroup      'listMiddleLayout' listMiddleLayout
+      0,  473  411x53   ViewGroup      'listMiddleLayout' listMiddleLayout
+    334,  709   60x60   FloatingAction 'Aggiungi' addFab
+      0,  782  103x27   LinearLayout   'MenuButton01' MenuButton01
+    103,  782  103x27   LinearLayout   'MenuButton02' MenuButton02
+    206,  782  103x27   LinearLayout   'MenuButton03' MenuButton03
+    309,  782  103x27   ViewGroup      'MenuButton04' MenuButton04
+== myexpenses-accounts
+      0,  150  411x51   View           '' 
+    356,  150   51x51   View           '' 
+      0,   99  411x51   View           '' 
+     17,   31  236x67   EditText       'Conti' 
+    304,   39   51x51   View           '' 
+    356,   39   51x51   View           '' 
+    285,  693   59x60   View           '' 
+    345,  693   51x60   View           '' 
+    103,  771  103x39   View           '' 
+    206,  771  103x39   View           '' 
+    309,  771  103x39   View           '' 
+== myexpenses-transactions
+      0,  157  411x51   View           '' 
+      0,  209  411x51   View           '' 
+      0,  262  411x51   View           '' 
+      0,  314  411x51   View           '' 
+      0,  367  411x51   View           '' 
+     17,   33  190x51   View           '' 
+    253,   32   51x51   View           '' 
+    304,   32   51x51   View           '' 
+    356,   32   51x51   View           '' 
+    285,  693   59x60   View           '' 
+    345,  693   51x60   View           '' 
+      0,  771  103x39   View           '' 
+    206,  771  103x39   View           '' 
+    309,  771  103x39   View           '' 
+== wallet-budget
+      0,   35   60x60   ImageButton    '' 
+      0,   99  206x51   LinearLayout   'Conti' 
+     28,  251  116x51   Button         'Crea budget' button_cta
+     28,  413  126x51   Button         'Crea obiettivo' button_cta
+== wallet-home-2
+    357,   20   43x43   ImageView      'button_close' button_close
+     19,  139  124x124  ViewGroup      'vFirstBank' vFirstBank
+    144,  139  124x124  ViewGroup      'vSecondBank' vSecondBank
+    268,  139  124x124  ViewGroup      'vThirdBank' vThirdBank
+     19,  272  124x124  ViewGroup      'vFourthBank' vFourthBank
+    144,  272  124x124  ViewGroup      'vFifthBank' vFifthBank
+    268,  272  124x124  ViewGroup      'vSixthBank' vSixthBank
+     19,  406  155x51   Button         'Trova la tua banca' button_positive
+    226,  576  158x51   Button         'Esplora ulteriormente' goDeeperBtn
+    357,  477   43x43   ImageView      'image_3dot' image_3dot
+    334,  763   60x47   View           '' 
+== wallet-home
+      0,   35   60x60   ImageButton    '' 
+    360,   39   51x51   LinearLayout   'menu_ring' menu_ring
+    206,   99  206x51   LinearLayout   'Budget & Obiettivi' 
+    364,  159   34x34   Button         'icon_account_settings' icon_account_settings
+      9,  202  197x52   RelativeLayout '' 
+    206,  202  197x56   LinearLayout   '' 
+     13,  267  150x51   Button         'Dettaglio account' button_account_detail
+     24,  435  164x51   Button         'Collega Google Pay' button_cta
+    357,  339   43x43   ImageView      'button_close' button_close
+     28,  549   43x43   RelativeLayout 'vLayoutIcon' vLayoutIcon
+     28,  650  356x51   Button         'Ottieni Wallet Premium' premium_widget_button
+    357,  730   43x43   ImageView      'button_close' button_close
+      0,    0    0x0    ViewGroup      'vFirstBank' vFirstBank
+      0,    0    0x0    ViewGroup      'vSecondBank' vSecondBank
+      0,    0    0x0    ViewGroup      'vThirdBank' vThirdBank
+    334,  763   60x47   View           '' 

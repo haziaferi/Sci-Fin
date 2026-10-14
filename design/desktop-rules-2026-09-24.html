@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sci-Fin — the desktop as rules, not numbers</title>
+<style>
+  :root{--bg:#F5F5F4;--surf:#FFFFFF;--surf2:#EBEBE9;--bord:#DCDCD9;--bordStrong:#8C8C8D;
+        --txt:#26262A;--txt2:#66666B;--txt3:#9D9DA1;--acc:#5B6670;--onAcc:#FFFFFF;
+        --xs:13.5px;--sm:14.8px;--base:16px;--lg:19.7px;--xxl:27px;
+        --u:8px;--r:14px}
+  body{margin:0;background:#8a8a8a;font-family:"Segoe UI",system-ui,sans-serif;color:#fff;padding:26px}
+  h1{font-size:23px;margin:0 0 6px;font-weight:700}
+  h2{font-size:18px;margin:38px 0 4px;font-weight:700}
+  h3{font-size:15px;margin:22px 0 6px;font-weight:700;opacity:.92}
+  p.intro{max-width:80ch;line-height:1.6;font-size:15px;opacity:.94;margin:0 0 10px}
+  .rule{max-width:80ch;background:rgba(0,0,0,.2);border-radius:10px;padding:14px 18px;margin:14px 0 0;
+        line-height:1.6;font-size:14.5px}
+  code{background:rgba(0,0,0,.25);padding:1px 5px;border-radius:4px;font-size:13px}
+  table{border-collapse:collapse;margin:14px 0 0;font-size:14px;background:rgba(0,0,0,.14);border-radius:8px;overflow:hidden}
+  th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid rgba(255,255,255,.14)}
+  th{font-weight:700;background:rgba(0,0,0,.18)}
+  td.y{color:#cfe8cf}
+  .cap{font-size:13px;opacity:.85;margin:10px 0 4px;font-weight:600}
+
+  /* Each frame is laid out at its TRUE client width and then scaled to fit the page,
+     so the proportions you see are the proportions the rule produces. */
+  .scaler{overflow:hidden;margin:0 0 6px}
+  .frame{transform-origin:top left;border-radius:8px;overflow:hidden;box-shadow:0 10px 32px rgba(0,0,0,.38)}
+  .win{background:var(--bg);display:flex;color:var(--txt);height:470px}
+  .rail{width:88px;flex:none;background:var(--bg);border-right:1px solid var(--bordStrong);
+        padding:calc(var(--u)*1.5) 0;display:flex;flex-direction:column;gap:2px}
+  .rail div{padding:calc(var(--u)*1) 0;text-align:center;font-size:var(--xs);color:var(--txt2);font-weight:600}
+  .rail div.on{color:var(--acc);font-weight:800}
+  .rail div b{display:block;font-size:16px;font-weight:400;margin-bottom:2px;opacity:.75}
+  .content{flex:1;display:flex;overflow:hidden}
+  .pane{overflow:hidden;padding:calc(var(--u)*1.5);box-sizing:border-box}
+  .half{flex:1 1 0;min-width:0}
+  .half+.half{border-left:1px solid var(--bord)}
+  .measure{flex:1;display:flex;justify-content:center;overflow:hidden;min-width:0}
+  .m{width:530px;max-width:100%;padding:calc(var(--u)*1.5) 0;box-sizing:border-box}
+  .wide{flex:1;padding:calc(var(--u)*1.5) calc(var(--u)*2);box-sizing:border-box;min-width:0}
+
+  .card{background:var(--surf);border-radius:var(--r);padding:calc(var(--u)*1.1) calc(var(--u)*1.4);margin-bottom:var(--u)}
+  .lbl{color:var(--txt2);font-size:var(--xs);font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin:0 0 6px}
+  .fig{font-size:var(--xxl);font-weight:800;line-height:1.1}
+  .fig.sm{font-size:var(--lg)}
+  .k{color:var(--txt2);font-size:var(--sm)}
+  .ttl{font-weight:700;font-size:var(--base)}
+  .rowb{display:flex;justify-content:space-between;align-items:center;gap:var(--u)}
+  .bar{height:9px;background:var(--surf2);border-radius:99px;overflow:hidden;margin-top:6px}
+  .bar i{display:block;height:100%;background:var(--acc);border-radius:99px}
+  .tbl{width:100%;border-collapse:collapse;background:transparent;margin:0;table-layout:fixed}
+  .tbl th{background:transparent;color:var(--txt2);font-size:var(--xs);font-weight:800;letter-spacing:.04em;
+          text-transform:uppercase;padding:0 0 6px;border-bottom:1px solid var(--bord)}
+  .tbl td{padding:9px 0;border-bottom:1px solid var(--bord);font-size:var(--sm);color:var(--txt);
+          overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tbl td.r,.tbl th.r{text-align:right}
+  .tag{display:inline-block;background:rgba(255,255,255,.16);border-radius:99px;padding:2px 9px;
+       font-size:12px;font-weight:600;margin-left:6px;vertical-align:middle}
+</style>
+</head>
+<body>
+
+<h1>The desktop as rules, not numbers</h1>
+<p class="intro">Every earlier sheet drew the app at <strong>one</strong> window size, as though 1100&nbsp;×&nbsp;760 were the size it has. It is not — the window is resizable to anything. This sheet draws the same five destinations as <strong>rules</strong>, each shown at three widths, so what you are judging is the behaviour rather than a snapshot of it.</p>
+<p class="intro">The rules are not invented. They were measured on 2026-09-24 from four applications installed on this machine — <strong>Notion, Obsidian, VS&nbsp;Code and Todoist</strong> — each driven through a two-axis resize sweep, down and back up through the same widths and heights. Full method and figures: <code>design/desktop-prior-art-2026-09-23.md</code> §15.</p>
+
+<div class="rule">
+<p style="margin:0 0 10px"><strong>What the four apps agree on, unanimously.</strong></p>
+<p style="margin:0 0 8px"><strong>1 · Navigation chrome is a fixed pixel size and never scales with the window.</strong> Not one of the four grows its rail or sidebar as the window grows. Notion holds 267px from a 644px window to a 1904px one — 41% of the window at the narrow end, 14% at the wide end. The same holds vertically: three of four have top-chrome rows that do not move by a single pixel across a 2× height range.</p>
+<p style="margin:0 0 8px"><strong>2 · All the variation lives in the content area</strong>, by exactly three mechanisms — <em>reveal</em> (Notion: keep a measure, let extra width be empty), <em>divide</em> (Obsidian: split the remainder exactly in half), and <em>centre to a maximum measure</em> (VS&nbsp;Code: fill below a threshold, hold and centre above it).</p>
+<p style="margin:0 0 8px"><strong>3 · Collapse is governed by content, not by window width.</strong> Todoist's sidebar is 280px, and it drops to 66px between client 744 and 764 — exactly where keeping it would push the content below ~484px. It is not collapsing at a width; it is collapsing to protect a measure.</p>
+<p style="margin:0"><strong>4 · Resizing is exactly reversible.</strong> Every app returns to an identical layout at a given size whatever path it took there. No app remembers having been narrow.</p>
+</div>
+
+<h2>What that makes Sci-Fin's rules</h2>
+<p class="intro">Three content types, three mechanisms, and the mapping is forced by the content rather than chosen:</p>
+<table>
+<tr><th>Destination</th><th>Content is…</th><th>Rule</th><th>Attested in</th></tr>
+<tr><th>Budget</th><td>two co-equal views</td><td class="y"><strong>divide</strong> — each column <code>content ÷ 2</code>, until a column would fall below the floor</td><td>Obsidian, exactly 50/50</td></tr>
+<tr><th>Learn</th><td>prose</td><td class="y"><strong>centre to a measure</strong> — fill below it, hold and centre above it</td><td>VS&nbsp;Code, at 946</td></tr>
+<tr><th>Settings</th><td>rows of controls</td><td class="y"><strong>centre to a measure</strong></td><td>VS&nbsp;Code; Actual at 530</td></tr>
+<tr><th>Activity</th><td>a table</td><td><strong>reveal</strong> — columns take the width</td><td>Actual, 849 of 860</td></tr>
+<tr><th>Reports</th><td>charts</td><td><strong>reveal</strong></td><td>Actual</td></tr>
+</table>
+<p class="intro" style="margin-top:12px">Two numbers below are <strong>candidates, not decisions</strong>: the prose measure is drawn at <strong>530</strong> (Actual's, measured) and the per-column floor at <strong>368</strong> (§4.8's own list-pane width). Both should come from §2.5's type ramp rather than be borrowed. The rail is drawn at 88 because §4.1 fixes it today; <strong>every frame here works identically with a 240px sidebar</strong> — the rule is that it is constant, not what the constant is.</p>
+
+<!-- ───────────────── Budget — divide ───────────────── -->
+<h2>1 · Budget — <em>divide</em> <span class="tag">and collapse to protect the floor</span></h2>
+<p class="intro">Each column is <code>content ÷ 2</code>. At client 700 the content is 611, so each column would be 305 — below the 368 floor — and the split collapses to one column rather than squeezing both. That is Todoist's rule applied to Sci-Fin's content: <strong>the layout yields to protect the measure, not at a window breakpoint.</strong></p>
+
+<div class="cap">client 700 — content 611, each column would be 305 &lt; 368 → <strong>one column</strong></div>
+<div class="scaler" style="height:329px"><div class="frame" style="width:700px;transform:scale(0.7)">
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content"><div class="pane half">
+      <div class="lbl">Envelopes</div>
+      <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+      <div class="card"><div class="rowb"><span class="ttl">6 recurring expenses</span><span class="ttl">€1,095/mo</span></div></div>
+      <div class="lbl" style="margin-top:12px">Categories</div>
+      <div class="card"><div class="rowb"><span class="ttl">Groceries</span><span class="k">€149.15 of €400</span></div><div class="bar"><i style="width:37%"></i></div></div>
+      <div class="card"><div class="rowb"><span class="ttl">Eating out</span><span class="k">€206.40 of €150</span></div><div class="bar"><i style="width:100%"></i></div></div>
+    </div></div>
+  </div>
+</div></div>
+
+<div class="cap">client 1084 — content 995, each column <strong>497</strong></div>
+<div class="scaler" style="height:305px"><div class="frame" style="width:1084px;transform:scale(0.65)">
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content">
+      <div class="pane half">
+        <div class="lbl">Envelopes</div>
+        <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+        <div class="card"><div class="k">Per paycheck (monthly)</div><div class="fig sm">€2,400</div></div>
+        <div class="card"><div class="rowb"><span class="ttl">6 recurring expenses</span><span class="ttl">€1,095/mo</span></div></div>
+      </div>
+      <div class="pane half">
+        <div class="lbl">Categories</div>
+        <div class="card"><div class="rowb"><span class="ttl">Groceries</span><span class="k">€149.15 of €400</span></div><div class="bar"><i style="width:37%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Transport</span><span class="k">€49 of €120</span></div><div class="bar"><i style="width:41%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Eating out</span><span class="k">€206.40 of €150</span></div><div class="bar"><i style="width:100%"></i></div></div>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<div class="cap">client 1800 — content 1711, each column <strong>855</strong>. Nothing is centred and nothing is capped: two co-equal views legitimately take the width.</div>
+<div class="scaler" style="height:259px"><div class="frame" style="width:1800px;transform:scale(0.55)">
+  <div class="win">
+    <div class="rail"><div class="on"><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content">
+      <div class="pane half">
+        <div class="lbl">Envelopes</div>
+        <div class="card"><div class="k">Savings</div><div class="fig">€4,470</div></div>
+        <div class="card"><div class="k">Per paycheck (monthly)</div><div class="fig sm">€2,400</div></div>
+        <div class="card"><div class="rowb"><span class="ttl">6 recurring expenses</span><span class="ttl">€1,095/mo</span></div></div>
+      </div>
+      <div class="pane half">
+        <div class="lbl">Categories</div>
+        <div class="card"><div class="rowb"><span class="ttl">Groceries</span><span class="k">€149.15 of €400</span></div><div class="bar"><i style="width:37%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Transport</span><span class="k">€49 of €120</span></div><div class="bar"><i style="width:41%"></i></div></div>
+        <div class="card"><div class="rowb"><span class="ttl">Eating out</span><span class="k">€206.40 of €150</span></div><div class="bar"><i style="width:100%"></i></div></div>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<!-- ───────────────── Learn — centre to a measure ───────────────── -->
+<h2>2 · Learn — <em>centre to a measure</em> <span class="tag">the only rule where extra width stays empty</span></h2>
+<p class="intro">Below the measure the content fills; above it the measure holds and the column centres. This is VS&nbsp;Code's rule exactly — it fills at client 984 and centres a 946-wide block from client 1184 up, and the crossing is where the content area passes the measure. The three frames below differ by 1100px of window and the reading column is identical in all three.</p>
+
+<div class="cap">client 620 — content 531 ≈ the measure → <strong>fills</strong></div>
+<div class="scaler" style="height:329px"><div class="frame" style="width:620px;transform:scale(0.7)">
+  <div class="win">
+    <div class="rail"><div><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div class="on"><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content"><div class="measure"><div class="m">
+      <div class="lbl">Topics</div>
+      <div class="card"><div class="ttl">Why nothing turns red</div></div>
+      <div class="card"><div class="ttl">Why naming a goal helps</div></div>
+      <div class="card"><div class="ttl">Credit scores, and what this app doesn't do</div></div>
+    </div></div></div>
+  </div>
+</div></div>
+
+<div class="cap">client 1084 — content 995 → holds 530, <strong>centred</strong>, 232 each side</div>
+<div class="scaler" style="height:305px"><div class="frame" style="width:1084px;transform:scale(0.65)">
+  <div class="win">
+    <div class="rail"><div><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div class="on"><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content"><div class="measure"><div class="m">
+      <div class="lbl">Topics</div>
+      <div class="card"><div class="ttl">Why nothing turns red</div></div>
+      <div class="card"><div class="ttl">Why naming a goal helps</div></div>
+      <div class="card"><div class="ttl">Credit scores, and what this app doesn't do</div></div>
+    </div></div></div>
+  </div>
+</div></div>
+
+<div class="cap">client 1800 — content 1711 → still 530, still centred, 590 each side. <strong>This is the case that looks wasteful and is not:</strong> a line of prose does not become easier to read by getting longer.</div>
+<div class="scaler" style="height:259px"><div class="frame" style="width:1800px;transform:scale(0.55)">
+  <div class="win">
+    <div class="rail"><div><b>▢</b>Budget</div><div><b>▤</b>Activity</div><div class="on"><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content"><div class="measure"><div class="m">
+      <div class="lbl">Topics</div>
+      <div class="card"><div class="ttl">Why nothing turns red</div></div>
+      <div class="card"><div class="ttl">Why naming a goal helps</div></div>
+      <div class="card"><div class="ttl">Credit scores, and what this app doesn't do</div></div>
+    </div></div></div>
+  </div>
+</div></div>
+
+<!-- ───────────────── Activity — reveal ───────────────── -->
+<h2>3 · Activity — <em>reveal</em> <span class="tag">a table legitimately takes the width</span></h2>
+<p class="intro">No cap and no centring: the columns widen with the window, which is Actual's behaviour (849 of an 860 pane) and the reason a table is not prose. The same applies to Reports, where the charts take the width.</p>
+
+<div class="cap">client 700 — table 581</div>
+<div class="scaler" style="height:235px"><div class="frame" style="width:700px;transform:scale(0.7)">
+  <div class="win" style="height:330px">
+    <div class="rail"><div><b>▢</b>Budget</div><div class="on"><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content"><div class="wide">
+      <div class="lbl">Log</div>
+      <table class="tbl">
+        <tr><th>Date</th><th>Payee</th><th>Category</th><th class="r">Amount</th></tr>
+        <tr><td class="k">23 Sep</td><td>Lidl</td><td class="k">Groceries</td><td class="r">€38.20</td></tr>
+        <tr><td class="k">22 Sep</td><td>Caffè Verdi</td><td class="k">Eating out</td><td class="r">€6.40</td></tr>
+        <tr><td class="k">21 Sep</td><td>Enel</td><td class="k">Utilities</td><td class="r">€46.20</td></tr>
+      </table>
+    </div></div>
+  </div>
+</div></div>
+
+<div class="cap">client 1800 — table 1681. Same rows, more room per column.</div>
+<div class="scaler" style="height:182px"><div class="frame" style="width:1800px;transform:scale(0.55)">
+  <div class="win" style="height:330px">
+    <div class="rail"><div><b>▢</b>Budget</div><div class="on"><b>▤</b>Activity</div><div><b>◯</b>Learn</div><div><b>▥</b>Reports</div><div><b>⚙</b>Settings</div></div>
+    <div class="content"><div class="wide">
+      <div class="lbl">Log</div>
+      <table class="tbl">
+        <tr><th>Date</th><th>Payee</th><th>Category</th><th>Account</th><th class="r">Amount</th></tr>
+        <tr><td class="k">23 Sep</td><td>Lidl</td><td class="k">Groceries</td><td class="k">Everyday</td><td class="r">€38.20</td></tr>
+        <tr><td class="k">22 Sep</td><td>Caffè Verdi</td><td class="k">Eating out</td><td class="k">Everyday</td><td class="r">€6.40</td></tr>
+        <tr><td class="k">21 Sep</td><td>Enel</td><td class="k">Utilities</td><td class="k">Everyday</td><td class="r">€46.20</td></tr>
+      </table>
+    </div></div>
+  </div>
+</div></div>
+
+<div class="rule">
+<p style="margin:0 0 10px"><strong>What this sheet settles and what it does not.</strong></p>
+<p style="margin:0 0 8px"><strong>Settled by measurement:</strong> the <em>form</em> of every rule above — chrome constant, content varying by one of three named mechanisms, collapse governed by a content floor rather than a window breakpoint, and resizing exactly reversible. Four apps out of four, both directions, on both axes.</p>
+<p style="margin:0 0 8px"><strong>Still yours — 1 · the rail.</strong> Drawn at 88 because §4.1 fixes it; zero of nine surveyed apps use an icon rail, and the measured alternatives are 240 (Actual, Todoist expanded 280) and 160 (Fava). §14.4 rules 160 out on text scaling. Nothing in this sheet changes if the answer is 240 — the rule is that it is constant.</p>
+<p style="margin:0 0 8px"><strong>Still yours — 2 · the two candidate numbers.</strong> The prose measure (drawn 530, Actual's) and the per-column floor (drawn 368, §4.8's own list pane). These are the only two constants the rules need, and both should be derived from §2.5's type ramp rather than borrowed from another app.</p>
+<p style="margin:0"><strong>Still yours — 3 · §2.5's open desktop half.</strong> The phone half is settled (width ÷ 360, floored 0.85). The measurement says the desktop half is not a smaller version of the same question: <strong>nothing on the desktop should multiply chrome by a window factor</strong>, because no shipping app does. A navigation label does not become easier to read because the window got wider.</p>
+</div>
+
+</body>
+</html>

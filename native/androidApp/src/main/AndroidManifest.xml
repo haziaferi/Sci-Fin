@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Manifest additions for §3.9/§3.11's notification subsystem.
+
+  ONE PERMISSION, AND ONLY ON API 33+. POST_NOTIFICATIONS is the runtime permission §11.5
+  requests at onboarding step 2. Below Android 13 there is none.
+
+  WHAT IS DELIBERATELY ABSENT:
+
+    SCHEDULE_EXACT_ALARM / USE_EXACT_ALARM — not requested, because the app would not pass
+    the policy gate. Google Play restricts USE_EXACT_ALARM to apps whose core function is
+    alarms or timers; a budgeting reminder is not that. §3.11's lead time is a whole number
+    of days, so exactness was never the requirement, and WorkManager delivers on the right
+    morning without asking for anything. Requesting a permission the app cannot honestly
+    justify is the same mistake §7.3 already refused with READ_SMS.
+
+    RECEIVE_BOOT_COMPLETED — not declared here, because androidx.work declares it and
+    restores its own queue across a reboot. §13.3's boot recovery is satisfied by the
+    library rather than by a receiver of ours, so adding one would be a second mechanism
+    for a solved problem.
+
+    INTERNET - not declared, on purpose, and never to be added without first adding a row to
+    the networked-features table in spec section 1 (2026-09-14). Nothing in the app reaches the
+    network: statement import reads a local file, notifications carry no payload anywhere, and
+    Profiles are local. Without this permission the process cannot open a socket at all, which
+    turns "nothing leaves the device" from a promise into a property of the build - a stray
+    dependency that phones home would fail here, loudly, rather than succeed quietly.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission
+        android:name="android.permission.POST_NOTIFICATIONS"
+        android:minSdkVersion="33" />
+
+    <application
+        android:name=".SciFinApplication"
+        android:label="Sci-Fin"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:allowBackup="false"
+        android:theme="@android:style/Theme.Material.NoActionBar">
+        <!-- allowBackup=false: §4.7's backup is the person's own file, made on purpose; a
+             cloud copy taken by the platform would be a networked feature §1's table lacks. -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <!--
+          WorkManager's own initializer is left in place; nothing here overrides it. The two
+          Workers are resolved by class name from the enqueued requests and need no manifest
+          entry of their own.
+
+          If the app ever adopts on-demand initialization, NotifyWorker and NewMonthWorker must
+          still be constructible from a boot-time restore, since that restore happens before
+          any Activity exists.
+        -->
+    </application>
+</manifest>

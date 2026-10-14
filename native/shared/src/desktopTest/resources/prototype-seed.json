@@ -1,0 +1,1451 @@
+{
+  "simDate": "2026-09-14",
+  "savings": 3067,
+  "transactions": [
+    {
+      "id": "tx-1",
+      "date": "2026-03-01",
+      "loggedAt": "2026-03-01T00:00:00.000Z",
+      "payee": "Opening balance",
+      "amount": 640,
+      "key": "acct:creditcard",
+      "targetLabel": "Credit Card",
+      "isIncome": false
+    },
+    {
+      "id": "tx-2",
+      "date": "2026-03-01",
+      "loggedAt": "2026-03-01T00:00:00.000Z",
+      "payee": "Opening balance",
+      "amount": 6700,
+      "key": "acct:carloan",
+      "targetLabel": "Car Loan",
+      "isIncome": false
+    },
+    {
+      "id": "tx-3",
+      "date": "2026-03-15",
+      "loggedAt": "2026-03-15T00:00:00.000Z",
+      "payee": "Auto-update (principal)",
+      "amount": -227.06,
+      "key": "acct:carloan",
+      "targetLabel": "Car Loan",
+      "isIncome": false
+    },
+    {
+      "id": "tx-4",
+      "date": "2026-04-15",
+      "loggedAt": "2026-04-15T00:00:00.000Z",
+      "payee": "Auto-update (principal)",
+      "amount": -228.17,
+      "key": "acct:carloan",
+      "targetLabel": "Car Loan",
+      "isIncome": false
+    },
+    {
+      "id": "tx-5",
+      "date": "2026-05-15",
+      "loggedAt": "2026-05-15T00:00:00.000Z",
+      "payee": "Auto-update (principal)",
+      "amount": -229.3,
+      "key": "acct:carloan",
+      "targetLabel": "Car Loan",
+      "isIncome": false
+    },
+    {
+      "id": "tx-6",
+      "date": "2026-06-15",
+      "loggedAt": "2026-06-15T00:00:00.000Z",
+      "payee": "Auto-update (principal)",
+      "amount": -230.42,
+      "key": "acct:carloan",
+      "targetLabel": "Car Loan",
+      "isIncome": false
+    },
+    {
+      "id": "tx-7",
+      "date": "2026-07-15",
+      "loggedAt": "2026-07-15T00:00:00.000Z",
+      "payee": "Auto-update (principal)",
+      "amount": -231.56,
+      "key": "acct:carloan",
+      "targetLabel": "Car Loan",
+      "isIncome": false
+    },
+    {
+      "id": "tx-8",
+      "date": "2026-08-15",
+      "loggedAt": "2026-08-15T00:00:00.000Z",
+      "payee": "Auto-update (principal)",
+      "amount": -232.7,
+      "key": "acct:carloan",
+      "targetLabel": "Car Loan",
+      "isIncome": false
+    },
+    {
+      "id": "tx-9",
+      "date": "2026-03-03",
+      "loggedAt": "2026-03-03T00:00:00.000Z",
+      "payee": "Income",
+      "amount": 1450,
+      "key": "savings",
+      "targetLabel": "Savings",
+      "isIncome": true
+    },
+    {
+      "id": "tx-10",
+      "date": "2026-03-17",
+      "loggedAt": "2026-03-17T00:00:00.000Z",
+      "payee": "Income",
+      "amount": 1450,
+      "key": "savings",
+      "targetLabel": "Savings",
+      "isIncome": true
+    },
+    {
+      "id": "tx-11",
+      "date": "2026-03-01",
+      "loggedAt": "2026-03-01T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 950,
+      "key": "rec:rent",
+      "targetLabel": "Rent",
+      "isIncome": false
+    },
+    {
+      "id": "tx-12",
+      "date": "2026-03-11",
+      "loggedAt": "2026-03-11T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 45,
+      "key": "rec:phone",
+      "targetLabel": "Phone bill",
+      "isIncome": false
+    },
+    {
+      "id": "tx-13",
+      "date": "2026-03-13",
+      "loggedAt": "2026-03-13T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 14,
+      "key": "rec:streaming",
+      "targetLabel": "Streaming service",
+      "isIncome": false
+    },
+    {
+      "id": "tx-14",
+      "date": "2026-03-01",
+      "loggedAt": "2026-03-01T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 50,
+      "key": "rec:insurance",
+      "targetLabel": "Car insurance",
+      "isIncome": false
+    },
+    {
+      "id": "tx-15",
+      "date": "2026-03-01",
+      "loggedAt": "2026-03-01T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 45,
+      "key": "rec:pest",
+      "targetLabel": "Pest control",
+      "isIncome": false
+    },
+    {
+      "id": "tx-16",
+      "date": "2026-03-15",
+      "loggedAt": "2026-03-15T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 260,
+      "key": "rec:carloan-pay",
+      "targetLabel": "Car loan payment",
+      "isIncome": false
+    },
+    {
+      "id": "tx-17",
+      "date": "2026-03-06",
+      "loggedAt": "2026-03-06T00:00:00.000Z",
+      "payee": "Groceries",
+      "amount": 300,
+      "key": "cat:groceries",
+      "targetLabel": "Groceries",
+      "isIncome": false
+    },
+    {
+      "id": "tx-18",
+      "date": "2026-03-20",
+      "loggedAt": "2026-03-20T00:00:00.000Z",
+      "payee": "Groceries",
+      "amount": 110,
+      "key": "cat:groceries",
+      "targetLabel": "Groceries",
+      "isIncome": false
+    },
+    {
+      "id": "tx-19",
+      "date": "2026-03-09",
+      "loggedAt": "2026-03-09T00:00:00.000Z",
+      "payee": "Dining out",
+      "amount": 160,
+      "key": "cat:dining",
+      "targetLabel": "Dining out",
+      "isIncome": false
+    },
+    {
+      "id": "tx-20",
+      "date": "2026-03-22",
+      "loggedAt": "2026-03-22T00:00:00.000Z",
+      "payee": "Transport",
+      "amount": 130,
+      "key": "cat:transport",
+      "targetLabel": "Transport",
+      "isIncome": false
+    },
+    {
+      "id": "tx-21",
+      "date": "2026-03-15",
+      "loggedAt": "2026-03-15T00:00:00.000Z",
+      "payee": "Entertainment",
+      "amount": 80,
+      "key": "cat:entertainment",
+      "targetLabel": "Entertainment",
+      "isIncome": false
+    },
+    {
+      "id": "tx-22",
+      "date": "2026-03-04",
+      "loggedAt": "2026-03-04T00:00:00.000Z",
+      "payee": "Toward Emergency fund",
+      "amount": 120,
+      "key": "goal:emergency-fund",
+      "targetLabel": "Emergency fund",
+      "isIncome": false
+    },
+    {
+      "id": "tx-23",
+      "date": "2026-03-18",
+      "loggedAt": "2026-03-18T00:00:00.000Z",
+      "payee": "Toward Trip to Lisbon",
+      "amount": 50,
+      "key": "goal:trip-lisbon",
+      "targetLabel": "Trip to Lisbon",
+      "isIncome": false
+    },
+    {
+      "id": "tx-24",
+      "date": "2026-04-03",
+      "loggedAt": "2026-04-03T00:00:00.000Z",
+      "payee": "Income",
+      "amount": 1450,
+      "key": "savings",
+      "targetLabel": "Savings",
+      "isIncome": true
+    },
+    {
+      "id": "tx-25",
+      "date": "2026-04-17",
+      "loggedAt": "2026-04-17T00:00:00.000Z",
+      "payee": "Income",
+      "amount": 1450,
+      "key": "savings",
+      "targetLabel": "Savings",
+      "isIncome": true
+    },
+    {
+      "id": "tx-26",
+      "date": "2026-04-01",
+      "loggedAt": "2026-04-01T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 950,
+      "key": "rec:rent",
+      "targetLabel": "Rent",
+      "isIncome": false
+    },
+    {
+      "id": "tx-27",
+      "date": "2026-04-10",
+      "loggedAt": "2026-04-10T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 45,
+      "key": "rec:phone",
+      "targetLabel": "Phone bill",
+      "isIncome": false
+    },
+    {
+      "id": "tx-28",
+      "date": "2026-04-12",
+      "loggedAt": "2026-04-12T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 14,
+      "key": "rec:streaming",
+      "targetLabel": "Streaming service",
+      "isIncome": false
+    },
+    {
+      "id": "tx-29",
+      "date": "2026-04-01",
+      "loggedAt": "2026-04-01T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 50,
+      "key": "rec:insurance",
+      "targetLabel": "Car insurance",
+      "isIncome": false
+    },
+    {
+      "id": "tx-30",
+      "date": "2026-04-01",
+      "loggedAt": "2026-04-01T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 45,
+      "key": "rec:pest",
+      "targetLabel": "Pest control",
+      "isIncome": false
+    },
+    {
+      "id": "tx-31",
+      "date": "2026-04-15",
+      "loggedAt": "2026-04-15T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 260,
+      "key": "rec:carloan-pay",
+      "targetLabel": "Car loan payment",
+      "isIncome": false
+    },
+    {
+      "id": "tx-32",
+      "date": "2026-04-06",
+      "loggedAt": "2026-04-06T00:00:00.000Z",
+      "payee": "Groceries",
+      "amount": 293.3333333333333,
+      "key": "cat:groceries",
+      "targetLabel": "Groceries",
+      "isIncome": false
+    },
+    {
+      "id": "tx-33",
+      "date": "2026-04-20",
+      "loggedAt": "2026-04-20T00:00:00.000Z",
+      "payee": "Groceries",
+      "amount": 106.66666666666667,
+      "key": "cat:groceries",
+      "targetLabel": "Groceries",
+      "isIncome": false
+    },
+    {
+      "id": "tx-34",
+      "date": "2026-04-09",
+      "loggedAt": "2026-04-09T00:00:00.000Z",
+      "payee": "Dining out",
+      "amount": 145,
+      "key": "cat:dining",
+      "targetLabel": "Dining out",
+      "isIncome": false
+    },
+    {
+      "id": "tx-35",
+      "date": "2026-04-22",
+      "loggedAt": "2026-04-22T00:00:00.000Z",
+      "payee": "Transport",
+      "amount": 123.33333333333334,
+      "key": "cat:transport",
+      "targetLabel": "Transport",
+      "isIncome": false
+    },
+    {
+      "id": "tx-36",
+      "date": "2026-04-15",
+      "loggedAt": "2026-04-15T00:00:00.000Z",
+      "payee": "Entertainment",
+      "amount": 75,
+      "key": "cat:entertainment",
+      "targetLabel": "Entertainment",
+      "isIncome": false
+    },
+    {
+      "id": "tx-37",
+      "date": "2026-04-04",
+      "loggedAt": "2026-04-04T00:00:00.000Z",
+      "payee": "Toward Emergency fund",
+      "amount": 130,
+      "key": "goal:emergency-fund",
+      "targetLabel": "Emergency fund",
+      "isIncome": false
+    },
+    {
+      "id": "tx-38",
+      "date": "2026-04-18",
+      "loggedAt": "2026-04-18T00:00:00.000Z",
+      "payee": "Toward Trip to Lisbon",
+      "amount": 56.666666666666664,
+      "key": "goal:trip-lisbon",
+      "targetLabel": "Trip to Lisbon",
+      "isIncome": false
+    },
+    {
+      "id": "tx-39",
+      "date": "2026-05-03",
+      "loggedAt": "2026-05-03T00:00:00.000Z",
+      "payee": "Income",
+      "amount": 1450,
+      "key": "savings",
+      "targetLabel": "Savings",
+      "isIncome": true
+    },
+    {
+      "id": "tx-40",
+      "date": "2026-05-17",
+      "loggedAt": "2026-05-17T00:00:00.000Z",
+      "payee": "Income",
+      "amount": 1450,
+      "key": "savings",
+      "targetLabel": "Savings",
+      "isIncome": true
+    },
+    {
+      "id": "tx-41",
+      "date": "2026-05-01",
+      "loggedAt": "2026-05-01T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 950,
+      "key": "rec:rent",
+      "targetLabel": "Rent",
+      "isIncome": false
+    },
+    {
+      "id": "tx-42",
+      "date": "2026-05-10",
+      "loggedAt": "2026-05-10T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 45,
+      "key": "rec:phone",
+      "targetLabel": "Phone bill",
+      "isIncome": false
+    },
+    {
+      "id": "tx-43",
+      "date": "2026-05-12",
+      "loggedAt": "2026-05-12T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 14,
+      "key": "rec:streaming",
+      "targetLabel": "Streaming service",
+      "isIncome": false
+    },
+    {
+      "id": "tx-44",
+      "date": "2026-05-01",
+      "loggedAt": "2026-05-01T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 50,
+      "key": "rec:insurance",
+      "targetLabel": "Car insurance",
+      "isIncome": false
+    },
+    {
+      "id": "tx-45",
+      "date": "2026-05-01",
+      "loggedAt": "2026-05-01T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 45,
+      "key": "rec:pest",
+      "targetLabel": "Pest control",
+      "isIncome": false
+    },
+    {
+      "id": "tx-46",
+      "date": "2026-05-15",
+      "loggedAt": "2026-05-15T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 260,
+      "key": "rec:carloan-pay",
+      "targetLabel": "Car loan payment",
+      "isIncome": false
+    },
+    {
+      "id": "tx-47",
+      "date": "2026-05-06",
+      "loggedAt": "2026-05-06T00:00:00.000Z",
+      "payee": "Groceries",
+      "amount": 286.6666666666667,
+      "key": "cat:groceries",
+      "targetLabel": "Groceries",
+      "isIncome": false
+    },
+    {
+      "id": "tx-48",
+      "date": "2026-05-20",
+      "loggedAt": "2026-05-20T00:00:00.000Z",
+      "payee": "Groceries",
+      "amount": 103.33333333333333,
+      "key": "cat:groceries",
+      "targetLabel": "Groceries",
+      "isIncome": false
+    },
+    {
+      "id": "tx-49",
+      "date": "2026-05-09",
+      "loggedAt": "2026-05-09T00:00:00.000Z",
+      "payee": "Dining out",
+      "amount": 130,
+      "key": "cat:dining",
+      "targetLabel": "Dining out",
+      "isIncome": false
+    },
+    {
+      "id": "tx-50",
+      "date": "2026-05-22",
+      "loggedAt": "2026-05-22T00:00:00.000Z",
+      "payee": "Transport",
+      "amount": 116.66666666666666,
+      "key": "cat:transport",
+      "targetLabel": "Transport",
+      "isIncome": false
+    },
+    {
+      "id": "tx-51",
+      "date": "2026-05-15",
+      "loggedAt": "2026-05-15T00:00:00.000Z",
+      "payee": "Entertainment",
+      "amount": 70,
+      "key": "cat:entertainment",
+      "targetLabel": "Entertainment",
+      "isIncome": false
+    },
+    {
+      "id": "tx-52",
+      "date": "2026-05-04",
+      "loggedAt": "2026-05-04T00:00:00.000Z",
+      "payee": "Toward Emergency fund",
+      "amount": 140,
+      "key": "goal:emergency-fund",
+      "targetLabel": "Emergency fund",
+      "isIncome": false
+    },
+    {
+      "id": "tx-53",
+      "date": "2026-05-18",
+      "loggedAt": "2026-05-18T00:00:00.000Z",
+      "payee": "Toward Trip to Lisbon",
+      "amount": 63.333333333333336,
+      "key": "goal:trip-lisbon",
+      "targetLabel": "Trip to Lisbon",
+      "isIncome": false
+    },
+    {
+      "id": "tx-54",
+      "date": "2026-06-03",
+      "loggedAt": "2026-06-03T00:00:00.000Z",
+      "payee": "Income",
+      "amount": 1450,
+      "key": "savings",
+      "targetLabel": "Savings",
+      "isIncome": true
+    },
+    {
+      "id": "tx-55",
+      "date": "2026-06-17",
+      "loggedAt": "2026-06-17T00:00:00.000Z",
+      "payee": "Income",
+      "amount": 1450,
+      "key": "savings",
+      "targetLabel": "Savings",
+      "isIncome": true
+    },
+    {
+      "id": "tx-56",
+      "date": "2026-06-01",
+      "loggedAt": "2026-06-01T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 950,
+      "key": "rec:rent",
+      "targetLabel": "Rent",
+      "isIncome": false
+    },
+    {
+      "id": "tx-57",
+      "date": "2026-06-09",
+      "loggedAt": "2026-06-09T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 45,
+      "key": "rec:phone",
+      "targetLabel": "Phone bill",
+      "isIncome": false
+    },
+    {
+      "id": "tx-58",
+      "date": "2026-06-11",
+      "loggedAt": "2026-06-11T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 14,
+      "key": "rec:streaming",
+      "targetLabel": "Streaming service",
+      "isIncome": false
+    },
+    {
+      "id": "tx-59",
+      "date": "2026-06-01",
+      "loggedAt": "2026-06-01T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 50,
+      "key": "rec:insurance",
+      "targetLabel": "Car insurance",
+      "isIncome": false
+    },
+    {
+      "id": "tx-60",
+      "date": "2026-06-01",
+      "loggedAt": "2026-06-01T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 45,
+      "key": "rec:pest",
+      "targetLabel": "Pest control",
+      "isIncome": false
+    },
+    {
+      "id": "tx-61",
+      "date": "2026-06-15",
+      "loggedAt": "2026-06-15T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 260,
+      "key": "rec:carloan-pay",
+      "targetLabel": "Car loan payment",
+      "isIncome": false
+    },
+    {
+      "id": "tx-62",
+      "date": "2026-06-06",
+      "loggedAt": "2026-06-06T00:00:00.000Z",
+      "payee": "Groceries",
+      "amount": 280,
+      "key": "cat:groceries",
+      "targetLabel": "Groceries",
+      "isIncome": false
+    },
+    {
+      "id": "tx-63",
+      "date": "2026-06-20",
+      "loggedAt": "2026-06-20T00:00:00.000Z",
+      "payee": "Groceries",
+      "amount": 100,
+      "key": "cat:groceries",
+      "targetLabel": "Groceries",
+      "isIncome": false
+    },
+    {
+      "id": "tx-64",
+      "date": "2026-06-09",
+      "loggedAt": "2026-06-09T00:00:00.000Z",
+      "payee": "Dining out",
+      "amount": 115,
+      "key": "cat:dining",
+      "targetLabel": "Dining out",
+      "isIncome": false
+    },
+    {
+      "id": "tx-65",
+      "date": "2026-06-22",
+      "loggedAt": "2026-06-22T00:00:00.000Z",
+      "payee": "Transport",
+      "amount": 110,
+      "key": "cat:transport",
+      "targetLabel": "Transport",
+      "isIncome": false
+    },
+    {
+      "id": "tx-66",
+      "date": "2026-06-15",
+      "loggedAt": "2026-06-15T00:00:00.000Z",
+      "payee": "Entertainment",
+      "amount": 65,
+      "key": "cat:entertainment",
+      "targetLabel": "Entertainment",
+      "isIncome": false
+    },
+    {
+      "id": "tx-67",
+      "date": "2026-06-04",
+      "loggedAt": "2026-06-04T00:00:00.000Z",
+      "payee": "Toward Emergency fund",
+      "amount": 150,
+      "key": "goal:emergency-fund",
+      "targetLabel": "Emergency fund",
+      "isIncome": false
+    },
+    {
+      "id": "tx-68",
+      "date": "2026-06-18",
+      "loggedAt": "2026-06-18T00:00:00.000Z",
+      "payee": "Toward Trip to Lisbon",
+      "amount": 70,
+      "key": "goal:trip-lisbon",
+      "targetLabel": "Trip to Lisbon",
+      "isIncome": false
+    },
+    {
+      "id": "tx-69",
+      "date": "2026-07-03",
+      "loggedAt": "2026-07-03T00:00:00.000Z",
+      "payee": "Income",
+      "amount": 1450,
+      "key": "savings",
+      "targetLabel": "Savings",
+      "isIncome": true
+    },
+    {
+      "id": "tx-70",
+      "date": "2026-07-17",
+      "loggedAt": "2026-07-17T00:00:00.000Z",
+      "payee": "Income",
+      "amount": 1450,
+      "key": "savings",
+      "targetLabel": "Savings",
+      "isIncome": true
+    },
+    {
+      "id": "tx-71",
+      "date": "2026-07-01",
+      "loggedAt": "2026-07-01T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 950,
+      "key": "rec:rent",
+      "targetLabel": "Rent",
+      "isIncome": false
+    },
+    {
+      "id": "tx-72",
+      "date": "2026-07-09",
+      "loggedAt": "2026-07-09T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 45,
+      "key": "rec:phone",
+      "targetLabel": "Phone bill",
+      "isIncome": false
+    },
+    {
+      "id": "tx-73",
+      "date": "2026-07-11",
+      "loggedAt": "2026-07-11T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 14,
+      "key": "rec:streaming",
+      "targetLabel": "Streaming service",
+      "isIncome": false
+    },
+    {
+      "id": "tx-74",
+      "date": "2026-07-01",
+      "loggedAt": "2026-07-01T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 50,
+      "key": "rec:insurance",
+      "targetLabel": "Car insurance",
+      "isIncome": false
+    },
+    {
+      "id": "tx-75",
+      "date": "2026-07-01",
+      "loggedAt": "2026-07-01T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 45,
+      "key": "rec:pest",
+      "targetLabel": "Pest control",
+      "isIncome": false
+    },
+    {
+      "id": "tx-76",
+      "date": "2026-07-15",
+      "loggedAt": "2026-07-15T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 260,
+      "key": "rec:carloan-pay",
+      "targetLabel": "Car loan payment",
+      "isIncome": false
+    },
+    {
+      "id": "tx-77",
+      "date": "2026-07-06",
+      "loggedAt": "2026-07-06T00:00:00.000Z",
+      "payee": "Groceries",
+      "amount": 273.3333333333333,
+      "key": "cat:groceries",
+      "targetLabel": "Groceries",
+      "isIncome": false
+    },
+    {
+      "id": "tx-78",
+      "date": "2026-07-20",
+      "loggedAt": "2026-07-20T00:00:00.000Z",
+      "payee": "Groceries",
+      "amount": 96.66666666666667,
+      "key": "cat:groceries",
+      "targetLabel": "Groceries",
+      "isIncome": false
+    },
+    {
+      "id": "tx-79",
+      "date": "2026-07-09",
+      "loggedAt": "2026-07-09T00:00:00.000Z",
+      "payee": "Dining out",
+      "amount": 100,
+      "key": "cat:dining",
+      "targetLabel": "Dining out",
+      "isIncome": false
+    },
+    {
+      "id": "tx-80",
+      "date": "2026-07-22",
+      "loggedAt": "2026-07-22T00:00:00.000Z",
+      "payee": "Transport",
+      "amount": 103.33333333333333,
+      "key": "cat:transport",
+      "targetLabel": "Transport",
+      "isIncome": false
+    },
+    {
+      "id": "tx-81",
+      "date": "2026-07-15",
+      "loggedAt": "2026-07-15T00:00:00.000Z",
+      "payee": "Entertainment",
+      "amount": 60,
+      "key": "cat:entertainment",
+      "targetLabel": "Entertainment",
+      "isIncome": false
+    },
+    {
+      "id": "tx-82",
+      "date": "2026-07-04",
+      "loggedAt": "2026-07-04T00:00:00.000Z",
+      "payee": "Toward Emergency fund",
+      "amount": 160,
+      "key": "goal:emergency-fund",
+      "targetLabel": "Emergency fund",
+      "isIncome": false
+    },
+    {
+      "id": "tx-83",
+      "date": "2026-07-18",
+      "loggedAt": "2026-07-18T00:00:00.000Z",
+      "payee": "Toward Trip to Lisbon",
+      "amount": 76.66666666666667,
+      "key": "goal:trip-lisbon",
+      "targetLabel": "Trip to Lisbon",
+      "isIncome": false
+    },
+    {
+      "id": "tx-84",
+      "date": "2026-08-03",
+      "loggedAt": "2026-08-03T00:00:00.000Z",
+      "payee": "Income",
+      "amount": 1450,
+      "key": "savings",
+      "targetLabel": "Savings",
+      "isIncome": true
+    },
+    {
+      "id": "tx-85",
+      "date": "2026-08-17",
+      "loggedAt": "2026-08-17T00:00:00.000Z",
+      "payee": "Income",
+      "amount": 1450,
+      "key": "savings",
+      "targetLabel": "Savings",
+      "isIncome": true
+    },
+    {
+      "id": "tx-86",
+      "date": "2026-08-01",
+      "loggedAt": "2026-08-01T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 950,
+      "key": "rec:rent",
+      "targetLabel": "Rent",
+      "isIncome": false
+    },
+    {
+      "id": "tx-87",
+      "date": "2026-08-08",
+      "loggedAt": "2026-08-08T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 45,
+      "key": "rec:phone",
+      "targetLabel": "Phone bill",
+      "isIncome": false
+    },
+    {
+      "id": "tx-88",
+      "date": "2026-08-10",
+      "loggedAt": "2026-08-10T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 14,
+      "key": "rec:streaming",
+      "targetLabel": "Streaming service",
+      "isIncome": false
+    },
+    {
+      "id": "tx-89",
+      "date": "2026-08-01",
+      "loggedAt": "2026-08-01T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 50,
+      "key": "rec:insurance",
+      "targetLabel": "Car insurance",
+      "isIncome": false
+    },
+    {
+      "id": "tx-90",
+      "date": "2026-08-01",
+      "loggedAt": "2026-08-01T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 45,
+      "key": "rec:pest",
+      "targetLabel": "Pest control",
+      "isIncome": false
+    },
+    {
+      "id": "tx-91",
+      "date": "2026-08-15",
+      "loggedAt": "2026-08-15T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 260,
+      "key": "rec:carloan-pay",
+      "targetLabel": "Car loan payment",
+      "isIncome": false
+    },
+    {
+      "id": "tx-92",
+      "date": "2026-08-06",
+      "loggedAt": "2026-08-06T00:00:00.000Z",
+      "payee": "Groceries",
+      "amount": 266.6666666666667,
+      "key": "cat:groceries",
+      "targetLabel": "Groceries",
+      "isIncome": false
+    },
+    {
+      "id": "tx-93",
+      "date": "2026-08-20",
+      "loggedAt": "2026-08-20T00:00:00.000Z",
+      "payee": "Groceries",
+      "amount": 93.33333333333333,
+      "key": "cat:groceries",
+      "targetLabel": "Groceries",
+      "isIncome": false
+    },
+    {
+      "id": "tx-94",
+      "date": "2026-08-09",
+      "loggedAt": "2026-08-09T00:00:00.000Z",
+      "payee": "Dining out",
+      "amount": 85,
+      "key": "cat:dining",
+      "targetLabel": "Dining out",
+      "isIncome": false
+    },
+    {
+      "id": "tx-95",
+      "date": "2026-08-22",
+      "loggedAt": "2026-08-22T00:00:00.000Z",
+      "payee": "Transport",
+      "amount": 96.66666666666667,
+      "key": "cat:transport",
+      "targetLabel": "Transport",
+      "isIncome": false
+    },
+    {
+      "id": "tx-96",
+      "date": "2026-08-15",
+      "loggedAt": "2026-08-15T00:00:00.000Z",
+      "payee": "Entertainment",
+      "amount": 55,
+      "key": "cat:entertainment",
+      "targetLabel": "Entertainment",
+      "isIncome": false
+    },
+    {
+      "id": "tx-97",
+      "date": "2026-08-04",
+      "loggedAt": "2026-08-04T00:00:00.000Z",
+      "payee": "Toward Emergency fund",
+      "amount": 170,
+      "key": "goal:emergency-fund",
+      "targetLabel": "Emergency fund",
+      "isIncome": false
+    },
+    {
+      "id": "tx-98",
+      "date": "2026-08-18",
+      "loggedAt": "2026-08-18T00:00:00.000Z",
+      "payee": "Toward Trip to Lisbon",
+      "amount": 83.33333333333334,
+      "key": "goal:trip-lisbon",
+      "targetLabel": "Trip to Lisbon",
+      "isIncome": false
+    },
+    {
+      "id": "tx-99",
+      "date": "2026-09-03",
+      "loggedAt": "2026-09-03T00:00:00.000Z",
+      "payee": "Income",
+      "amount": 1450,
+      "key": "savings",
+      "targetLabel": "Savings",
+      "isIncome": true
+    },
+    {
+      "id": "tx-100",
+      "date": "2026-09-01",
+      "loggedAt": "2026-09-01T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 950,
+      "key": "rec:rent",
+      "targetLabel": "Rent",
+      "isIncome": false
+    },
+    {
+      "id": "tx-101",
+      "date": "2026-09-07",
+      "loggedAt": "2026-09-07T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 45,
+      "key": "rec:phone",
+      "targetLabel": "Phone bill",
+      "isIncome": false
+    },
+    {
+      "id": "tx-102",
+      "date": "2026-09-09",
+      "loggedAt": "2026-09-09T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 14,
+      "key": "rec:streaming",
+      "targetLabel": "Streaming service",
+      "isIncome": false
+    },
+    {
+      "id": "tx-103",
+      "date": "2026-09-01",
+      "loggedAt": "2026-09-01T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 50,
+      "key": "rec:insurance",
+      "targetLabel": "Car insurance",
+      "isIncome": false
+    },
+    {
+      "id": "tx-104",
+      "date": "2026-09-01",
+      "loggedAt": "2026-09-01T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 45,
+      "key": "rec:pest",
+      "targetLabel": "Pest control",
+      "isIncome": false
+    },
+    {
+      "id": "tx-105",
+      "date": "2026-09-15",
+      "loggedAt": "2026-09-15T00:00:00.000Z",
+      "payee": "Recurring sweep",
+      "amount": 260,
+      "key": "rec:carloan-pay",
+      "targetLabel": "Car loan payment",
+      "isIncome": false
+    },
+    {
+      "id": "tx-106",
+      "date": "2026-09-06",
+      "loggedAt": "2026-09-06T00:00:00.000Z",
+      "payee": "Groceries",
+      "amount": 260,
+      "key": "cat:groceries",
+      "targetLabel": "Groceries",
+      "isIncome": false
+    },
+    {
+      "id": "tx-107",
+      "date": "2026-09-14",
+      "loggedAt": "2026-09-14T00:00:00.000Z",
+      "payee": "Groceries",
+      "amount": 90,
+      "key": "cat:groceries",
+      "targetLabel": "Groceries",
+      "isIncome": false
+    },
+    {
+      "id": "tx-108",
+      "date": "2026-09-09",
+      "loggedAt": "2026-09-09T00:00:00.000Z",
+      "payee": "Dining out",
+      "amount": 70,
+      "key": "cat:dining",
+      "targetLabel": "Dining out",
+      "isIncome": false
+    },
+    {
+      "id": "tx-109",
+      "date": "2026-09-14",
+      "loggedAt": "2026-09-14T00:00:00.000Z",
+      "payee": "Transport",
+      "amount": 90,
+      "key": "cat:transport",
+      "targetLabel": "Transport",
+      "isIncome": false
+    },
+    {
+      "id": "tx-110",
+      "date": "2026-09-14",
+      "loggedAt": "2026-09-14T00:00:00.000Z",
+      "payee": "Entertainment",
+      "amount": 50,
+      "key": "cat:entertainment",
+      "targetLabel": "Entertainment",
+      "isIncome": false
+    },
+    {
+      "id": "tx-111",
+      "date": "2026-09-02",
+      "loggedAt": "2026-09-02T00:00:00.000Z",
+      "payee": "Dining out",
+      "amount": 95,
+      "key": "cat:dining",
+      "targetLabel": "Dining out",
+      "isIncome": false
+    },
+    {
+      "id": "tx-112",
+      "date": "2026-09-04",
+      "loggedAt": "2026-09-04T00:00:00.000Z",
+      "payee": "Toward Emergency fund",
+      "amount": 180,
+      "key": "goal:emergency-fund",
+      "targetLabel": "Emergency fund",
+      "isIncome": false
+    }
+  ],
+  "goals": [
+    {
+      "id": "emergency-fund",
+      "name": "Emergency fund",
+      "icon": "wallet",
+      "saved": 1050,
+      "target": 2200,
+      "targetDate": null,
+      "mode": "amount",
+      "monthly": 150,
+      "months": null
+    },
+    {
+      "id": "trip-lisbon",
+      "name": "Trip to Lisbon",
+      "icon": "wallet",
+      "saved": 400,
+      "target": 900,
+      "targetDate": "2027-05-14",
+      "mode": "date",
+      "months": 8,
+      "monthly": 74
+    },
+    {
+      "id": "someday-fund",
+      "name": "Someday fund",
+      "icon": "piggy-bank",
+      "saved": 0,
+      "target": null,
+      "targetDate": null,
+      "mode": null,
+      "monthly": null,
+      "months": null
+    }
+  ],
+  "categories": [
+    {
+      "id": "groceries",
+      "name": "Groceries",
+      "icon": "shopping-cart",
+      "planned": 300,
+      "spent": 350,
+      "lastResetMonth": "2026-09"
+    },
+    {
+      "id": "dining",
+      "name": "Dining out",
+      "icon": "utensils-crossed",
+      "planned": 120,
+      "spent": 165,
+      "lastResetMonth": "2026-09"
+    },
+    {
+      "id": "transport",
+      "name": "Transport",
+      "icon": "bus",
+      "planned": 150,
+      "spent": 90,
+      "lastResetMonth": "2026-09"
+    },
+    {
+      "id": "entertainment",
+      "name": "Entertainment",
+      "icon": "lightbulb",
+      "planned": 100,
+      "spent": 50,
+      "lastResetMonth": "2026-09"
+    }
+  ],
+  "recurringExpenses": [
+    {
+      "id": "rent",
+      "name": "Rent",
+      "icon": "wallet",
+      "amount": 950,
+      "cadence": "monthly",
+      "firstDueDate": "2026-01-01",
+      "dueDate": "2026-10-01",
+      "dueDate2": null,
+      "dateMode": "fixedDate",
+      "dueDateAnchorDay": 1,
+      "intervalDays": null,
+      "apportionedShare": null,
+      "reminderEnabled": false,
+      "reminderLeadDays": 3,
+      "lastReminderFiredFor": null,
+      "lastSweptMonth": "2026-09",
+      "endDate": null,
+      "finishedAt": null,
+      "linkedAccountId": null
+    },
+    {
+      "id": "phone",
+      "name": "Phone bill",
+      "icon": "smartphone",
+      "amount": 45,
+      "cadence": "monthly",
+      "firstDueDate": "2026-01-10",
+      "dueDate": "2026-10-07",
+      "dueDate2": null,
+      "dateMode": "interval",
+      "dueDateAnchorDay": null,
+      "intervalDays": 30,
+      "apportionedShare": null,
+      "reminderEnabled": true,
+      "reminderLeadDays": 3,
+      "lastReminderFiredFor": null,
+      "lastSweptMonth": "2026-09",
+      "endDate": null,
+      "finishedAt": null,
+      "linkedAccountId": null
+    },
+    {
+      "id": "streaming",
+      "name": "Streaming service",
+      "icon": "tag",
+      "amount": 14,
+      "cadence": "monthly",
+      "firstDueDate": "2026-01-12",
+      "dueDate": "2026-10-09",
+      "dueDate2": null,
+      "dateMode": "interval",
+      "dueDateAnchorDay": null,
+      "intervalDays": 30,
+      "apportionedShare": null,
+      "reminderEnabled": false,
+      "reminderLeadDays": 3,
+      "lastReminderFiredFor": null,
+      "lastSweptMonth": "2026-09",
+      "endDate": null,
+      "finishedAt": null,
+      "linkedAccountId": null
+    },
+    {
+      "id": "insurance",
+      "name": "Car insurance",
+      "icon": "shield",
+      "amount": 600,
+      "cadence": "yearly",
+      "firstDueDate": "2026-03-01",
+      "dueDate": "2027-03-01",
+      "dueDate2": null,
+      "dateMode": null,
+      "dueDateAnchorDay": null,
+      "intervalDays": 365,
+      "apportionedShare": 50,
+      "reminderEnabled": true,
+      "reminderLeadDays": 14,
+      "lastReminderFiredFor": null,
+      "lastSweptMonth": "2026-09",
+      "endDate": null,
+      "finishedAt": null,
+      "linkedAccountId": null
+    },
+    {
+      "id": "pest",
+      "name": "Pest control",
+      "icon": "calendar-clock",
+      "amount": 90,
+      "cadence": "bimonthly",
+      "firstDueDate": "2026-01-05",
+      "dueDate": "2026-11-01",
+      "dueDate2": null,
+      "dateMode": null,
+      "dueDateAnchorDay": null,
+      "intervalDays": 60,
+      "apportionedShare": 45,
+      "reminderEnabled": false,
+      "reminderLeadDays": 3,
+      "lastReminderFiredFor": null,
+      "lastSweptMonth": "2026-09",
+      "endDate": null,
+      "finishedAt": null,
+      "linkedAccountId": null
+    },
+    {
+      "id": "carloan-pay",
+      "name": "Car loan payment",
+      "icon": "landmark",
+      "amount": 260,
+      "cadence": "monthly",
+      "firstDueDate": "2026-01-15",
+      "dueDate": "2026-09-15",
+      "dueDate2": null,
+      "dateMode": "fixedDate",
+      "dueDateAnchorDay": 15,
+      "intervalDays": null,
+      "apportionedShare": null,
+      "reminderEnabled": false,
+      "reminderLeadDays": 3,
+      "lastReminderFiredFor": null,
+      "lastSweptMonth": "2026-09",
+      "endDate": "2027-07-15",
+      "finishedAt": null,
+      "linkedAccountId": "carloan"
+    }
+  ],
+  "accounts": [
+    {
+      "id": "creditcard",
+      "name": "Credit Card",
+      "icon": "credit-card",
+      "type": "credit",
+      "balance": 640,
+      "apr": 0.219,
+      "autoUpdateFromPayments": false,
+      "linkedRecurringExpenseId": null,
+      "principal": null,
+      "interestRate": null,
+      "termMonths": null,
+      "rateType": null,
+      "originationDate": null
+    },
+    {
+      "id": "carloan",
+      "name": "Car Loan",
+      "icon": "landmark",
+      "type": "loan",
+      "balance": 5320.79,
+      "apr": null,
+      "autoUpdateFromPayments": true,
+      "linkedRecurringExpenseId": "carloan-pay",
+      "principal": 9800,
+      "interestRate": 0.059,
+      "termMonths": 48,
+      "rateType": "fixed",
+      "originationDate": "2024-08-15"
+    }
+  ],
+  "settings": {
+    "incomeEnabled": true,
+    "income": 1450,
+    "incomeCadence": "biweekly",
+    "incomePayDate": "2026-09-11",
+    "incomeEnabledDate": "2026-03-01"
+  },
+  "figures": {
+    "incomeReceivedThisMonth": 1450,
+    "ageOfMoney": 59,
+    "ageOfMoneyTrend": [
+      11,
+      27,
+      28,
+      41,
+      42,
+      59
+    ],
+    "savingsVsOwedNow": -2893.79,
+    "savingsVsOwedTrend": [
+      -5692.7699999999995,
+      -4837.469999999999,
+      -3961.0499999999993,
+      -3063.489999999999,
+      -2144.7899999999995,
+      -2893.789999999999
+    ],
+    "spending": {
+      "rows": [
+        {
+          "label": "Rent",
+          "icon": "wallet",
+          "amt": 950
+        },
+        {
+          "label": "Groceries",
+          "icon": "shopping-cart",
+          "amt": 350
+        },
+        {
+          "label": "Car loan payment",
+          "icon": "landmark",
+          "amt": 260
+        },
+        {
+          "label": "Goals",
+          "icon": "piggy-bank",
+          "amt": 180
+        },
+        {
+          "label": "Dining out",
+          "icon": "utensils-crossed",
+          "amt": 165
+        },
+        {
+          "label": "Transport",
+          "icon": "bus",
+          "amt": 90
+        },
+        {
+          "label": "Car insurance",
+          "icon": "shield",
+          "amt": 50
+        },
+        {
+          "label": "Entertainment",
+          "icon": "lightbulb",
+          "amt": 50
+        },
+        {
+          "label": "Phone bill",
+          "icon": "smartphone",
+          "amt": 45
+        },
+        {
+          "label": "Pest control",
+          "icon": "calendar-clock",
+          "amt": 45
+        },
+        {
+          "label": "Streaming service",
+          "icon": "tag",
+          "amt": 14
+        }
+      ],
+      "net": 2199,
+      "anyNegative": false
+    },
+    "buffer": 42,
+    "trailingSpend": {
+      "start": "2026-06-01",
+      "end": "2026-09-01",
+      "days": 92
+    },
+    "pairEligibility": []
+  }
+}
