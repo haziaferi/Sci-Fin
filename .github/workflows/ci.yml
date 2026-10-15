@@ -1,0 +1,68 @@
+# One check for every pull request and every push to main: the desktop test suite and the
+# repository's own consistency checks. Windows, because the app ships Windows-specific code
+# (NotificationScheduler.windows.kt) and Windows is where it is developed. The render, walk and
+# census tests skip themselves unless SCIFIN_MEASURE / SCIFIN_WALK / SCIFIN_CENSUS / SCIFIN_MOCKUP
+# is set, so this never renders the hundreds of frames those passes write.
+# Actions are pinned to commits (tag in the comment), not to movable tags.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Tests
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        # bash (-e): PowerShell reports only a multi-line step's last exit code, which would let a
+        # failing speccheck hide behind a passing selftest
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6  # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "21"            # jvmToolchain(21) in shared/build.gradle.kts
+
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6  # v6.4.0
+
+      - name: Desktop tests
+        working-directory: native
+        run: ./gradlew --console=plain --continue :shared:desktopTest :desktopApp:test
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Spec checks
+        run: |
+          python tools/speccheck.py
+          python tools/selftest.py
+
+      - name: Borrowed-axes formulas
+        if: hashFiles('tools/borrowed_axes.py') != ''
+        run: |
+          python -m pip install --disable-pip-version-check --quiet "pillow==12.2.0"
+          python tools/borrowed_axes.py --selftest
+
+      - name: Test reports
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: test-reports
+          path: |
+            native/shared/build/reports/tests/
+            native/desktopApp/build/reports/tests/
+          retention-days: 7
