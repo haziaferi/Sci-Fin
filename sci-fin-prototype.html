@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sci-Fin — Stage 3 prototype</title>
+<!-- HISTORICAL. Frozen 2026-09-14 (scifinspec.md, line 8 and §14): anything decided after that date overrides it,
+     the native app under native/ is the current Sci-Fin, and this file is never a source of values, defaults or
+     logic. It is kept as an interaction reference and as the parity tests' second oracle (tools/export_fixture.mjs
+     reads only the module script below, so this banner does not touch the fixture). -->
+<title>Sci-Fin — Stage 3 prototype (historical, frozen 2026-09-14)</title>
 <style>
   /* ---------- embedded webfonts (inlined so the file works with no network) ----------
      Was a <link> to fonts.googleapis.com, which left the app on fallback system fonts
@@ -488,6 +492,14 @@
 </style>
 </head>
 <body>
+
+  <div role="note" aria-label="Historical prototype" style="background:#fff3cd;color:#3b2a00;border:1px solid #c9a227;border-radius:8px;padding:12px 16px;margin:12px auto;max-width:960px;font:15px/1.5 system-ui,sans-serif">
+    <strong>Historical — frozen 14 September 2026.</strong>
+    This prototype predates every decision made since (59 of them up to 10 October), including the whole desktop layout,
+    the navigation rail, the four current themes and the entry sentence. The current Sci-Fin is the native app in
+    <code>native/</code>; the spec (<code>scifinspec.md</code>) wins wherever the two differ. Kept only as an interaction
+    reference and as the second oracle for the parity tests.
+  </div>
 
   <div class="page-head">
     <h1>Sci-Fin — Stage 3 prototype</h1>
