@@ -38,3 +38,8 @@ design/scratch-*/
 # screen-axis-harvest: the raw inventory names every project on the machine; the committed
 # per-group files are redacted with ~/.claude/skills/screen-axis-harvest/redact.py
 design/axis-harvest-*/inventory.json
+
+# feature map: kept local, it describes private projects in detail
+design/feature-map.json
+design/feature-map.md
+tools/feature_map.py
