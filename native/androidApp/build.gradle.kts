@@ -12,14 +12,15 @@ plugins {
 // Release signing, read from native/local.properties (machine-local, git-ignored) and never committed:
 // this repository is public, and a keystore in it would let anyone sign an APK that Android accepts as an
 // update of every app signed with that key. The four values are all present or all absent -- some but not
-// all is a typo, never an intent. Absent, the release APK is built unsigned, as before (CI does not sign).
+// all is a typo, never an intent; a blank value counts as absent. Absent, the release APK is built unsigned,
+// as before (CI does not sign). A relative storeFile is read from native/, where local.properties is.
 //   scifin.signing.storeFile=C:/Users/<you>/.android/debug.keystore
 //   scifin.signing.storePassword=…   scifin.signing.keyAlias=…   scifin.signing.keyPassword=…
 val localProperties = Properties().apply {
     rootProject.file("local.properties").takeIf { it.exists() }?.reader()?.use { reader -> load(reader) }
 }
 val signing: Map<String, String?> = listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
-    .associateWith { localProperties.getProperty("scifin.signing.$it") }
+    .associateWith { localProperties.getProperty("scifin.signing.$it")?.takeIf { it.isNotBlank() } }
 if (signing.values.any { it != null } && signing.values.any { it == null }) {
     throw GradleException("local.properties sets only some of scifin.signing.*: missing " +
         signing.filterValues { it == null }.keys.joinToString { "scifin.signing.$it" })
@@ -39,7 +40,7 @@ android {
 
     if (signing.values.all { it != null }) {
         signingConfigs.create("local") {
-            storeFile = file(signing.getValue("storeFile")!!)
+            storeFile = rootProject.file(signing.getValue("storeFile")!!)
             storePassword = signing.getValue("storePassword")
             keyAlias = signing.getValue("keyAlias")
             keyPassword = signing.getValue("keyPassword")

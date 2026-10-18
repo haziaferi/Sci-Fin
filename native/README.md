@@ -19,6 +19,22 @@ manifest into `androidApp/src/main/`; the engine (spec §3, §5, §6, §7, §9) 
 `shared/src/commonMain/kotlin/app/scifin/engine/`, its tests in `shared/src/desktopTest/`, and
 `tools/export_fixture.mjs` (repo root) regenerates the parity fixture from the prototype.
 
+## A signed release build
+
+`gradlew :androidApp:assembleRelease` signs the APK only when `native/local.properties` (git-ignored)
+sets all four of these; with none set, as on CI or a fresh checkout, the release APK is built unsigned.
+
+```
+scifin.signing.storeFile=C:/Users/<you>/.android/debug.keystore
+scifin.signing.storePassword=...
+scifin.signing.keyAlias=...
+scifin.signing.keyPassword=...
+```
+
+Some but not all of them, or one left blank, stops the build and names what is missing. A relative
+`storeFile` is read from `native/`. Never commit the keystore or these values: this repository is public,
+and anyone holding the key can sign an APK that Android accepts as an update of the app.
+
 ## Stage 2 (2026-09-14, complete): the screens
 
 The order is the optimizer's (spec §14): frame → Savings row + quick-add → onboarding screen 1 →
