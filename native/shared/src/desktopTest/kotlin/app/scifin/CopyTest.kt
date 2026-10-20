@@ -17,8 +17,11 @@ import kotlin.test.assertTrue
 /** The 2026-09-15 device critique's copy findings, each pinned where the words are made. */
 class CopyTest {
     @Test fun `the second delete step speaks in the future -- nothing has happened until Delete`() {
-        assertEquals("Rent will be deleted. Savings stays as it is.", deleteOnlyCopy("Rent"))
-        assertEquals("€950 will go back to Savings and Rent will be deleted. Its past history stays in the log.", deleteAddBackCopy("€950", "Rent"))
+        // a delete goes to the Trash (2026-10-20), and says so; §7.2's retype removes without one
+        assertEquals("Rent will go to the Trash for 30 days. Savings stays as it is.", deleteOnlyCopy("Rent"))
+        assertEquals("€950 will go back to Savings and Rent will go to the Trash for 30 days. Restoring it takes the €950 back out. Its past history stays in the log.", deleteAddBackCopy("€950", "Rent"))
+        assertEquals("Rent will be deleted. Savings stays as it is.", deleteOnlyCopy("Rent", trash = false))
+        assertEquals("€950 will go back to Savings and Rent will be deleted. Its past history stays in the log.", deleteAddBackCopy("€950", "Rent", trash = false))
     }
 
     @Test fun `paid in full reads as an outcome, not a state`() {

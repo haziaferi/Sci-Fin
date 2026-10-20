@@ -61,7 +61,7 @@ sealed interface Route {
 }
 
 enum class SettingsPage(val title: String) {
-    APPEARANCE("Appearance"), INCOME("Income"), NOTIFICATIONS("Notifications"), BACKUP("Data & backup"), SECURITY("Security & lock"), PROFILES("Profiles"), REPLAY("The tour, condensed");
+    APPEARANCE("Appearance"), INCOME("Income"), NOTIFICATIONS("Notifications"), BACKUP("Data & backup"), SECURITY("Security & lock"), TRASH("Trash"), PROFILES("Profiles"), REPLAY("The tour, condensed");
 }
 
 /**

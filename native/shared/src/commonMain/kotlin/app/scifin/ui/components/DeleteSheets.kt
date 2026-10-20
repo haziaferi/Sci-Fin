@@ -44,6 +44,8 @@ fun DeleteWithReturnSheet(
     note: @Composable () -> Unit = {},
     /** Renders only: start on a confirmation step instead of the question. */
     initialPending: Boolean? = null,
+    /** The delete goes to the Trash; false for §7.2's retype, which removes a payment without one. */
+    trash: Boolean = true,
 ) {
     val t = LocalTokens.current; val p = t.palette
     // null: the question; true / false: confirming that path
@@ -51,7 +53,8 @@ fun DeleteWithReturnSheet(
     SheetScaffold(title = title, onDismiss = onDismiss) {
         note()
         val body = when (pending) { null -> question; true -> confirmAddBack; false -> confirmDeleteOnly }
-        Text(body, color = p.txt, fontSize = t.type.body, lineHeight = t.type.body * 1.5, modifier = Modifier.padding(bottom = t.spacing.pad))
+        Text(body, color = p.txt, fontSize = t.type.body, lineHeight = t.type.body * 1.5, modifier = Modifier.padding(bottom = if (trash && pending == null) t.spacing.gap else t.spacing.pad))
+        if (trash && pending == null) Caption(TRASH_LINE, Modifier.padding(bottom = t.spacing.pad))
         if (pending == null) {
             // three actions do not share one row at phone width, so the accepting one takes its own line
             if (hasReturn) Button("Delete and add back", modifier = Modifier.fillMaxWidth().padding(bottom = t.spacing.gap)) { pending = true }
@@ -85,7 +88,13 @@ fun EditorDeleteButton(name: String, onClick: () -> Unit) {
 
 /*
  * The second step's copy, in one place. Future tense: the confirming Delete is still ahead when
- * these are read.
+ * these are read. A delete goes to the Trash (owner, 2026-10-19/20); §7.2's retype removes a payment
+ * without one, so it passes trash = false.
  */
-fun deleteOnlyCopy(name: String): String = "$name will be deleted. Savings stays as it is."
-fun deleteAddBackCopy(amount: String, name: String): String = "$amount will go back to Savings and $name will be deleted. Its past history stays in the log."
+const val TRASH_LINE = "It waits in the Trash for 30 days: Settings › Trash puts it back."
+
+fun deleteOnlyCopy(name: String, trash: Boolean = true): String =
+    if (trash) "$name will go to the Trash for 30 days. Savings stays as it is." else "$name will be deleted. Savings stays as it is."
+fun deleteAddBackCopy(amount: String, name: String, trash: Boolean = true): String =
+    if (trash) "$amount will go back to Savings and $name will go to the Trash for 30 days. Restoring it takes the $amount back out. Its past history stays in the log."
+    else "$amount will go back to Savings and $name will be deleted. Its past history stays in the log."

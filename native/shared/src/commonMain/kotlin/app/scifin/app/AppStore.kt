@@ -37,6 +37,10 @@ import app.scifin.engine.Pin
 import app.scifin.engine.hintProblem
 import app.scifin.model.AppLock
 import app.scifin.model.CopySchedule
+import app.scifin.model.TrashItem
+import app.scifin.engine.Trash
+import app.scifin.engine.TrashPayload
+import app.scifin.engine.TrashedProfile
 import kotlinx.datetime.LocalDate
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -72,6 +76,8 @@ data class UiState(
     /** §4.7's review card: a validated backup waiting for Confirm, or the reason the file was refused. */
     val pendingBackup: ValidatedBackup? = null,
     val backupError: String? = null,
+    /** The Trash, as its page lists it. */
+    val trash: List<TrashEntry> = emptyList(),
     /** §4.7's automatic copy as the page shows it -- never the password; null until it is first set up. */
     val copy: CopySummary? = null,
     /** The app PIN was just turned on while the copies have no password: the prompt to set one is owed. */
@@ -118,6 +124,9 @@ data class UiState(
     /** §11.1's steps 2-4 are pages without the tab bar (the prototype clears it); screen 1 is a sheet over Budget and keeps it. */
     val inOnboardingPage: Boolean get() = (route as? Route.Onboarding)?.let { it.step > 1 } ?: false
 }
+
+/** One row of the Trash page: what it was, when it goes for good, and the money restoring moves back. */
+data class TrashEntry(val id: String, val kind: String, val name: String, val deletedOn: LocalDate, val goesOn: LocalDate, val money: Money)
 
 /** §4.7: what is known about the lock outside the store -- enough to draw it, nothing to break it. */
 data class LockSummary(val pinLength: Int, val hint: String?, val after: LockAfter)
@@ -212,6 +221,9 @@ class AppStore(
             )
         }
         if (resume == 3) startTutorial(fromOnboarding = true)
+        // the Trash's 30 days are kept on opening as well as by the daily task
+        runCatching { session.tidyTrash() }
+        refreshTrash()
         // §4.7: opening the app catches up a copy the daily task missed (a phone off, a PC asleep at its hour)
         if (copy != null) scope.launch { withContext(hashing) { session.runCopy() }; refreshCopy() }
     }
@@ -221,6 +233,7 @@ class AppStore(
         val dao = db.dao()
         val d = dao.appState()?.let { session.activate(it.activeProfileId) }
         _state.update { it.forProfile(d).copy(profiles = dao.profiles(), appState = dao.appState()) }
+        refreshTrash()
     }
 
     /** A change of Profile keeps nothing read against the old one (§8.3); Settings' origin keeps only its tab. */
@@ -402,13 +415,30 @@ class AppStore(
             }
         }
 
+    /**
+     * A delete that keeps what it removed in the Trash for 30 days (owner, 2026-10-19/20). [write] is the engine's
+     * delete through [Trash], which also says what it removed and the money it moved.
+     */
+    private fun toTrash(kind: String, name: String, write: (ProfileData) -> Pair<ProfileData, TrashPayload>?): Job =
+        scope.launch {
+            writes.withLock {
+                val before = _state.value.data ?: return@withLock
+                val (after, payload) = write(before) ?: return@withLock
+                db.dao().save(after)
+                db.dao().upsertTrash(TrashItem(newId(), before.profileId, kind, name, clock.today().toString(), Trash.encode(payload)))
+                session.syncNotifications(after)
+                _state.update { it.copy(data = after, profiles = db.dao().profiles(), trash = trashEntries()) }
+            }
+        }
+
     // ---- §6 Goals -----------------------------------------------------------------------------
 
     fun saveGoal(draft: GoalDraft): Job = dispatch { GoalEditing.save(it, draft, clock, newId) }
 
     /** Closes the sheet and leaves the editor, which no longer has a Goal to edit. */
     fun deleteGoal(id: String, returnSaved: Boolean): Job {
-        val job = dispatch { GoalEditing.delete(it, id, returnSaved, clock, newId) }
+        val name = _state.value.data?.goals?.firstOrNull { it.id == id }?.name.orEmpty()
+        val job = toTrash("goal", name) { Trash.deleteGoal(it, id, returnSaved, clock, newId) }
         _state.update { st -> st.copy(sheet = null, routes = st.routes.filterNot { it is Route.GoalEditor && it.id == id }) }
         return job
     }
@@ -458,7 +488,8 @@ class AppStore(
     }
 
     fun deleteExpense(id: String, reverse: Boolean): Job {
-        val job = dispatch { Recurring.delete(it, id, reverse, clock, newId) }
+        val name = _state.value.data?.recurringExpenses?.firstOrNull { it.id == id }?.name.orEmpty()
+        val job = toTrash("expense", name) { Trash.deleteExpense(it, id, reverse, clock, newId) }
         _state.update { st -> st.copy(sheet = null, routes = st.routes.filterNot { it is Route.RecurringEditor && it.id == id }) }
         return job
     }
@@ -471,7 +502,8 @@ class AppStore(
     fun saveCategory(draft: CategoryEditing.Draft): Job = dispatch { CategoryEditing.save(it, draft, clock, newId) }
 
     fun deleteCategory(id: String): Job {
-        val job = dispatch { CategoryEditing.delete(it, id) }
+        val name = _state.value.data?.categories?.firstOrNull { it.id == id }?.name.orEmpty()
+        val job = toTrash("category", name) { Trash.deleteCategory(it, id) }
         _state.update { st -> st.copy(sheet = null, routes = st.routes.filterNot { it is Route.CategoryEditor && it.id == id }) }
         return job
     }
@@ -482,7 +514,8 @@ class AppStore(
 
     /** §7.2's cascade; the editor and the detail beneath it close, having nothing left to show. */
     fun deleteAccount(id: String, reverse: Boolean = false): Job {
-        val job = dispatch { Accounts.deleteCascade(it, id, clock, reverse, newId) }
+        val name = _state.value.data?.accounts?.firstOrNull { it.id == id }?.name.orEmpty()
+        val job = toTrash("account", name) { Trash.deleteAccount(it, id, reverse, clock, newId) }
         _state.update { st -> st.copy(sheet = null, routes = st.routes.filterNot { (it is Route.AccountEditor && it.id == id) || (it is Route.AccountDetail && it.id == id) }) }
         return job
     }
@@ -500,7 +533,9 @@ class AppStore(
     fun commitPayoff(accountId: String, amount: Money, name: String): Job = dispatch { Accounts.commitFixedPayment(it, accountId, amount, name, clock, newId()) }
 
     fun deletePair(id: String, otherId: String): Job {
-        val job = dispatch { Ledger.deletePair(it, id, otherId) }
+        val a = _state.value.data?.transactions?.firstOrNull { it.id == id }
+        val name = a?.let { "${it.targetLabel.ifEmpty { "Savings" }}, two entries that cancel out" } ?: "Two entries that cancel out"
+        val job = toTrash("pair", name) { Trash.deletePair(it, id, otherId) }
         closeSheet()
         return job
     }
@@ -659,6 +694,7 @@ class AppStore(
             val d = session.activate(id) ?: return@withLock
             // nothing transient survives a switch: an editor open on one Profile's Goal must not reopen against another's
             _state.update { it.forProfile(d).copy(appState = dao.appState(), profiles = dao.profiles()) }
+            _state.update { it.copy(trash = trashEntries()) }
         }
     }
 
@@ -679,13 +715,60 @@ class AppStore(
             val dao = db.dao()
             val remaining = dao.profiles().filter { it.id != id }
             if (remaining.isEmpty()) return@withLock
+            // §8.3 and the Trash: the whole Profile is kept 30 days, inert like anything else there
+            dao.load(id)?.let { whole ->
+                dao.upsertTrash(TrashItem(newId(), id, "profile", whole.profile.name, clock.today().toString(), Trash.encode(TrashPayload(profile = TrashedProfile.of(whole)))))
+            }
             dao.deleteProfileWhole(id)
             if (_state.value.data?.profileId == id) {
                 val next = session.activate(remaining.first().id)!!
                 _state.update { it.forProfile(next) }
             }
-            _state.update { it.copy(profiles = dao.profiles(), appState = dao.appState(), sheet = null) }
+            _state.update { it.copy(profiles = dao.profiles(), appState = dao.appState(), sheet = null, trash = trashEntries()) }
         }
+    }
+
+    // ---- The Trash ------------------------------------------------------------------------------
+
+    /** What the Trash page lists: the open Profile's items and every deleted Profile, newest first. */
+    private suspend fun trashEntries(): List<TrashEntry> {
+        val open = _state.value.data?.profileId
+        return db.dao().trash().filter { it.kind == "profile" || it.profileId == open }.mapNotNull { t ->
+            val p = Trash.decode(t.payload) ?: return@mapNotNull null
+            val on = runCatching { LocalDate.parse(t.deletedOn) }.getOrNull() ?: return@mapNotNull null
+            TrashEntry(t.id, t.kind, t.name, on, Trash.goesOn(on), Trash.moneyMoved(p))
+        }
+    }
+
+    private suspend fun refreshTrash() = _state.update { it.copy(trash = trashEntries()) }
+
+    /**
+     * Restore puts the item back as it was, and moves back any money its delete moved, as a new logged row. A
+     * Profile comes back whole, as one more Profile; it is not opened.
+     */
+    fun restoreFromTrash(id: String): Job = scope.launch {
+        writes.withLock {
+            val dao = db.dao()
+            val t = dao.trashItem(id) ?: return@withLock
+            val p = Trash.decode(t.payload) ?: return@withLock
+            p.profile?.let { tp ->
+                if (dao.profile(tp.profile.id) == null) dao.save(tp.data())
+            } ?: run {
+                val d = _state.value.data?.takeIf { it.profileId == t.profileId } ?: return@withLock
+                val after = Trash.restore(d, p, clock, newId)
+                dao.save(after); session.syncNotifications(after)
+                _state.update { it.copy(data = after) }
+            }
+            dao.deleteTrash(id)
+            _state.update { it.copy(profiles = dao.profiles()) }
+        }
+        refreshTrash()
+    }
+
+    /** Delete forever: the item leaves the Trash now. Its money was settled when it was deleted. */
+    fun deleteForever(id: String): Job = scope.launch {
+        writes.withLock { db.dao().deleteTrash(id) }
+        refreshTrash()
     }
 
     // ---- §4.7 Automatic copy -------------------------------------------------------------------

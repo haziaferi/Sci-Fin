@@ -404,9 +404,10 @@ fun RetypeCascadeSheet(sheet: Sheet.RetypeCascade, state: UiState, store: AppSto
         question = "Change ${sheet.draft.name} to Credit? This also removes the ${formatMoney(linked.amount, cur)}/month payment “${linked.name}” — a credit account can’t keep a loan’s tracked figure honest." +
             (if (back > 0) " Add $amount back to Savings? That’s what’s actually been swept for the current period." else ""),
         hasReturn = back > 0,
-        confirmAddBack = deleteAddBackCopy(amount, "“${linked.name}”"),
-        confirmDeleteOnly = deleteOnlyCopy("“${linked.name}”"),
+        confirmAddBack = deleteAddBackCopy(amount, "“${linked.name}”", trash = false),
+        confirmDeleteOnly = deleteOnlyCopy("“${linked.name}”", trash = false),
         onDismiss = store::closeSheet,
         onDelete = { returnMoney -> store.retypeAccountToCredit(sheet.draft, reverse = returnMoney) },
+        trash = false,
     )
 }

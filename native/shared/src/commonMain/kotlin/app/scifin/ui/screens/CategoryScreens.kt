@@ -29,6 +29,7 @@ import app.scifin.ui.components.Button
 import app.scifin.ui.components.ButtonKind
 import app.scifin.ui.components.ButtonRow
 import app.scifin.ui.components.Caption
+import app.scifin.ui.components.TRASH_LINE
 import app.scifin.ui.components.FieldGroup
 import app.scifin.ui.components.FieldLabel
 import app.scifin.ui.components.InfoNote
@@ -104,7 +105,8 @@ fun DeleteCategorySheet(sheet: Sheet.DeleteCategory, state: UiState, store: AppS
     val d = state.data ?: return
     val c = d.categories.firstOrNull { it.id == sheet.id } ?: return
     SheetScaffold(title = "Delete category", onDismiss = store::closeSheet) {
-        Text("Delete ${c.name}? This month’s spend is not un-spent — only the category itself goes away.", color = p.txt, fontSize = t.type.body, lineHeight = t.type.body * 1.5, modifier = Modifier.padding(bottom = t.spacing.pad))
+        Text("Delete ${c.name}? This month’s spend is not un-spent — only the category itself goes away.", color = p.txt, fontSize = t.type.body, lineHeight = t.type.body * 1.5, modifier = Modifier.padding(bottom = t.spacing.gap))
+        Caption(TRASH_LINE, Modifier.padding(bottom = t.spacing.pad))
         ButtonRow {
             Button("Cancel", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.closeSheet() }
             Button("Delete", ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { store.deleteCategory(c.id) }
