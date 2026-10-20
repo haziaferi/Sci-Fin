@@ -686,6 +686,21 @@ class AppStore(
         }
     }
 
+    /**
+     * A new PIN (or only a new hint: the same PIN typed as the new one), behind the current PIN. The "lock after"
+     * choice is kept; the salt is new. Returns, through the job, nothing -- [UiState.pinWrong] says a wrong current PIN.
+     */
+    fun changePin(current: String, new: String, hint: String): Job = scope.launch {
+        if (!Pin.valid(new) || hintProblem(new, hint, "PIN") != null) return@launch
+        if (checkPin(current) != true) return@launch
+        val after = _state.value.lock?.after ?: LockAfter.ONE_MINUTE
+        val lock = withContext(hashing) { Pin.lockFor(new, hint, after) }
+        writes.withLock {
+            db.dao().upsertAppLock(lock)
+            _state.update { it.copy(lock = lock.summary(), pinWrong = false, pinWaitEnds = null) }
+        }
+    }
+
     /** The field changed: a "wrong" line about the last attempt no longer describes what is typed. */
     fun clearPinWrong() = _state.update { if (it.pinWrong) it.copy(pinWrong = false) else it }
 
