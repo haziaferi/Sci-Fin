@@ -13,6 +13,7 @@ import androidx.room.TypeConverters
 import androidx.room.Upsert
 import androidx.sqlite.SQLiteDriver
 import app.scifin.model.Account
+import app.scifin.model.AppLock
 import app.scifin.model.AppState
 import app.scifin.model.Category
 import app.scifin.model.Goal
@@ -38,7 +39,7 @@ import kotlinx.coroutines.Dispatchers
 @Database(
     entities = [
         Profile::class, Savings::class, Goal::class, Category::class, RecurringExpense::class,
-        Account::class, Transaction::class, Settings::class, ImportState::class, AppState::class,
+        Account::class, Transaction::class, Settings::class, ImportState::class, AppState::class, AppLock::class,
     ],
     version = SCHEMA_VERSION,
     exportSchema = true,
@@ -75,6 +76,10 @@ interface SciFinDao {
     @Query("SELECT * FROM profiles ORDER BY name") suspend fun profiles(): List<Profile>
     @Query("SELECT * FROM app_state WHERE id = 1") suspend fun appState(): AppState?
     @Upsert suspend fun upsertAppState(s: AppState)
+    @Query("SELECT * FROM app_lock WHERE id = 1") suspend fun appLock(): AppLock?
+    @Upsert suspend fun upsertAppLock(l: AppLock)
+    @Query("DELETE FROM app_lock") suspend fun deleteAppLock()
+    @Query("DELETE FROM app_state") suspend fun deleteAppState()
 
     @Query("SELECT * FROM profiles WHERE id = :id") suspend fun profile(id: String): Profile?
     @Query("SELECT * FROM savings WHERE profileId = :id") suspend fun savings(id: String): Savings?
@@ -143,5 +148,12 @@ interface SciFinDao {
         deleteGoals(id); deleteCategories(id); deleteRecurringExpenses(id); deleteAccounts(id)
         deleteTransactions(id); deleteSavings(id); deleteSettings(id); deleteImportState(id)
         deleteProfile(id)
+    }
+
+    /** §4.7's forgotten PIN: every Profile, the app row and the lock, in one transaction. */
+    @RoomTransaction
+    suspend fun eraseAll() {
+        for (p in profiles()) deleteProfileWhole(p.id)
+        deleteAppState(); deleteAppLock()
     }
 }

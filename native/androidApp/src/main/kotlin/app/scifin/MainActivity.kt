@@ -25,7 +25,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import app.scifin.app.AppStore
 import app.scifin.app.Files
 import app.scifin.app.PickedFile
+import android.view.WindowManager
 import app.scifin.data.sciFinDamageNotice
+import app.scifin.data.sciFinLocalCopies
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import app.scifin.ui.SciFinApp
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
@@ -55,7 +59,7 @@ class StoreViewModel(app: Application) : AndroidViewModel(app) {
     /** Built off the main thread: opening the store runs §12's quick_check and snapshot, both whole-file passes. */
     val store: Deferred<AppStore> = viewModelScope.async {
         val db = withContext(Dispatchers.IO) { sciFin.db }
-        AppStore(sciFin.session, db, viewModelScope, files, sciFinDamageNotice(app)).also { s -> viewModelScope.launch { s.start() } }
+        AppStore(sciFin.session, db, viewModelScope, files, sciFinDamageNotice(app), sciFinLocalCopies(app)).also { s -> viewModelScope.launch { s.start() } }
     }
 }
 
@@ -127,6 +131,12 @@ class MainActivity : ComponentActivity() {
             // root activity rather than finishing it.
             val back = onBackPressedDispatcher.addCallback(this@MainActivity) { store.back() }
             launch { repeatOnLifecycle(Lifecycle.State.STARTED) { store.state.collect { back.isEnabled = store.handlesBack(it) } } }
+            // §4.7: while a PIN is set, the recent-apps preview shows nothing and screenshots are refused
+            launch {
+                store.state.map { it.lock != null }.distinctUntilChanged().collect { on ->
+                    if (on) window.addFlags(WindowManager.LayoutParams.FLAG_SECURE) else window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                }
+            }
 
             setContent {
                 val state by store.state.collectAsState()
@@ -144,6 +154,20 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         lifecycleScope.launch { vm.store.await().refreshPermission() }
+    }
+
+    /**
+     * §4.7's "lock after leaving": leaving is the Activity going out of sight -- another app, Home, the screen
+     * off -- not a notification shade or a dialog over it, and not a rotation. The store ignores its own file pickers.
+     */
+    override fun onStart() {
+        super.onStart()
+        lifecycleScope.launch { vm.store.await().appReturned() }
+    }
+
+    override fun onStop() {
+        if (!isChangingConfigurations) lifecycleScope.launch { vm.store.await().appLeft() }
+        super.onStop()
     }
 
     override fun onDestroy() {

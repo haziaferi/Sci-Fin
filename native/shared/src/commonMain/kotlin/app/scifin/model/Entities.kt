@@ -228,5 +228,28 @@ data class AppState(
     val lastBackupImportDate: LocalDate? = null,
 )
 
+/**
+ * §4.7's app lock, one row while a PIN is set and none otherwise. Device-only: not @Serializable, so it can
+ * never reach a backup file, and outside `app_state`, which a restore rewrites (Backup.apply). The PIN is
+ * kept only as a salted PBKDF2-HMAC-SHA256 hash ([app.scifin.engine.Pin]).
+ */
+@Entity(tableName = "app_lock")
+data class AppLock(
+    @PrimaryKey val id: Int = 1,
+    /** Base64 of the 16 random bytes and of the derived 32-byte hash. */
+    val salt: String,
+    val hash: String,
+    /** Stored so the cost can be raised later without locking anyone out. */
+    val iterations: Int,
+    /** The digit count, so the gate checks once, on the last digit, rather than on every partial entry. */
+    val pinLength: Int,
+    /** The person's own hint, optional, never the PIN itself (engine/Lock.kt). */
+    val hint: String? = null,
+    /** [app.scifin.engine.LockAfter]'s token. */
+    val lockAfter: String = "one_minute",
+    /** Wrong PINs since the last right one; kept so restarting the app cannot skip a wait. */
+    val failedAttempts: Int = 0,
+)
+
 /** §12's storage version, carried by the Room database and the backup file. Every bump has a Migration (data/Migrations.kt); the history is in the spec. */
-const val SCHEMA_VERSION = 5
+const val SCHEMA_VERSION = 6

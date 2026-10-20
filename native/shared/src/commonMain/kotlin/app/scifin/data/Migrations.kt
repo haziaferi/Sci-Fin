@@ -76,4 +76,11 @@ val SCIFIN_MIGRATIONS: Array<Migration> = arrayOf(
             connection.execSQL("ALTER TABLE `settings_new` RENAME TO `settings`")
         }
     },
+
+    /** 5 → 6: §4.7's app lock, its own table so a restore (which rewrites `app_state`) leaves it alone. Empty: no PIN is set. */
+    object : Migration(5, 6) {
+        override fun migrate(connection: SQLiteConnection) {
+            connection.execSQL("CREATE TABLE IF NOT EXISTS `app_lock` (`id` INTEGER NOT NULL, `salt` TEXT NOT NULL, `hash` TEXT NOT NULL, `iterations` INTEGER NOT NULL, `pinLength` INTEGER NOT NULL, `hint` TEXT, `lockAfter` TEXT NOT NULL, `failedAttempts` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+        }
+    },
 )

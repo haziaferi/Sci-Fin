@@ -68,7 +68,7 @@ fun main(args: Array<String>) {
     }
     (scheduler as? WindowsNotificationScheduler)?.installIfNeeded(log)
     // one thread: each write is its own launch, and on a pool two keystrokes' writes could take the lock out of order
-    val store = AppStore(session, db, CoroutineScope(SupervisorJob() + Dispatchers.Default.limitedParallelism(1)), AwtFiles, Integrity.notice(dbFile))
+    val store = AppStore(session, db, CoroutineScope(SupervisorJob() + Dispatchers.Default.limitedParallelism(1)), AwtFiles, Integrity.notice(dbFile), Integrity.copies(dbFile))
     runBlocking { store.start() }
     val textScale = parseTextScaleFactor(
         runCatching {
@@ -89,7 +89,7 @@ fun main(args: Array<String>) {
                 val ui = store.state.value
                 when {
                     e.type != KeyEventType.KeyDown -> false
-                    e.isCtrlPressed && e.key == Key.N && ui.sheet == null && ui.data != null && ui.route !is Route.Onboarding && ui.tutorialStop == null -> { store.openSheet(Sheet.Entry()); true }
+                    e.isCtrlPressed && e.key == Key.N && !ui.locked && ui.sheet == null && ui.data != null && ui.route !is Route.Onboarding && ui.tutorialStop == null -> { store.openSheet(Sheet.Entry()); true }
                     e.key == Key.Escape && store.closesOnBack(ui) -> { store.closeSheet(); true }
                     else -> false
                 }
@@ -99,9 +99,13 @@ fun main(args: Array<String>) {
             // each small frame with its own thickening. Window(icon=) is left unset on purpose: Compose
             // would paint one 192px image and Windows would downscale it into a smudge at 16px.
             LaunchedEffect(Unit) { window.iconImages = ICON_LADDER }
-            // §4.7: the permission is re-read whenever the app comes back -- it may have been changed in Windows' settings
+            // §4.7: the permission is re-read whenever the app comes back -- it may have been changed in Windows' settings --
+            // and "lock after leaving" counts from the moment the window lost focus (another window, or minimised)
             LaunchedEffect(Unit) {
-                window.addWindowFocusListener(object : WindowAdapter() { override fun windowGainedFocus(e: WindowEvent) = store.refreshPermission() })
+                window.addWindowFocusListener(object : WindowAdapter() {
+                    override fun windowGainedFocus(e: WindowEvent) { store.refreshPermission(); store.appReturned() }
+                    override fun windowLostFocus(e: WindowEvent) = store.appLeft()
+                })
             }
             // §2.5: Compose Desktop fixes fontScale at 1
             // (CMP-6391), so the person's Windows text size is applied here, as read at launch.

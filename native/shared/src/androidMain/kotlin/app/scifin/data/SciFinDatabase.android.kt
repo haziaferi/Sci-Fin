@@ -28,6 +28,9 @@ fun buildSciFinDatabase(context: Context, log: (String) -> Unit = {}): SciFinDat
 /** The damage notice for the store [buildSciFinDatabase] opens. */
 fun sciFinDamageNotice(context: Context) = Integrity.notice(context.applicationContext.getDatabasePath(DB_NAME))
 
+/** The kept copies beside that store, for §4.7's forgotten-PIN erase. */
+fun sciFinLocalCopies(context: Context) = Integrity.copies(context.applicationContext.getDatabasePath(DB_NAME))
+
 /**
  * `PRAGMA quick_check` through an open that cannot delete: a handler that does nothing means the
  * framework's retry after a corruption report throws instead of reopening an emptied file.
