@@ -40,7 +40,7 @@ import app.scifin.ui.opener
 import app.scifin.ui.shownDetail
 import app.scifin.ui.components.AddRow
 import app.scifin.ui.components.Avatar
-import app.scifin.ui.components.BackupReview
+import androidx.compose.runtime.saveable.rememberSaveable
 import app.scifin.ui.components.Button
 import app.scifin.ui.components.ButtonKind
 import app.scifin.ui.components.Caption
@@ -119,7 +119,7 @@ fun SettingsScreen(state: UiState, store: AppStore) {
 @Composable
 fun SettingsPageScreen(route: Route.Settings, state: UiState, store: AppStore) {
     val d = state.data ?: return
-    val title = if (route.page == SettingsPage.BACKUP && state.pendingBackup != null) "Restore backup" else route.page.title
+    val title = if (route.page == SettingsPage.BACKUP && (state.pendingBackup != null || state.lockedBackup != null)) "Restore backup" else route.page.title
     Page(null) {
         TopRow(title, onBack = { store.back() })
         when (route.page) {
@@ -238,20 +238,22 @@ private fun NotificationsPage(d: ProfileData, state: UiState, store: AppStore) {
 @Composable
 private fun BackupPage(state: UiState, store: AppStore) {
     val t = LocalTokens.current
-    val pend = state.pendingBackup
-    if (pend != null) {
-        BackupReview(pend, store)
-        return
-    }
+    if (BackupOpen(state, store)) return
+    var exporting by rememberSaveable { mutableStateOf(false) }
+    if (exporting) { ExportStep(state, store) { exporting = false }; return }
     InfoNote("A backup is one file holding every profile, every transaction and every setting. It stays where you put it — nothing is sent anywhere.")
-    Button("Export a backup", ButtonKind.SECONDARY, modifier = Modifier.fillMaxWidth().padding(top = t.spacing.gap)) { store.exportBackup() }
+    Button("Export a backup", ButtonKind.SECONDARY, modifier = Modifier.fillMaxWidth().padding(top = t.spacing.gap)) { exporting = true }
+    Caption(
+        if (state.lock != null) "The file is written with a password while the app PIN is on." else "You can add a password to the file on the next step.",
+        Modifier.padding(start = t.spacing.u * 0.25f, top = t.spacing.u / 2),
+    )
     state.appState?.lastBackupExportDate?.let { Caption("Last export: ${formatDateFull(it)}.", Modifier.padding(start = t.spacing.u * 0.25f, top = t.spacing.u / 2)) }
     Column(Modifier.padding(top = t.spacing.pad)) {
         FieldLabel("Restore from a backup")
         Button("Choose a backup file", ButtonKind.SECONDARY, modifier = Modifier.fillMaxWidth()) { store.pickBackup() }
     }
     state.backupError?.let { FeasibilityNote(it, Modifier.padding(top = t.spacing.gap)) }
-    Caption("Restoring replaces what is on this device; you will be shown what the file holds and asked before anything changes.", Modifier.padding(top = t.spacing.gap))
+    Caption("Restoring replaces what is on this device; you will be shown what the file holds and asked before anything changes. A file with a password asks for it first.", Modifier.padding(top = t.spacing.gap))
     state.appState?.lastBackupImportDate?.let { Caption("Last restore: ${formatDateFull(it)}.", Modifier.padding(top = t.spacing.gap)) }
 }
 

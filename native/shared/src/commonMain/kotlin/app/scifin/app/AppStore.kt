@@ -30,6 +30,8 @@ import app.scifin.model.ProfileData
 import app.scifin.model.Settings
 import app.scifin.model.Theme
 import androidx.room.useWriterConnection
+import app.scifin.engine.BackupCrypto
+import app.scifin.engine.LockedBackup
 import app.scifin.engine.LockAfter
 import app.scifin.engine.Pin
 import app.scifin.engine.hintProblem
@@ -68,6 +70,9 @@ data class UiState(
     /** §4.7's review card: a validated backup waiting for Confirm, or the reason the file was refused. */
     val pendingBackup: ValidatedBackup? = null,
     val backupError: String? = null,
+    /** §4.7: a picked file with a password, waiting for it; and whether the last one tried was wrong. */
+    val lockedBackup: LockedBackup? = null,
+    val backupPasswordWrong: Boolean = false,
     val notificationPermission: NotificationPermission? = null,
     /** §4.3's review screen: the parsed, annotated rows waiting for Confirm, or why the file was refused. */
     val importReview: ImportReview? = null,
@@ -536,29 +541,54 @@ class AppStore(
         try { return block() } finally { dialogsOpen-- }
     }
 
-    /** Export: one file holding every Profile (§8.4's wrap is the unit); the app keeps only the date. */
-    fun exportBackup(): Job = scope.launch {
+    /**
+     * Export: one file holding every Profile (§8.4's wrap is the unit); the app keeps only the date. With a
+     * [password] the file is encrypted ([BackupCrypto]) and carries its [hint]; while the app PIN is on, a file
+     * without one is not written (§4.7, owner 2026-10-19).
+     */
+    fun exportBackup(password: String? = null, hint: String = ""): Job = scope.launch {
+        if (password == null && _state.value.lock != null) return@launch
+        if (password != null && BackupCrypto.passwordProblem(password, password, hint) != null) return@launch
         writes.withLock {
             val dao = db.dao()
             val app = dao.appState() ?: return@withLock
             val all = dao.profiles().mapNotNull { dao.load(it.id) }
             val today = clock.today()
-            val text = Backup.encode(Backup.build(all, app.activeProfileId, today))
+            val plain = Backup.encode(Backup.build(all, app.activeProfileId, today))
+            val text = if (password == null) plain else withContext(hashing) { BackupCrypto.encrypt(plain, password, hint, today.toString()) }
             if (attempt(::backupFailed, "Could not save the backup there. Try another place.") { inDialog { files.save("sci-fin-backup-$today.json", text) } } == true) {
                 dao.upsertAppState(app.copy(lastBackupExportDate = today))
-                _state.update { it.copy(appState = dao.appState()) }
+                _state.update { it.copy(appState = dao.appState(), backupError = null) }
             }
         }
     }
 
-    /** Restore, step one: pick and validate whole; nothing changes until [confirmBackup]. */
+    /** Restore, step one: pick and validate whole; nothing changes until [confirmBackup]. A file with a password asks for it first. */
     fun pickBackup(): Job = scope.launch {
         val picked = attempt(::backupFailed, READ_FAILED) { inDialog { files.open(listOf("json")) } } ?: return@launch
-        when (val r = Backup.validate(picked.text)) {
-            is BackupResult.Ok -> _state.update { it.copy(pendingBackup = r.backup, backupError = null) }
-            is BackupResult.Refused -> _state.update { it.copy(pendingBackup = null, backupError = r.reason) }
+        BackupCrypto.locked(picked.text)?.let { l ->
+            _state.update { it.copy(lockedBackup = l, backupPasswordWrong = false, pendingBackup = null, backupError = null) }
+            return@launch
+        }
+        showValidated(picked.text)
+    }
+
+    private fun showValidated(text: String) = when (val r = Backup.validate(text)) {
+        is BackupResult.Ok -> _state.update { it.copy(pendingBackup = r.backup, backupError = null, lockedBackup = null) }
+        is BackupResult.Refused -> _state.update { it.copy(pendingBackup = null, backupError = r.reason, lockedBackup = null) }
+    }
+
+    /** Restore, step one and a half: the file's password. A wrong one says so and the prompt stays. */
+    fun openLockedBackup(password: String): Job = scope.launch {
+        val l = _state.value.lockedBackup ?: return@launch
+        when (val o = withContext(hashing) { BackupCrypto.decrypt(l.text, password) }) {
+            is BackupCrypto.Opened.Plain -> showValidated(o.text)
+            BackupCrypto.Opened.WrongPassword -> _state.update { it.copy(backupPasswordWrong = true) }
+            is BackupCrypto.Opened.Refused -> _state.update { it.copy(lockedBackup = null, backupError = o.reason) }
         }
     }
+
+    fun clearBackupPasswordWrong() = _state.update { if (it.backupPasswordWrong) it.copy(backupPasswordWrong = false) else it }
 
     /** §12's screen, "Start fresh": the kept copy stays where it is; §11.1's screen 1 follows. */
     fun startFresh() {
@@ -566,7 +596,7 @@ class AppStore(
         _state.update { it.copy(damagedCopy = null, backupError = null) }
     }
 
-    fun cancelBackup() = _state.update { it.copy(pendingBackup = null, backupError = null) }
+    fun cancelBackup() = _state.update { it.copy(pendingBackup = null, backupError = null, lockedBackup = null, backupPasswordWrong = false) }
 
     /** Restore, step two: replace, not merge (§4.7), then load everything again. */
     fun confirmBackup(): Job = scope.launch {

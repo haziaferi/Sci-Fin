@@ -25,7 +25,6 @@ import app.scifin.app.Route
 import app.scifin.app.UiState
 import app.scifin.model.Theme
 import app.scifin.ui.LocalTokens
-import app.scifin.ui.components.BackupReview
 import app.scifin.ui.components.Button
 import app.scifin.ui.components.ButtonKind
 import app.scifin.ui.components.FeasibilityNote
@@ -59,8 +58,9 @@ fun OnboardingSheet(route: Route.Onboarding, state: UiState, store: AppStore) {
 
     // §4.7's review takes the sheet over while a file is pending: the same card, the same note
     // and the same Confirm/Cancel pair the Settings route shows, so nothing is decided twice.
-    state.pendingBackup?.let { pend ->
-        SheetScaffold(title = "Restore backup", onDismiss = null) { BackupReview(pend, store) }
+    // A file with a password asks for it first (§4.7), in the same sheet.
+    if (state.pendingBackup != null || state.lockedBackup != null) {
+        SheetScaffold(title = "Restore backup", onDismiss = null) { BackupOpen(state, store) }
         return
     }
 
