@@ -16,6 +16,7 @@ import app.scifin.model.Account
 import app.scifin.model.AppLock
 import app.scifin.model.AppState
 import app.scifin.model.CopySchedule
+import app.scifin.model.TrashItem
 import app.scifin.model.Category
 import app.scifin.model.Goal
 import app.scifin.model.ImportState
@@ -40,7 +41,7 @@ import kotlinx.coroutines.Dispatchers
 @Database(
     entities = [
         Profile::class, Savings::class, Goal::class, Category::class, RecurringExpense::class,
-        Account::class, Transaction::class, Settings::class, ImportState::class, AppState::class, AppLock::class, CopySchedule::class,
+        Account::class, Transaction::class, Settings::class, ImportState::class, AppState::class, AppLock::class, CopySchedule::class, TrashItem::class,
     ],
     version = SCHEMA_VERSION,
     exportSchema = true,
@@ -84,6 +85,11 @@ interface SciFinDao {
     @Query("SELECT * FROM copy_schedule WHERE id = 1") suspend fun copySchedule(): CopySchedule?
     @Upsert suspend fun upsertCopySchedule(c: CopySchedule)
     @Query("DELETE FROM copy_schedule") suspend fun deleteCopySchedule()
+    @Query("SELECT * FROM trash ORDER BY deletedOn DESC, id DESC") suspend fun trash(): List<TrashItem>
+    @Query("SELECT * FROM trash WHERE id = :id") suspend fun trashItem(id: String): TrashItem?
+    @Upsert suspend fun upsertTrash(t: TrashItem)
+    @Query("DELETE FROM trash WHERE id = :id") suspend fun deleteTrash(id: String)
+    @Query("DELETE FROM trash") suspend fun emptyTrash()
 
     @Query("SELECT * FROM profiles WHERE id = :id") suspend fun profile(id: String): Profile?
     @Query("SELECT * FROM savings WHERE profileId = :id") suspend fun savings(id: String): Savings?
@@ -158,6 +164,6 @@ interface SciFinDao {
     @RoomTransaction
     suspend fun eraseAll() {
         for (p in profiles()) deleteProfileWhole(p.id)
-        deleteAppState(); deleteAppLock(); deleteCopySchedule()
+        deleteAppState(); deleteAppLock(); deleteCopySchedule(); emptyTrash()
     }
 }

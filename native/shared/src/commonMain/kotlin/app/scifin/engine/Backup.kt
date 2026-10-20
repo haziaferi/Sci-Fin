@@ -177,6 +177,8 @@ object Backup {
                 for (p in b.profiles) dao.save(p)
                 afterProfiles()
                 for (id in existing) if (b.profiles.none { it.profileId == id }) dao.deleteProfileWhole(id)
+                // the Trash holds what was deleted from the data now replaced; none of it can come back into this
+                dao.emptyTrash()
                 val prev = dao.appState()
                 dao.upsertAppState(AppState(activeProfileId = b.activeProfileId, lastBackupExportDate = prev?.lastBackupExportDate, lastBackupImportDate = today))
             }

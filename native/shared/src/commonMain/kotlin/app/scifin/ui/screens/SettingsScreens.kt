@@ -108,6 +108,7 @@ fun SettingsScreen(state: UiState, store: AppStore) {
         val exported = state.appState?.lastBackupExportDate
         NavRow(Lucide.DATABASE, "Data & backup", if (exported != null) "Exported ${formatDate(exported)}" else "Export or restore", selected = shown == SettingsPage.BACKUP) { open(Route.Settings(SettingsPage.BACKUP)) }
         NavRow(Lucide.LOCK, "Security & lock", if (state.lock != null) "PIN on" else "Off", selected = shown == SettingsPage.SECURITY) { open(Route.Settings(SettingsPage.SECURITY)) }
+        NavRow(Lucide.TRASH_2, "Trash", if (state.trash.isEmpty()) "Empty" else "${state.trash.size} ${if (state.trash.size == 1) "item" else "items"}", selected = shown == SettingsPage.TRASH) { open(Route.Settings(SettingsPage.TRASH)) }
         NavRow(Lucide.ROTATE_CCW, "Replay onboarding", "View", selected = shown == SettingsPage.REPLAY) { open(Route.Settings(SettingsPage.REPLAY)) }
         val total = state.profiles.size
         Box(Modifier.tutAnchor("profiles-hook")) { NavRow(null, "Profiles", d.profile.name + (if (total > 1) " · $total total" else ""), leading = { Avatar(d.profile.name.take(1).ifEmpty { "Y" }) }, selected = shown == SettingsPage.PROFILES) { open(Route.Settings(SettingsPage.PROFILES)) } }
@@ -128,6 +129,7 @@ fun SettingsPageScreen(route: Route.Settings, state: UiState, store: AppStore) {
             SettingsPage.NOTIFICATIONS -> NotificationsPage(d, state, store)
             SettingsPage.BACKUP -> BackupPage(state, store)
             SettingsPage.SECURITY -> SecurityPage(state, store)
+            SettingsPage.TRASH -> TrashPage(state, store)
             SettingsPage.PROFILES -> ProfilesPage(state, store)
             SettingsPage.REPLAY -> ReplaySummaryPage(store)
         }

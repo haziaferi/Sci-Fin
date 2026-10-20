@@ -15,6 +15,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import app.scifin.engine.Backup
 import app.scifin.engine.BackupCrypto
+import app.scifin.engine.Trash
+import app.scifin.model.TrashItem
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
 
@@ -32,6 +34,7 @@ sealed class CopyOutcome {
 const val COPY_PREFIX = "sci-fin-copy-"
 const val COPIES_KEPT = 14
 private const val COPY_NOTICE = "scifin.copy.failed"
+private const val TRASH_NOTICE = "scifin.trash.leaving"
 
 /**
  * What "opening the app" means (§3.9, §3.11, §11.5), in one place both hosts call:
@@ -193,5 +196,32 @@ class AppSession(
         }
         // the same daily run writes §4.7's automatic copy when one is due; a failure is recorded, never thrown
         runCatching { runCopy() }
+        runCatching { tidyTrash() }
+    }
+
+    /**
+     * The Trash's two dates (owner, 2026-10-20): at 20 days one notice says what will go for good in ten; at 30
+     * the item goes. Runs daily with the background task and on every open. Returns how many went.
+     */
+    suspend fun tidyTrash(): Int {
+        val dao = db.dao()
+        val today = clock.today()
+        var gone = 0
+        val toWarn = ArrayList<TrashItem>()
+        for (t in dao.trash()) {
+            val on = runCatching { LocalDate.parse(t.deletedOn) }.getOrNull() ?: continue
+            when {
+                Trash.expired(on, today) -> { dao.deleteTrash(t.id); gone++ }
+                !t.warned && Trash.warnDue(on, today) -> toWarn += t
+            }
+        }
+        if (toWarn.isNotEmpty()) {
+            val names = toWarn.joinToString(", ") { "“${it.name}”" }
+            val body = if (toWarn.size == 1) "$names leaves the Trash for good in 10 days. Restore it from Settings › Trash if you still want it."
+                else "${toWarn.size} items leave the Trash for good in 10 days: $names. Restore any you still want from Settings › Trash."
+            scheduler.notifyNow(TRASH_NOTICE, "Leaving the Trash soon", body)
+            toWarn.forEach { dao.upsertTrash(it.copy(warned = true)) }
+        }
+        return gone
     }
 }

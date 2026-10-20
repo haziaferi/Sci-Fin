@@ -275,5 +275,25 @@ data class CopySchedule(
     val failureNotified: Boolean = false,
 )
 
+/**
+ * One deleted thing in the Trash (owner, 2026-10-19/20), kept 30 days. [payload] is [app.scifin.engine.TrashPayload]
+ * as JSON: what the delete removed and the money it moved. Device-only, like the lock: a backup carries what
+ * exists, not what was deleted, and restoring one empties the Trash.
+ */
+@Entity(tableName = "trash", indices = [Index("profileId")])
+data class TrashItem(
+    @PrimaryKey val id: String,
+    /** The Profile the item belonged to; for a deleted Profile, its own id. */
+    val profileId: String,
+    /** goal, category, expense, account, pair, profile. */
+    val kind: String,
+    val name: String,
+    /** ISO day of the delete; it goes for good 30 days on. */
+    val deletedOn: String,
+    val payload: String,
+    /** The 20-day notice has been given for it. */
+    val warned: Boolean = false,
+)
+
 /** §12's storage version, carried by the Room database and the backup file. Every bump has a Migration (data/Migrations.kt); the history is in the spec. */
-const val SCHEMA_VERSION = 7
+const val SCHEMA_VERSION = 8

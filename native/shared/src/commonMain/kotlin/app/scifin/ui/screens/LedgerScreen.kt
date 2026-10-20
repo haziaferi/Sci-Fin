@@ -146,7 +146,7 @@ fun DeletePairSheet(sheet: Sheet.DeletePair, state: UiState, store: AppStore) {
     val ready = typed.trim().uppercase() == "DELETE"
     SheetScaffold(title = "Remove both entries", onDismiss = store::closeSheet) {
         FeasibilityNote("${a.targetLabel.ifEmpty { "Savings" }} — ${formatMoney(a.amount, cur)} and ${formatMoney(b.amount, cur)}, logged within two days of each other. They describe something that never happened, so both go and every figure they touched is put back.")
-        Caption("No current balance changes: the two already summed to zero. Trend points you have already seen will move, which is the point.", Modifier.padding(top = t.spacing.gap, bottom = t.spacing.u * 1.25f))
+        Caption("No current balance changes: the two already summed to zero. Trend points you have already seen will move, which is the point. Both wait in the Trash for 30 days.", Modifier.padding(top = t.spacing.gap, bottom = t.spacing.u * 1.25f))
         FieldGroup { FieldLabel("Type DELETE to confirm"); TextField(typed, { typed = it }, placeholder = "DELETE", label = "Type DELETE to confirm") }
         ButtonRow {
             Button("Cancel", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.closeSheet() }

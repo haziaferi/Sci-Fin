@@ -90,4 +90,12 @@ val SCIFIN_MIGRATIONS: Array<Migration> = arrayOf(
             connection.execSQL("CREATE TABLE IF NOT EXISTS `copy_schedule` (`id` INTEGER NOT NULL, `every` TEXT NOT NULL, `folder` TEXT, `folderLabel` TEXT, `sealedPassword` TEXT, `hint` TEXT, `lastCopy` TEXT, `lastError` TEXT, `failureNotified` INTEGER NOT NULL, PRIMARY KEY(`id`))")
         }
     },
+
+    /** 7 → 8: the Trash, device-only. Empty: nothing deleted before it existed can come back. */
+    object : Migration(7, 8) {
+        override fun migrate(connection: SQLiteConnection) {
+            connection.execSQL("CREATE TABLE IF NOT EXISTS `trash` (`id` TEXT NOT NULL, `profileId` TEXT NOT NULL, `kind` TEXT NOT NULL, `name` TEXT NOT NULL, `deletedOn` TEXT NOT NULL, `payload` TEXT NOT NULL, `warned` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            connection.execSQL("CREATE INDEX IF NOT EXISTS `index_trash_profileId` ON `trash` (`profileId`)")
+        }
+    },
 )
