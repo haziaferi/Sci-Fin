@@ -10,6 +10,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import app.scifin.app.AppSession
+import app.scifin.app.WindowsCopyPlace
 import app.scifin.data.Integrity
 import app.scifin.data.buildSciFinDatabase
 import app.scifin.engine.SystemClock
@@ -59,11 +60,11 @@ fun main(args: Array<String>) {
     val dbFile = File(dataDir, "scifin.db")
     val db = buildSciFinDatabase(dbFile, log)
     val scheduler = notificationScheduler(PlatformContext(exe))
-    val session = AppSession(db, scheduler, SystemClock, ::newId)
+    val session = AppSession(db, scheduler, SystemClock, ::newId, WindowsCopyPlace)
     log("launched as $exe with args [${args.joinToString(" ")}]")
     if ("--sync-notifications" in args) {
         runBlocking { session.restoreAfterBoot() }
-        log("notifications re-armed from state")
+        log("notifications re-armed from state; automatic copy run if due")
         exitProcess(0)
     }
     (scheduler as? WindowsNotificationScheduler)?.installIfNeeded(log)

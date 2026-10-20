@@ -189,6 +189,18 @@ class WindowsNotificationScheduler(
         logSkips(powershell(syncRemindersScript(registrations, Clock.System.now(), TimeZone.currentSystemDefault())))
     }
 
+    override fun notifyNow(key: String, title: String, body: String) {
+        if (permissionState() != NotificationPermission.GRANTED) return
+        powershell(PREAMBLE + """
+            ${'$'}xml = New-Object Windows.Data.Xml.Dom.XmlDocument
+            ${'$'}xml.LoadXml('<toast><visual><binding template="ToastGeneric"><text>${psQuote(xmlEscape(title))}</text><text>${psQuote(xmlEscape(body))}</text></binding></visual></toast>')
+            ${'$'}t = New-Object Windows.UI.Notifications.ToastNotification ${'$'}xml
+            ${'$'}t.Tag = '${psQuote(key.take(64))}'
+            ${'$'}t.Group = '$TOAST_GROUP'
+            ${'$'}notifier.Show(${'$'}t)
+        """.trimIndent())
+    }
+
     override fun setNewMonthNotification(enabled: Boolean) {
         if (!enabled) {
             powershell(PREAMBLE + "foreach (${'$'}s in ${'$'}notifier.GetScheduledToastNotifications()) { if (${'$'}s.Tag -like 'newmonth-*') { ${'$'}notifier.RemoveFromSchedule(${'$'}s) } }")

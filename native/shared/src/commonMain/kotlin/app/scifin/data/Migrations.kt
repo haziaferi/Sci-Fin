@@ -83,4 +83,11 @@ val SCIFIN_MIGRATIONS: Array<Migration> = arrayOf(
             connection.execSQL("CREATE TABLE IF NOT EXISTS `app_lock` (`id` INTEGER NOT NULL, `salt` TEXT NOT NULL, `hash` TEXT NOT NULL, `iterations` INTEGER NOT NULL, `pinLength` INTEGER NOT NULL, `hint` TEXT, `lockAfter` TEXT NOT NULL, `failedAttempts` INTEGER NOT NULL, PRIMARY KEY(`id`))")
         }
     },
+
+    /** 6 → 7: §4.7's automatic copy, device-only like the lock. Empty: nothing is set up. */
+    object : Migration(6, 7) {
+        override fun migrate(connection: SQLiteConnection) {
+            connection.execSQL("CREATE TABLE IF NOT EXISTS `copy_schedule` (`id` INTEGER NOT NULL, `every` TEXT NOT NULL, `folder` TEXT, `folderLabel` TEXT, `sealedPassword` TEXT, `hint` TEXT, `lastCopy` TEXT, `lastError` TEXT, `failureNotified` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+        }
+    },
 )

@@ -36,6 +36,8 @@ import app.scifin.engine.LockAfter
 import app.scifin.engine.Pin
 import app.scifin.engine.hintProblem
 import app.scifin.model.AppLock
+import app.scifin.model.CopySchedule
+import kotlinx.datetime.LocalDate
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -70,6 +72,10 @@ data class UiState(
     /** §4.7's review card: a validated backup waiting for Confirm, or the reason the file was refused. */
     val pendingBackup: ValidatedBackup? = null,
     val backupError: String? = null,
+    /** §4.7's automatic copy as the page shows it -- never the password; null until it is first set up. */
+    val copy: CopySummary? = null,
+    /** The app PIN was just turned on while the copies have no password: the prompt to set one is owed. */
+    val copyPasswordAsked: Boolean = false,
     /** §4.7: a picked file with a password, waiting for it; and whether the last one tried was wrong. */
     val lockedBackup: LockedBackup? = null,
     val backupPasswordWrong: Boolean = false,
@@ -117,6 +123,18 @@ data class UiState(
 data class LockSummary(val pinLength: Int, val hint: String?, val after: LockAfter)
 
 private fun AppLock.summary() = LockSummary(pinLength, hint, LockAfter.of(lockAfter))
+
+/** §4.7's automatic copy, as Data & backup draws it. [paused]: the PIN is on and there is no password yet. */
+data class CopySummary(
+    val every: CopyEvery, val folderLabel: String?, val hasPassword: Boolean, val hint: String?,
+    val lastCopy: LocalDate?, val lastError: String?, val paused: Boolean,
+)
+
+private fun CopySchedule.summary(pinOn: Boolean) = CopySummary(
+    CopyEvery.of(every), folderLabel, sealedPassword != null, hint,
+    lastCopy?.let { runCatching { LocalDate.parse(it) }.getOrNull() }, lastError,
+    paused = pinOn && sealedPassword == null && CopyEvery.of(every) != CopyEvery.OFF,
+)
 
 /** What a call with nothing to do returns, so a caller may still join it. */
 private val DONE: Job = Job().apply { complete() }
@@ -178,8 +196,10 @@ class AppStore(
         val owed = if (data == null) damage.keptAs else { damage.clear(); null }
         // §4.7: every open of the app starts locked while a PIN is set, and a wait owed before it closed is owed again
         val lock = db.dao().appLock()
+        val copy = db.dao().copySchedule()
         _state.update {
             it.copy(
+                copy = copy?.summary(lock != null),
                 lock = lock?.summary(), locked = lock != null, pinWaitEnds = lock?.let { l -> waitFrom(l.failedAttempts) },
                 ready = true, data = data,
                 damagedCopy = owed, profiles = db.dao().profiles(), appState = db.dao().appState(),
@@ -192,6 +212,8 @@ class AppStore(
             )
         }
         if (resume == 3) startTutorial(fromOnboarding = true)
+        // §4.7: opening the app catches up a copy the daily task missed (a phone off, a PC asleep at its hour)
+        if (copy != null) scope.launch { withContext(hashing) { session.runCopy() }; refreshCopy() }
     }
 
     /** After a restore (§4.7): everything on the device may have changed, so load it all again. */
@@ -546,9 +568,20 @@ class AppStore(
      * [password] the file is encrypted ([BackupCrypto]) and carries its [hint]; while the app PIN is on, a file
      * without one is not written (§4.7, owner 2026-10-19).
      */
-    fun exportBackup(password: String? = null, hint: String = ""): Job = scope.launch {
-        if (password == null && _state.value.lock != null) return@launch
-        if (password != null && BackupCrypto.passwordProblem(password, password, hint) != null) return@launch
+    fun exportBackup(password: String? = null, hint: String = ""): Job = scope.launch { export(password, hint) }
+
+    /** Export with the copies' password and hint (owner, 2026-10-20: offered first, "a different password" possible). */
+    fun exportWithCopiesPassword(): Job = scope.launch {
+        val unreadable = "The copies’ password can’t be read on this device any more. Choose a different password for this file."
+        val c = db.dao().copySchedule()
+        val password = c?.sealedPassword?.let { session.place.unseal(it) }
+        if (c == null || password == null) { _state.update { it.copy(backupError = unreadable) }; return@launch }
+        export(password, c.hint.orEmpty())
+    }
+
+    private suspend fun export(password: String?, hint: String) {
+        if (password == null && _state.value.lock != null) return
+        if (password != null && BackupCrypto.passwordProblem(password, password, hint) != null) return
         writes.withLock {
             val dao = db.dao()
             val app = dao.appState() ?: return@withLock
@@ -655,6 +688,66 @@ class AppStore(
         }
     }
 
+    // ---- §4.7 Automatic copy -------------------------------------------------------------------
+
+    private suspend fun refreshCopy() {
+        val c = db.dao().copySchedule()
+        _state.update { it.copy(copy = c?.summary(it.lock != null)) }
+    }
+
+    private suspend fun editCopy(change: (CopySchedule) -> CopySchedule) = writes.withLock {
+        db.dao().upsertCopySchedule(change(db.dao().copySchedule() ?: CopySchedule()))
+    }
+
+    /**
+     * How often. Turning it on with no folder yet asks for one first, and stays off if none is chosen. Weekly is
+     * what the page offers first (owner, 2026-10-19).
+     */
+    fun setCopyEvery(every: CopyEvery): Job = scope.launch {
+        if (every != CopyEvery.OFF && db.dao().copySchedule()?.folder == null) {
+            val f = attempt(::backupFailed, "That folder can’t be used. Try another.") { inDialog { files.pickFolder() } } ?: return@launch
+            editCopy { it.copy(folder = f.id, folderLabel = f.label, lastError = null, failureNotified = false) }
+        }
+        editCopy { it.copy(every = every.token) }
+        refreshCopy()
+        if (_state.value.copy?.paused == true) _state.update { it.copy(copyPasswordAsked = true) }
+    }
+
+    fun chooseCopyFolder(): Job = scope.launch {
+        val f = attempt(::backupFailed, "That folder can’t be used. Try another.") { inDialog { files.pickFolder() } } ?: return@launch
+        editCopy { it.copy(folder = f.id, folderLabel = f.label, lastError = null, failureNotified = false) }
+        refreshCopy()
+    }
+
+    /**
+     * The copies' password, sealed by the device's key store so the copy can run with nobody there to type it.
+     * The caller checked [BackupCrypto.passwordProblem]; the hint is required.
+     */
+    fun setCopyPassword(password: String, hint: String): Job = scope.launch {
+        if (BackupCrypto.passwordProblem(password, password, hint) != null) return@launch
+        val sealed = withContext(hashing) { session.place.seal(password) }
+        if (sealed == null) { _state.update { it.copy(backupError = "This device’s key store refused to keep the password, so the copies can’t use one here.") }; return@launch }
+        editCopy { it.copy(sealedPassword = sealed, hint = hint.trim()) }
+        _state.update { it.copy(copyPasswordAsked = false) }
+        refreshCopy()
+    }
+
+    /** Back to plain copies -- never while the app PIN is on. */
+    fun removeCopyPassword(): Job = scope.launch {
+        if (_state.value.lock != null) return@launch
+        editCopy { it.copy(sealedPassword = null, hint = null) }
+        refreshCopy()
+    }
+
+    /** The prompt after turning the PIN on was put off: the copies stay paused, and the page says so. */
+    fun dismissCopyPasswordPrompt() = _state.update { it.copy(copyPasswordAsked = false) }
+
+    /** Copy now: a copy whatever the schedule's day, if one can be written. */
+    fun copyNow(): Job = scope.launch {
+        withContext(hashing) { session.runCopy(force = true) }
+        refreshCopy()
+    }
+
     // ---- §4.7 Security & lock ------------------------------------------------------------------
 
     /** When the app was left (switched away from, minimised); null while it is in front or no PIN is set. */
@@ -673,6 +766,9 @@ class AppStore(
             db.dao().upsertAppLock(lock)
             _state.update { it.copy(lock = lock.summary(), pinWrong = false, pinWaitEnds = null) }
         }
+        refreshCopy()
+        // §4.7 (owner, 2026-10-20): copies without a password pause, and the prompt to set one comes at once
+        if (_state.value.copy?.paused == true) _state.update { it.copy(copyPasswordAsked = true) }
     }
 
     fun setLockAfter(after: LockAfter): Job = scope.launch {
@@ -712,8 +808,9 @@ class AppStore(
         writes.withLock {
             db.dao().deleteAppLock()
             leftAt = null
-            _state.update { it.copy(lock = null, locked = false, pinWrong = false, pinWaitEnds = null) }
+            _state.update { it.copy(lock = null, locked = false, pinWrong = false, pinWaitEnds = null, copyPasswordAsked = false) }
         }
+        refreshCopy()
     }
 
     /**

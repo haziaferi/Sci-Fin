@@ -15,6 +15,12 @@ interface Files {
     /** Let the person choose where to write [text] under [suggestedName]; false if they cancel. */
     suspend fun save(suggestedName: String, text: String): Boolean
 
+    /**
+     * §4.7's automatic copy: let the person choose a folder the app may keep writing to, with no dialog later;
+     * null if they cancel. The host makes the access last (Android: a persisted tree permission).
+     */
+    suspend fun pickFolder(): CopyFolder? = null
+
     /** For tests and the headless renders: no dialogs, nothing picked. */
     object None : Files {
         override suspend fun open(extensions: List<String>): PickedFile? = null

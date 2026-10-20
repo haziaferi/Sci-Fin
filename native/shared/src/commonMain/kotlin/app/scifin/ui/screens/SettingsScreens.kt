@@ -248,6 +248,7 @@ private fun BackupPage(state: UiState, store: AppStore) {
         Modifier.padding(start = t.spacing.u * 0.25f, top = t.spacing.u / 2),
     )
     state.appState?.lastBackupExportDate?.let { Caption("Last export: ${formatDateFull(it)}.", Modifier.padding(start = t.spacing.u * 0.25f, top = t.spacing.u / 2)) }
+    AutomaticCopy(state, store)
     Column(Modifier.padding(top = t.spacing.pad)) {
         FieldLabel("Restore from a backup")
         Button("Choose a backup file", ButtonKind.SECONDARY, modifier = Modifier.fillMaxWidth()) { store.pickBackup() }

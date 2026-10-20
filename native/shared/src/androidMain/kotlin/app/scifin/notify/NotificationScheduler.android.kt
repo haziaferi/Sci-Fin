@@ -44,6 +44,7 @@ import kotlinx.datetime.*
 
 private const val CHANNEL_REMINDERS = "scifin.reminders"
 private const val CHANNEL_NEW_MONTH = "scifin.newmonth"
+private const val CHANNEL_COPIES = "scifin.copies"
 
 /** Carried by every due-date reminder, so a whole-schedule sync can clear them. */
 private const val TAG_REMINDER = "scifin.reminder"
@@ -165,6 +166,8 @@ class AndroidNotificationScheduler(
         setNewMonthNotification(newMonthEnabled)
     }
 
+    override fun notifyNow(key: String, title: String, body: String) = post(context, CHANNEL_COPIES, key.hashCode(), title, body)
+
     private fun ensureChannels() {
         val mgr = context.getSystemService(NotificationManager::class.java) ?: return
         // Two channels, so a person can silence due-date reminders without losing the New Month
@@ -180,6 +183,11 @@ class AndroidNotificationScheduler(
             NotificationChannel(
                 CHANNEL_NEW_MONTH, "New month", NotificationManager.IMPORTANCE_DEFAULT
             ).apply { description = "One gentle ping on the 1st of each month." }
+        )
+        mgr.createNotificationChannel(
+            NotificationChannel(
+                CHANNEL_COPIES, "Automatic copies", NotificationManager.IMPORTANCE_DEFAULT
+            ).apply { description = "Said once when an automatic copy could not be written." }
         )
     }
 }

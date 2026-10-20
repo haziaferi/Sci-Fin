@@ -251,5 +251,29 @@ data class AppLock(
     val failedAttempts: Int = 0,
 )
 
+/**
+ * §4.7's automatic copy, one row once it has been set up. Device-only like [AppLock]: a folder on this device and
+ * a password only this device's key store can read are meaningless anywhere else.
+ */
+@Entity(tableName = "copy_schedule")
+data class CopySchedule(
+    @PrimaryKey val id: Int = 1,
+    /** [app.scifin.app.CopyEvery]'s token. */
+    val every: String = "off",
+    /** The platform's handle on the chosen folder (an Android tree URI, a Windows path) and the name to show for it. */
+    val folder: String? = null,
+    val folderLabel: String? = null,
+    /** The copies' password, sealed by the platform's key store (Android Keystore, Windows DPAPI); null for plain copies. */
+    val sealedPassword: String? = null,
+    /** Required with a password (owner, 2026-10-20); travels in each file unencrypted. */
+    val hint: String? = null,
+    /** The day of the last copy written, ISO; null before the first. */
+    val lastCopy: String? = null,
+    /** Why the last attempt failed; null after a success or before any attempt. */
+    val lastError: String? = null,
+    /** The failure notice was shown for the current run of failures; cleared by the next success. */
+    val failureNotified: Boolean = false,
+)
+
 /** §12's storage version, carried by the Room database and the backup file. Every bump has a Migration (data/Migrations.kt); the history is in the spec. */
-const val SCHEMA_VERSION = 6
+const val SCHEMA_VERSION = 7
