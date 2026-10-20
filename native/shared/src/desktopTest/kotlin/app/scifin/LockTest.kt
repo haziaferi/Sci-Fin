@@ -162,6 +162,25 @@ class LockTest {
         assertFalse(store(db).state.value.locked)
     }
 
+    @Test fun `changing the PIN asks for the current one, keeps the lock-after choice, and can change only the hint`() {
+        val db = db()
+        val s = store(db)
+        runBlocking { s.setPin("4821", "door").join(); s.setLockAfter(LockAfter.FIVE_MINUTES).join() }
+        runBlocking { s.changePin("1111", "907316", "").join() }
+        assertTrue(s.state.value.pinWrong); assertEquals(4, s.state.value.lock?.pinLength, "a wrong current PIN changes nothing")
+        assertEquals(1, runBlocking { db.dao().appLock() }!!.failedAttempts, "and it counts towards the wait")
+
+        runBlocking { s.changePin("4821", "907316", "the old bus").join() }
+        val lock = runBlocking { db.dao().appLock() }!!
+        assertTrue(Pin.matches(lock, "907316")); assertFalse(Pin.matches(lock, "4821"))
+        assertEquals(LockAfter.FIVE_MINUTES, s.state.value.lock?.after); assertEquals("the old bus", lock.hint); assertEquals(0, lock.failedAttempts)
+
+        runBlocking { s.changePin("907316", "907316", "").join() }
+        assertNull(runBlocking { db.dao().appLock() }!!.hint, "the same PIN again changes only the hint")
+        runBlocking { s.changePin("907316", "1234", "1234").join() }
+        assertTrue(Pin.matches(runBlocking { db.dao().appLock() }!!, "907316"), "a hint equal to the new PIN is refused")
+    }
+
     @Test fun `the lock never travels in a backup, and a restore leaves it in place`() {
         val db = db()
         runBlocking { store(db).setPin("4821", "door").join() }

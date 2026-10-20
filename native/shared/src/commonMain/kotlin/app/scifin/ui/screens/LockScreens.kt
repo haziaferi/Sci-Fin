@@ -15,6 +15,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -188,16 +190,18 @@ internal fun SecurityPage(state: UiState, store: AppStore) {
     val lock = state.lock
     var settingUp by rememberSaveable { mutableStateOf(false) }
     var turningOff by rememberSaveable { mutableStateOf(false) }
+    var changing by rememberSaveable { mutableStateOf(false) }
     SettingRow(Lucide.LOCK, "Lock with a PIN", "Off by default — 4 to 6 digits, asked for each time Sci-Fin opens on this device") {
         Switch(lock != null || settingUp) {
             when {
-                lock != null -> { turningOff = !turningOff; store.clearPinWrong() }
+                lock != null -> { turningOff = !turningOff; changing = false; store.clearPinWrong() }
                 else -> settingUp = !settingUp
             }
         }
     }
     when {
-        lock == null && settingUp -> NewPin(store) { settingUp = false }
+        lock == null && settingUp -> NewPin(state, store) { settingUp = false }
+        lock != null && changing -> NewPin(state, store, change = true) { changing = false }
         lock != null && turningOff -> Column(Modifier.padding(top = t.spacing.gap)) {
             Caption("Enter the PIN to turn the lock off.", Modifier.padding(bottom = t.spacing.gap))
             PinField(state, "Current PIN", "Turn off", null, focus = true, onTry = { store.turnOffLock(it) }, clearStore = store::clearPinWrong)
@@ -209,21 +213,43 @@ internal fun SecurityPage(state: UiState, store: AppStore) {
                 ChipRow(LockAfter.entries.map { it.token to it.label }, lock.after.token) { store.setLockAfter(LockAfter.of(it)) }
             }
             Caption("Leaving is switching to another app or minimising Sci-Fin.", Modifier.padding(bottom = t.spacing.gap))
-            Button("Lock now", ButtonKind.SECONDARY, modifier = Modifier.fillMaxWidth()) { store.lockNow() }
+            ButtonRow {
+                Button("Change PIN", ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { changing = true; store.clearPinWrong() }
+                Button("Lock now", ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { store.lockNow() }
+            }
         }
     }
-    LaunchedEffect(lock == null) { if (lock == null) turningOff = false }
+    LaunchedEffect(lock == null) { if (lock == null) { turningOff = false; changing = false } }
     Caption(FORGOTTEN, Modifier.padding(top = t.spacing.gap))
 }
 
+/**
+ * Choosing a PIN: setting the first one, or -- with [change] -- replacing it behind the current one, the hint
+ * starting as the one kept. Typing the same PIN as the new one changes only the hint.
+ */
 @Composable
-private fun NewPin(store: AppStore, onDone: () -> Unit) {
+private fun NewPin(state: UiState, store: AppStore, change: Boolean = false, onDone: () -> Unit) {
     val t = LocalTokens.current
+    val scope = rememberCoroutineScope()
+    var current by remember { mutableStateOf("") }
     var first by remember { mutableStateOf("") }
     var second by remember { mutableStateOf("") }
-    var hint by remember { mutableStateOf("") }
-    val ready = Pin.valid(first) && first == second && hintProblem(first, hint, "PIN") == null
+    var hint by remember { mutableStateOf(if (change) state.lock?.hint.orEmpty() else "") }
+    val wait = if (change) waitLeft(state) else null
+    val ready = Pin.valid(first) && first == second && hintProblem(first, hint, "PIN") == null && (!change || (Pin.valid(current) && wait == null))
+    // a wrong current PIN clears that field, ready for the next try
+    LaunchedEffect(state.pinWrong) { if (change && state.pinWrong) current = "" }
     Column(Modifier.padding(top = t.spacing.gap)) {
+        if (change) {
+            FieldGroup {
+                FieldLabel("Current PIN")
+                TextField(current, { current = Pin.clean(it); store.clearPinWrong() }, keyboard = KeyboardType.NumberPassword, label = "Current PIN", masked = true)
+            }
+            when {
+                wait != null -> Caption("Too many wrong PINs. Try again in ${waitText(wait)}.", Modifier.padding(bottom = t.spacing.gap))
+                state.pinWrong -> Caption("That isn’t the PIN.", Modifier.padding(bottom = t.spacing.gap))
+            }
+        }
         FieldGroup {
             FieldLabel("New PIN, 4 to 6 digits")
             TextField(first, { first = Pin.clean(it) }, keyboard = KeyboardType.NumberPassword, label = "New PIN, 4 to 6 digits", masked = true)
@@ -235,8 +261,11 @@ private fun NewPin(store: AppStore, onDone: () -> Unit) {
         if (second.isNotEmpty() && second.length >= first.length && second != first) Caption("The two don’t match yet.")
         HintField(hint, { hint = it }, first, "PIN", Modifier.padding(top = t.spacing.gap))
         ButtonRow {
-            Button("Cancel", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { onDone() }
-            Button("Set PIN", enabled = ready, modifier = Modifier.weight(1f)) { store.setPin(first, hint); onDone() }
+            Button("Cancel", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.clearPinWrong(); onDone() }
+            if (change) Button("Change PIN", enabled = ready, modifier = Modifier.weight(1f)) {
+                scope.launch { store.changePin(current, first, hint).join(); if (!store.state.value.pinWrong && store.state.value.pinWaitEnds == null) onDone() }
+            }
+            else Button("Set PIN", enabled = ready, modifier = Modifier.weight(1f)) { store.setPin(first, hint); onDone() }
         }
     }
 }
