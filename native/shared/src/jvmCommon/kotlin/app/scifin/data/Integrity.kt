@@ -1,6 +1,7 @@
 package app.scifin.data
 
 import app.scifin.app.DamageNotice
+import app.scifin.app.LocalCopies
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -74,6 +75,16 @@ object Integrity {
     /** SQLITE_BUSY / SQLITE_LOCKED, as the bundled driver and Android's framework report them. */
     private fun isLock(e: Exception): Boolean =
         e.javaClass.simpleName.contains("Locked") || e.message.orEmpty().let { m -> "database is locked" in m || "database table is locked" in m || "SQLITE_BUSY" in m || "SQLITE_LOCKED" in m }
+
+    /** §4.7's erase: the `snapshots/` folder beside [db] (Snapshot's and this object's copies) and the marker. */
+    fun copies(db: File): LocalCopies = object : LocalCopies {
+        override fun eraseAll(): Int {
+            var n = 0
+            File(db.parentFile, "snapshots").listFiles().orEmpty().forEach { if (runCatching { it.delete() }.getOrDefault(false)) n++ }
+            if (File(db.parentFile, MARKER).delete()) n++
+            return n
+        }
+    }
 
     /** The marker as §12's screen reads it: the kept copy's name until the person answers. */
     fun notice(db: File): DamageNotice = object : DamageNotice {

@@ -102,6 +102,14 @@ class AppSession(
         }
     }
 
+    /** §4.7's erase: the OS holds nothing once there is no Profile to remind about. */
+    suspend fun clearSchedule() {
+        notify.withLock {
+            scheduler.syncReminders(emptyList()); scheduler.setNewMonthNotification(false)
+            lastReminders = emptyList(); lastNewMonth = false
+        }
+    }
+
     /**
      * §11.5: after a reboot, and from the daily top-up, re-arm the whole schedule from state as of
      * today: the anchor chain is advanced in memory first (nothing is saved), so a passed occurrence

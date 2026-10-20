@@ -55,6 +55,7 @@ import app.scifin.ui.screens.RecurringEditorScreen
 import app.scifin.ui.screens.RecurringListScreen
 import app.scifin.ui.screens.LearnScreen
 import app.scifin.ui.screens.LoanCalcScreen
+import app.scifin.ui.screens.LockGate
 import app.scifin.ui.screens.PurchaseCalcScreen
 import app.scifin.ui.screens.OnboardingSheet
 import app.scifin.ui.screens.ReportsScreen
@@ -106,6 +107,8 @@ fun SciFinApp(store: AppStore, targetDp: Int, systemDark: Boolean = isSystemInDa
             val wc = widthClassOf(maxWidth.value)
             CompositionLocalProvider(LocalWidthClass provides wc, LocalTutorialAnchors provides anchors, LocalTutorialActive provides activeAnchor) {
                 if (!state.ready) return@CompositionLocalProvider
+                // §4.7: the gate is drawn instead of the app, never over it
+                if (state.locked) { LockGate(state, store); return@CompositionLocalProvider }
                 Box(Modifier.fillMaxSize()) {
                     when (wc) {
                         WidthClass.COMPACT -> Column(Modifier.fillMaxSize()) {

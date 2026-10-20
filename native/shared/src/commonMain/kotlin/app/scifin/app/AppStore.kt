@@ -29,9 +29,20 @@ import app.scifin.model.Profile
 import app.scifin.model.ProfileData
 import app.scifin.model.Settings
 import app.scifin.model.Theme
+import androidx.room.useWriterConnection
+import app.scifin.engine.LockAfter
+import app.scifin.engine.Pin
+import app.scifin.engine.hintProblem
+import app.scifin.model.AppLock
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.withContext
+import kotlin.concurrent.Volatile
+import kotlin.coroutines.CoroutineContext
+import kotlin.time.TimeMark
+import kotlin.time.TimeSource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -75,6 +86,14 @@ data class UiState(
     val damagedCopy: String? = null,
     /** The routes Settings was opened from, which Back returns to; null elsewhere. */
     val settingsFrom: List<Route>? = null,
+    /** §4.7's app lock as Settings and the gate need it -- never the PIN or its hash; null while no PIN is set. */
+    val lock: LockSummary? = null,
+    /** The gate is up: nothing beneath it is drawn. */
+    val locked: Boolean = false,
+    /** The last PIN tried, on the gate or to turn the lock off, was wrong. */
+    val pinWrong: Boolean = false,
+    /** While set and not yet passed, no PIN is checked (Pin.waitAfter). */
+    val pinWaitEnds: TimeMark? = null,
 ) {
     val route: Route get() = routes.last()
     /** §3.9's unread card, read from where it is stored so a restart cannot lose it. */
@@ -88,6 +107,11 @@ data class UiState(
     /** §11.1's steps 2-4 are pages without the tab bar (the prototype clears it); screen 1 is a sheet over Budget and keeps it. */
     val inOnboardingPage: Boolean get() = (route as? Route.Onboarding)?.let { it.step > 1 } ?: false
 }
+
+/** §4.7: what is known about the lock outside the store -- enough to draw it, nothing to break it. */
+data class LockSummary(val pinLength: Int, val hint: String?, val after: LockAfter)
+
+private fun AppLock.summary() = LockSummary(pinLength, hint, LockAfter.of(lockAfter))
 
 /** What a call with nothing to do returns, so a caller may still join it. */
 private val DONE: Job = Job().apply { complete() }
@@ -111,6 +135,11 @@ class AppStore(
     hostScope: CoroutineScope,
     private val files: Files = Files.None,
     private val damage: DamageNotice = DamageNotice.None,
+    private val copies: LocalCopies = LocalCopies.None,
+    /** §4.7's "lock after" and the wrong-PIN wait are timed on this, never on the wall clock a person can change. */
+    private val time: TimeSource = TimeSource.Monotonic,
+    /** Where the PIN is hashed: a third of a second must not land on the main thread. */
+    private val hashing: CoroutineContext = Dispatchers.Default,
 ) {
     /**
      * The host's scope with a backstop: a write or a file that fails must not take the process
@@ -142,8 +171,11 @@ class AppStore(
         val resume = data?.settings?.takeIf { !it.onboardingComplete }?.let { it.onboardingStep ?: 2 }
         // §12's screen is owed only while nothing exists yet: a Profile made or restored since answered it
         val owed = if (data == null) damage.keptAs else { damage.clear(); null }
+        // §4.7: every open of the app starts locked while a PIN is set, and a wait owed before it closed is owed again
+        val lock = db.dao().appLock()
         _state.update {
             it.copy(
+                lock = lock?.summary(), locked = lock != null, pinWaitEnds = lock?.let { l -> waitFrom(l.failedAttempts) },
                 ready = true, data = data,
                 damagedCopy = owed, profiles = db.dao().profiles(), appState = db.dao().appState(),
                 notificationPermission = readPermission(data?.settings),
@@ -300,7 +332,7 @@ class AppStore(
     fun closeSheet() = _state.update { it.copy(sheet = null) }
 
     /** Whether Back has something to do here: an open sheet that may be dismissed (Reconcile must be answered, §3.11), or a push. */
-    fun closesOnBack(s: UiState): Boolean = s.sheet != null && s.sheet !is Sheet.Reconcile
+    fun closesOnBack(s: UiState): Boolean = !s.locked && s.sheet != null && s.sheet !is Sheet.Reconcile
 
     /**
      * Where Back is taken and does nothing: a sheet that must be answered (§3.11) and the
@@ -310,11 +342,13 @@ class AppStore(
     private fun holdsBack(s: UiState): Boolean =
         s.sheet is Sheet.Reconcile || (s.route as? Route.Onboarding)?.let { !it.forNewProfile || it.step > 1 } ?: false
 
-    fun handlesBack(s: UiState): Boolean = s.tutorialStop != null || holdsBack(s) || closesOnBack(s) || s.routes.size > 1 || (s.tab == Tab.SETTINGS && s.settingsFrom != null)
+    // §4.7: Back on the lock screen is the system's -- it leaves the app, it never reaches what is beneath
+    fun handlesBack(s: UiState): Boolean = !s.locked && (s.tutorialStop != null || holdsBack(s) || closesOnBack(s) || s.routes.size > 1 || (s.tab == Tab.SETTINGS && s.settingsFrom != null))
 
     /** Back closes an open sheet first, then pops a push; on a tab root there is nothing to pop and the host decides (Android: finish). */
     fun back(): Boolean {
         val s = _state.value
+        if (s.locked) return false
         s.tutorialStop?.let { i -> if (i > 0) goToStop(i - 1) else tutorialFinish(); return true }   // §11.6: the previous stop; before the first, the tour ends
         if (holdsBack(s)) return true
         if (closesOnBack(s)) { closeSheet(); return true }
@@ -449,7 +483,7 @@ class AppStore(
     /** Pick, parse by format, annotate against what is already imported or swept; nothing is written. */
     fun pickStatement(): Job = scope.launch {
         _state.update { it.copy(importDone = null) }
-        val picked = attempt(::importFailed, READ_FAILED) { files.open(listOf("csv", "ofx", "qfx", "txt")) } ?: return@launch
+        val picked = attempt(::importFailed, READ_FAILED) { inDialog { files.open(listOf("csv", "ofx", "qfx", "txt")) } } ?: return@launch
         val d = _state.value.data ?: return@launch
         val isOfx = Regex("<STMTTRN>", RegexOption.IGNORE_CASE).containsMatchIn(picked.text) || Regex("\\.(ofx|qfx)$", RegexOption.IGNORE_CASE).containsMatchIn(picked.name)
         val rows = attempt(::importFailed, NOT_A_STATEMENT) { if (isOfx) Import.parseOFX(picked.text) else Import.parseCSV(picked.text) } ?: return@launch
@@ -494,6 +528,14 @@ class AppStore(
 
     // ---- §4.7 Data & backup --------------------------------------------------------------------
 
+    /** A file dialog of the app's own is open: the host reports the app as left, and it was not (§4.7). */
+    @Volatile private var dialogsOpen = 0
+
+    private suspend fun <T> inDialog(block: suspend () -> T): T {
+        dialogsOpen++
+        try { return block() } finally { dialogsOpen-- }
+    }
+
     /** Export: one file holding every Profile (§8.4's wrap is the unit); the app keeps only the date. */
     fun exportBackup(): Job = scope.launch {
         writes.withLock {
@@ -502,7 +544,7 @@ class AppStore(
             val all = dao.profiles().mapNotNull { dao.load(it.id) }
             val today = clock.today()
             val text = Backup.encode(Backup.build(all, app.activeProfileId, today))
-            if (attempt(::backupFailed, "Could not save the backup there. Try another place.") { files.save("sci-fin-backup-$today.json", text) } == true) {
+            if (attempt(::backupFailed, "Could not save the backup there. Try another place.") { inDialog { files.save("sci-fin-backup-$today.json", text) } } == true) {
                 dao.upsertAppState(app.copy(lastBackupExportDate = today))
                 _state.update { it.copy(appState = dao.appState()) }
             }
@@ -511,7 +553,7 @@ class AppStore(
 
     /** Restore, step one: pick and validate whole; nothing changes until [confirmBackup]. */
     fun pickBackup(): Job = scope.launch {
-        val picked = attempt(::backupFailed, READ_FAILED) { files.open(listOf("json")) } ?: return@launch
+        val picked = attempt(::backupFailed, READ_FAILED) { inDialog { files.open(listOf("json")) } } ?: return@launch
         when (val r = Backup.validate(picked.text)) {
             is BackupResult.Ok -> _state.update { it.copy(pendingBackup = r.backup, backupError = null) }
             is BackupResult.Refused -> _state.update { it.copy(pendingBackup = null, backupError = r.reason) }
@@ -580,6 +622,101 @@ class AppStore(
                 _state.update { it.forProfile(next) }
             }
             _state.update { it.copy(profiles = dao.profiles(), appState = dao.appState(), sheet = null) }
+        }
+    }
+
+    // ---- §4.7 Security & lock ------------------------------------------------------------------
+
+    /** When the app was left (switched away from, minimised); null while it is in front or no PIN is set. */
+    @Volatile private var leftAt: TimeMark? = null
+
+    private fun waitFrom(failed: Int): TimeMark? = Pin.waitAfter(failed).takeIf { it.isPositive() }?.let { time.markNow() + it }
+
+    /** Whether a PIN may be checked now: no wait is running. */
+    private fun waiting(s: UiState) = s.pinWaitEnds?.hasNotPassedNow() == true
+
+    /** Turns the lock on. The caller checked [Pin.valid], the match of the two entries, and [hintProblem]. */
+    fun setPin(pin: String, hint: String): Job = scope.launch {
+        if (!Pin.valid(pin) || hintProblem(pin, hint, "PIN") != null) return@launch
+        val lock = withContext(hashing) { Pin.lockFor(pin, hint, LockAfter.ONE_MINUTE) }
+        writes.withLock {
+            db.dao().upsertAppLock(lock)
+            _state.update { it.copy(lock = lock.summary(), pinWrong = false, pinWaitEnds = null) }
+        }
+    }
+
+    fun setLockAfter(after: LockAfter): Job = scope.launch {
+        writes.withLock {
+            val l = db.dao().appLock() ?: return@withLock
+            db.dao().upsertAppLock(l.copy(lockAfter = after.token))
+            _state.update { it.copy(lock = it.lock?.copy(after = after)) }
+        }
+    }
+
+    fun lockNow() = _state.update { if (it.lock == null) it else it.copy(locked = true, sheet = null, pinWrong = false) }
+
+    /**
+     * Checks [pin], on the gate or to turn the lock off. A wrong one counts towards the wait wherever it was
+     * typed: turning the lock off is no side door for guessing. Nothing is checked while a wait runs.
+     */
+    private suspend fun checkPin(pin: String): Boolean? {
+        if (waiting(_state.value)) return null
+        val lock = db.dao().appLock() ?: return null
+        val right = withContext(hashing) { Pin.matches(lock, pin) }
+        writes.withLock {
+            val now = db.dao().appLock() ?: return null
+            val failed = if (right) 0 else now.failedAttempts + 1
+            if (failed != now.failedAttempts) db.dao().upsertAppLock(now.copy(failedAttempts = failed))
+            _state.update { it.copy(pinWrong = !right, pinWaitEnds = waitFrom(failed)) }
+        }
+        return right
+    }
+
+    fun unlock(pin: String): Job = scope.launch {
+        if (checkPin(pin) == true) _state.update { it.copy(locked = false, pinWrong = false) }
+    }
+
+    /** Turning the lock off asks for the PIN, so a phone left unlocked cannot have its lock removed. */
+    fun turnOffLock(pin: String): Job = scope.launch {
+        if (checkPin(pin) != true) return@launch
+        writes.withLock {
+            db.dao().deleteAppLock()
+            leftAt = null
+            _state.update { it.copy(lock = null, locked = false, pinWrong = false, pinWaitEnds = null) }
+        }
+    }
+
+    /** The field changed: a "wrong" line about the last attempt no longer describes what is typed. */
+    fun clearPinWrong() = _state.update { if (it.pinWrong) it.copy(pinWrong = false) else it }
+
+    /** The host: the app went to the background (Android) or lost focus (Windows). The app's own file dialogs don't count. */
+    fun appLeft() {
+        val s = _state.value
+        if (s.lock != null && !s.locked && dialogsOpen == 0) leftAt = time.markNow()
+    }
+
+    /** The host: the app is in front again. Locks when it was away for at least the chosen time. */
+    fun appReturned() {
+        val left = leftAt ?: return
+        leftAt = null
+        val s = _state.value
+        if (s.lock != null && left.elapsedNow() >= s.lock.after.wait) lockNow()
+    }
+
+    /**
+     * §4.7's forgotten PIN: everything on this device goes -- every Profile, the app row, the lock, the kept
+     * snapshots -- and the app opens on §11.1's screen 1, which offers a restore. The person typed ERASE first.
+     */
+    fun eraseEverything(): Job = scope.launch {
+        writes.withLock {
+            db.dao().eraseAll()
+            // the rows are gone; VACUUM rewrites the file so their pages are too, and the log is folded in and emptied
+            runCatching { db.useWriterConnection { c -> c.usePrepared("VACUUM") { it.step() }; c.usePrepared("PRAGMA wal_checkpoint(TRUNCATE)") { it.step() } } }
+            copies.eraseAll()
+            damage.clear()
+            session.clearSchedule()
+            leftAt = null
+            _state.value = UiState(ready = true, routes = listOf(Route.TabRoute(Tab.BUDGET), Route.Onboarding(1)), notificationPermission = readPermission(null))
         }
     }
 }
