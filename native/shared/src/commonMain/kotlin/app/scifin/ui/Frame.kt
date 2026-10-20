@@ -56,6 +56,7 @@ import app.scifin.ui.screens.RecurringListScreen
 import app.scifin.ui.screens.LearnScreen
 import app.scifin.ui.screens.LoanCalcScreen
 import app.scifin.ui.screens.LockGate
+import app.scifin.ui.screens.CopyPasswordPrompt
 import app.scifin.ui.screens.PurchaseCalcScreen
 import app.scifin.ui.screens.OnboardingSheet
 import app.scifin.ui.screens.ReportsScreen
@@ -123,6 +124,8 @@ fun SciFinApp(store: AppStore, targetDp: Int, systemDark: Boolean = isSystemInDa
                     state.sheet?.let { Sheets(it, state, store) }
                     (state.route as? Route.Onboarding)?.let { if (it.step == 1) OnboardingSheet(it, state, store) }
                     state.tutorialStop?.let { TutorialOverlay(it, anchors, state.data, store) }
+                    // §4.7: owed at once when the PIN turns on while the copies have no password
+                    if (state.copyPasswordAsked) CopyPasswordPrompt(store)
                 }
             }
         }

@@ -26,6 +26,9 @@ import app.scifin.app.AppStore
 import app.scifin.app.Files
 import app.scifin.app.PickedFile
 import android.view.WindowManager
+import android.content.Intent
+import android.provider.DocumentsContract
+import app.scifin.app.CopyFolder
 import app.scifin.data.sciFinDamageNotice
 import app.scifin.data.sciFinLocalCopies
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -55,6 +58,7 @@ class StoreViewModel(app: Application) : AndroidViewModel(app) {
     var pendingPermission: CompletableDeferred<Boolean>? = null
     var pendingOpen: CompletableDeferred<Uri?>? = null
     var pendingSave: CompletableDeferred<Uri?>? = null
+    var pendingTree: CompletableDeferred<Uri?>? = null
 
     /** Built off the main thread: opening the store runs §12's quick_check and snapshot, both whole-file passes. */
     val store: Deferred<AppStore> = viewModelScope.async {
@@ -68,6 +72,7 @@ class ForwardingFiles : Files {
     @Volatile var host: Files? = null
     override suspend fun open(extensions: List<String>): PickedFile? = host?.open(extensions)
     override suspend fun save(suggestedName: String, text: String): Boolean = host?.save(suggestedName, text) ?: false
+    override suspend fun pickFolder(): CopyFolder? = host?.pickFolder()
 }
 
 /**
@@ -89,6 +94,7 @@ class MainActivity : ComponentActivity() {
     // §4.7's backup and §4.3's import go through the Storage Access Framework: the person picks the place, the app never sees a path
     private val openLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> vm.pendingOpen?.complete(uri); vm.pendingOpen = null }
     private val saveLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri -> vm.pendingSave?.complete(uri); vm.pendingSave = null }
+    private val treeLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri -> vm.pendingTree?.complete(uri); vm.pendingTree = null }
     private val files = object : Files {
         override suspend fun open(extensions: List<String>): PickedFile? {
             val d = CompletableDeferred<Uri?>(); vm.pendingOpen = d
@@ -109,6 +115,22 @@ class MainActivity : ComponentActivity() {
             val resolver = application.contentResolver
             return withContext(Dispatchers.IO) {
                 resolver.openOutputStream(uri)?.use { it.write(text.toByteArray(Charsets.UTF_8)) } != null
+            }
+        }
+
+        /** §4.7's automatic copy: a folder, with access kept across restarts so the daily task can write to it. */
+        override suspend fun pickFolder(): CopyFolder? {
+            val d = CompletableDeferred<Uri?>(); vm.pendingTree = d
+            treeLauncher.launch(null)
+            val uri = d.await() ?: return null
+            val resolver = application.contentResolver
+            return withContext(Dispatchers.IO) {
+                resolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                val doc = DocumentsContract.buildDocumentUriUsingTree(uri, DocumentsContract.getTreeDocumentId(uri))
+                val name = runCatching {
+                    resolver.query(doc, arrayOf(DocumentsContract.Document.COLUMN_DISPLAY_NAME), null, null, null)?.use { c -> if (c.moveToFirst()) c.getString(0) else null }
+                }.getOrNull() ?: uri.lastPathSegment.orEmpty().substringAfterLast(':').ifEmpty { "Chosen folder" }
+                CopyFolder(uri.toString(), name)
             }
         }
     }
@@ -174,8 +196,8 @@ class MainActivity : ComponentActivity() {
         // an outstanding dialog belongs to this instance unless it is only being recreated (its result then reaches the
         // next one): answer "cancelled" rather than leave its caller waiting forever
         if (!isChangingConfigurations) {
-            vm.pendingOpen?.complete(null); vm.pendingSave?.complete(null); vm.pendingPermission?.complete(false)
-            vm.pendingOpen = null; vm.pendingSave = null; vm.pendingPermission = null
+            vm.pendingOpen?.complete(null); vm.pendingSave?.complete(null); vm.pendingTree?.complete(null); vm.pendingPermission?.complete(false)
+            vm.pendingOpen = null; vm.pendingSave = null; vm.pendingTree = null; vm.pendingPermission = null
         }
         if (vm.files.host === files) vm.files.host = null
         (application as SciFinApplication).scheduler.let { if (it.permissionRequester === requester) it.permissionRequester = null }

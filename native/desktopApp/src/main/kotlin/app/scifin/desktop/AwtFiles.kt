@@ -1,6 +1,9 @@
 package app.scifin.desktop
 
+import app.scifin.app.CopyFolder
 import app.scifin.app.Files
+import javax.swing.JFileChooser
+import javax.swing.UIManager
 import app.scifin.app.PickedFile
 import java.awt.FileDialog
 import java.awt.Frame
@@ -30,5 +33,18 @@ object AwtFiles : Files {
         val name = dlg.file ?: return@withContext false
         File(dir, name).writeText(text, Charsets.UTF_8)
         true
+    }
+
+    /** §4.7's automatic copy: Swing's folder chooser in the system look, since AWT's dialog cannot pick a folder. */
+    override suspend fun pickFolder(): CopyFolder? = withContext(Dispatchers.Swing) {
+        runCatching { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()) }
+        val chooser = JFileChooser().apply {
+            dialogTitle = "Choose a folder for the automatic copies"
+            fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
+            isAcceptAllFileFilterUsed = false
+        }
+        if (chooser.showDialog(null, "Use this folder") != JFileChooser.APPROVE_OPTION) return@withContext null
+        val dir = chooser.selectedFile?.takeIf { it.isDirectory } ?: return@withContext null
+        CopyFolder(dir.absolutePath, dir.absolutePath)
     }
 }

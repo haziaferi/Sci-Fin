@@ -108,6 +108,12 @@ interface NotificationScheduler {
      * §13.3's boot recovery. Called at boot/logon and by each platform's daily top-up.
      */
     fun restoreAfterBoot(reminders: List<ReminderRegistration>, newMonthEnabled: Boolean)
+
+    /**
+     * One notice, shown now; a later one with the same [key] replaces it. §4.7's failed automatic copy is its
+     * one user, once per run of failures. Hosts without notifications show nothing.
+     */
+    fun notifyNow(key: String, title: String, body: String) {}
 }
 
 /** Fixed by §3.9. Held here so neither platform can drift from the other's wording. */

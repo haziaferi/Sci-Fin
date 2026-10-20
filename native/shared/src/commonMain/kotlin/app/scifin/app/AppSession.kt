@@ -13,6 +13,25 @@ import app.scifin.model.Theme
 import app.scifin.notify.NotificationScheduler
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import app.scifin.engine.Backup
+import app.scifin.engine.BackupCrypto
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.daysUntil
+
+/** What one run of §4.7's automatic copy did. */
+sealed class CopyOutcome {
+    /** Off, no folder chosen, or nothing to copy yet. */
+    data object NotSetUp : CopyOutcome()
+    data object NotDue : CopyOutcome()
+    /** The app PIN is on and the copies have no password: nothing is written until one is set. */
+    data object Paused : CopyOutcome()
+    data class Written(val name: String) : CopyOutcome()
+    data class Failed(val reason: String) : CopyOutcome()
+}
+
+const val COPY_PREFIX = "sci-fin-copy-"
+const val COPIES_KEPT = 14
+private const val COPY_NOTICE = "scifin.copy.failed"
 
 /**
  * What "opening the app" means (§3.9, §3.11, §11.5), in one place both hosts call:
@@ -26,6 +45,8 @@ class AppSession(
     private val scheduler: NotificationScheduler,
     val clock: Clock,
     val newId: () -> String,
+    /** §4.7's automatic copy's hands on the platform; none in tests that do not copy. */
+    val place: CopyPlace = CopyPlace.None,
 ) {
     /** The active Profile, caught up and saved; null on a fresh install: nothing exists until screen 1's Continue. */
     suspend fun open(): ProfileData? {
@@ -102,6 +123,52 @@ class AppSession(
         }
     }
 
+    // ---- §4.7's automatic copy ----------------------------------------------------------------
+
+    /** One copy at a time: the daily task and the app's own run (or Copy now) can meet. */
+    private val copying = Mutex()
+
+    /**
+     * Writes a copy when one is due -- or, with [force] (Copy now), whenever the copy is set up. Runs from the
+     * daily background task on both platforms and on every open of the app, so a missed day is caught up the
+     * next time either runs. While the app PIN is on and the copies have no password, nothing is written
+     * ([CopyOutcome.Paused]): a plain file must never be easier to read than the app.
+     */
+    suspend fun runCopy(force: Boolean = false): CopyOutcome = copying.withLock {
+        val dao = db.dao()
+        val c = dao.copySchedule() ?: return CopyOutcome.NotSetUp
+        val every = CopyEvery.of(c.every)
+        val folder = c.folder
+        if (folder == null || (every == CopyEvery.OFF && !force)) return CopyOutcome.NotSetUp
+        if (dao.appLock() != null && c.sealedPassword == null) return CopyOutcome.Paused
+        val today = clock.today()
+        val last = c.lastCopy?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+        if (!force && last != null && last.daysUntil(today) < every.days) return CopyOutcome.NotDue
+        val app = dao.appState() ?: return CopyOutcome.NotSetUp
+
+        suspend fun fail(reason: String): CopyOutcome {
+            val now = dao.copySchedule() ?: c
+            if (!now.failureNotified) scheduler.notifyNow(COPY_NOTICE, "Automatic copy not written", reason)
+            dao.upsertCopySchedule(now.copy(lastError = reason, failureNotified = true))
+            return CopyOutcome.Failed(reason)
+        }
+
+        val plain = Backup.encode(Backup.build(dao.profiles().mapNotNull { dao.load(it.id) }, app.activeProfileId, today))
+        val text = c.sealedPassword?.let { sealed ->
+            val password = place.unseal(sealed) ?: return fail("The copies’ password can’t be read on this device any more. Set it again in Data & backup.")
+            BackupCrypto.encrypt(plain, password, c.hint.orEmpty(), today.toString())
+        } ?: plain
+        val name = "$COPY_PREFIX$today.json"
+        val existing = place.list(folder) ?: return fail("The copies’ folder can’t be reached. It may have been moved or removed, or Sci-Fin’s access to it withdrawn.")
+        if (name in existing) place.delete(folder, name)          // Copy now twice in a day: the later one stands
+        if (!place.write(folder, name, text)) return fail("The copy could not be written to its folder. The folder may be full or read-only.")
+        // the oldest beyond the fourteen kept go (owner, 2026-10-20); only this app's own copies are ever touched
+        val ours = (place.list(folder) ?: existing + name).filter { it.startsWith(COPY_PREFIX) && it.endsWith(".json") }.sorted()
+        ours.dropLast(COPIES_KEPT).forEach { place.delete(folder, it) }
+        dao.upsertCopySchedule((dao.copySchedule() ?: c).copy(lastCopy = today.toString(), lastError = null, failureNotified = false))
+        CopyOutcome.Written(name)
+    }
+
     /** §4.7's erase: the OS holds nothing once there is no Profile to remind about. */
     suspend fun clearSchedule() {
         notify.withLock {
@@ -124,5 +191,7 @@ class AppSession(
             scheduler.restoreAfterBoot(regs, d.settings.newMonthNotificationEnabled)
             lastReminders = regs; lastNewMonth = d.settings.newMonthNotificationEnabled
         }
+        // the same daily run writes §4.7's automatic copy when one is due; a failure is recorded, never thrown
+        runCatching { runCopy() }
     }
 }
