@@ -189,7 +189,7 @@ fun FeasibilityNote(text: String, modifier: Modifier = Modifier) {
 @Composable
 fun TabTitle(icon: Lucide?, title: String, onSettings: () -> Unit) {
     val t = LocalTokens.current; val p = t.palette
-    Row(Modifier.fillMaxWidth().padding(bottom = t.spacing.gap * 1.4f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.u * 0.875f)) {
+    Row(Modifier.fillMaxWidth().padding(bottom = t.spacing.gap * 1.4f).heightIn(min = LocalHeaderMinHeight.current), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.u * 0.875f)) {
         if (icon != null) EntityIcon(icon, size = t.icons.lg)
         Text(title, color = p.txt, fontSize = t.type.title, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f).semantics { heading() })
         if (LocalWidthClass.current == WidthClass.COMPACT) Box(
@@ -205,7 +205,7 @@ fun TopRow(title: String, onBack: (() -> Unit)?, trailing: (@Composable () -> Un
     val t = LocalTokens.current; val p = t.palette
     // the second column's resting view has nothing to go back to (§4.8)
     @Suppress("NAME_SHADOWING") val onBack = if (LocalResting.current) null else onBack
-    Row(Modifier.fillMaxWidth().padding(bottom = t.spacing.gap * 1.4f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+    Row(Modifier.fillMaxWidth().padding(bottom = t.spacing.gap * 1.4f).heightIn(min = LocalHeaderMinHeight.current), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
         if (onBack != null) {
             Box(Modifier.size(t.spacing.target).background(p.surf2, CircleShape).clickable(onClick = onBack).semantics { contentDescription = "Back"; role = Role.Button }, contentAlignment = Alignment.Center) { LucideIcon(Lucide.CHEVRON_LEFT, tint = p.txt2, size = t.icons.md) }
         }
