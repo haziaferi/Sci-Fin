@@ -29,7 +29,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import app.scifin.ui.LocalTokens
 
 /**
@@ -58,7 +57,7 @@ val LocalPageColumns = compositionLocalOf { 1 }
 val LocalContentEdges = staticCompositionLocalOf<SnapshotStateMap<Any, Float>?> { null }
 
 /** The desktop Add's height while it is shown: a page's header row is at least this tall, so nothing starts beneath the button. */
-val LocalHeaderMinHeight = compositionLocalOf { 0.dp }
+val LocalHeaderMinHeight = compositionLocalOf { Dp.Unspecified }
 
 /**
  * A tab's page: the title, then its sections in §4.2's order, scrolling as one column.

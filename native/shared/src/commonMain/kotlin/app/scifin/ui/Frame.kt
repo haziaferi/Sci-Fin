@@ -297,7 +297,7 @@ private fun RowScope.DesktopContent(state: UiState, store: AppStore, wc: WidthCl
     val shown = showsFloatingAdd(state, wc) && state.tutorialStop == null
     val density = LocalDensity.current
     Box(Modifier.weight(1f).fillMaxHeight().onGloballyPositioned { boxRight = it.positionInWindow().x + it.size.width }) {
-        val headerMin = if (shown) with(density) { addHeight.toDp() } else 0.dp
+        val headerMin = if (shown) with(density) { addHeight.toDp() } else Dp.Unspecified
         CompositionLocalProvider(LocalContentEdges provides edges, LocalHeaderMinHeight provides headerMin) { Screen(state, store) }
         if (shown) {
             val t = LocalTokens.current
