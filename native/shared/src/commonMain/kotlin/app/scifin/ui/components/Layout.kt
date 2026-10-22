@@ -17,6 +17,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateMap
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -45,6 +51,15 @@ fun columnsIn(avail: Dp, measure: Dp, gap: Dp): Int =
 val LocalPageColumns = compositionLocalOf { 1 }
 
 /**
+ * Where each [Page] on screen ends on the right, in window pixels, inside its padding: the desktop frame
+ * puts its Add at the right-most of these (§3.6, owner 2026-10-22: "at the content edge"). Null outside a frame.
+ */
+val LocalContentEdges = staticCompositionLocalOf<SnapshotStateMap<Any, Float>?> { null }
+
+/** The desktop Add's height while it is shown: a page's header row is at least this tall, so nothing starts beneath the button. */
+val LocalHeaderMinHeight = compositionLocalOf { Dp.Unspecified }
+
+/**
  * A tab's page: the title, then its sections in §4.2's order, scrolling as one column.
  *
  * §4.8's column rule: **a column is one measure wide and never wider**; surplus width is left
@@ -62,8 +77,13 @@ fun Page(title: String?, maxColumns: Int = 1, content: @Composable ColumnScope.(
         LocalProbe.current?.let { probe -> SideEffect { probe("page", mapOf("n" to n.toFloat(), "avail" to maxWidth.value, "maxColumns" to maxColumns.toFloat())) } }
         Box(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), contentAlignment = Alignment.TopCenter) {
             CompositionLocalProvider(LocalPageColumns provides n) {
+                val edges = LocalContentEdges.current
+                val key = remember { Any() }
+                if (edges != null) DisposableEffect(key) { onDispose { edges.remove(key) } }
                 Column(
-                    Modifier.widthIn(max = w).fillMaxWidth().padding(t.spacing.pad),
+                    Modifier.widthIn(max = w).fillMaxWidth()
+                        .let { m -> if (edges == null) m else m.onGloballyPositioned { c -> edges[key] = c.positionInWindow().x + c.size.width } }
+                        .padding(t.spacing.pad),
                     verticalArrangement = Arrangement.spacedBy(t.spacing.gap),
                 ) {
                     if (title != null) Text(title, color = t.palette.txt, fontSize = t.type.title, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = t.spacing.gap).semantics { heading() })

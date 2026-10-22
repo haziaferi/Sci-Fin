@@ -181,6 +181,6 @@ fun SavingsLedgerRow(amount: String, onClick: () -> Unit, clickLabel: String, sl
 @Composable
 fun FloatingAddRoom() {
     val t = LocalTokens.current
-    val over = LocalWidthClass.current == WidthClass.COMPACT   // a desktop has no floating + (§3.6)
+    val over = LocalWidthClass.current == WidthClass.COMPACT   // the desktop has a fixed Add at the top instead (§3.6)
     if (over) Box(Modifier.height(t.spacing.target + t.spacing.gap))
 }

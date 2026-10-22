@@ -27,6 +27,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
+import app.scifin.ui.components.Button
+import app.scifin.ui.components.ButtonKind
+import app.scifin.ui.components.LocalContentEdges
+import app.scifin.ui.components.LocalHeaderMinHeight
+import androidx.compose.ui.unit.dp
+import app.scifin.ui.components.probeAs
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Rect
@@ -118,7 +129,7 @@ fun SciFinApp(store: AppStore, targetDp: Int, systemDark: Boolean = isSystemInDa
                         }
                         else -> Row(Modifier.fillMaxSize()) {
                             if (!state.inOnboardingPage) NavRail(state.tab, tokens, onSelect = store::selectTab)
-                            Box(Modifier.weight(1f).fillMaxHeight()) { Screen(state, store) }
+                            DesktopContent(state, store, wc)
                         }
                     }
                     state.sheet?.let { Sheets(it, state, store) }
@@ -272,7 +283,33 @@ internal fun showsFloatingAdd(state: UiState, wc: WidthClass): Boolean {
     return state.routes.size == 1 || (wc != WidthClass.COMPACT && root.tab == Tab.ACTIVITY && shownDetail(state) != null)
 }
 
-/** The floating + (phone only, §3.6): the last area and target used. A desktop's rows carry their own +, and Ctrl+N. */
+/**
+ * The desktop's content area (§3.6, owner 2026-10-22, from the Add Bench): the screen, and over it one labelled
+ * Add fixed at the top right of the content -- the edge of the right-most column, not the window's, so it stays
+ * beside what it adds to on a wide window -- where the phone shows its floating +. It opens the last area and
+ * target used, as Ctrl+N does; every row keeps its own +, which opens on that row.
+ */
+@Composable
+private fun RowScope.DesktopContent(state: UiState, store: AppStore, wc: WidthClass) {
+    val edges = remember { mutableStateMapOf<Any, Float>() }
+    var boxRight by remember { mutableStateOf(0f) }
+    var addHeight by remember { mutableStateOf(0f) }
+    val shown = showsFloatingAdd(state, wc) && state.tutorialStop == null
+    val density = LocalDensity.current
+    Box(Modifier.weight(1f).fillMaxHeight().onGloballyPositioned { boxRight = it.positionInWindow().x + it.size.width }) {
+        val headerMin = if (shown) with(density) { addHeight.toDp() } else Dp.Unspecified
+        CompositionLocalProvider(LocalContentEdges provides edges, LocalHeaderMinHeight provides headerMin) { Screen(state, store) }
+        if (shown) {
+            val t = LocalTokens.current
+            // the Page's right edge includes its padding; the button lines up with the content inside it
+            val gap = edges.values.maxOrNull()?.let { boxRight - it } ?: 0f
+            val end = with(density) { gap.coerceAtLeast(0f).toDp() } + t.spacing.pad
+            Button("Add", ButtonKind.PRIMARY, modifier = Modifier.align(Alignment.TopEnd).padding(top = t.spacing.pad, end = end).onGloballyPositioned { addHeight = it.size.height.toFloat() }.probeAs("add")) { store.openSheet(Sheet.Entry()) }
+        }
+    }
+}
+
+/** The floating + (phone only, §3.6): the last area and target used. The desktop's Add is [DesktopContent]'s. */
 @Composable
 private fun BoxScope.FloatingAddOver(state: UiState, store: AppStore, wc: WidthClass) {
     if (wc != WidthClass.COMPACT || !showsFloatingAdd(state, wc) || goalPromptShows(state)) return
