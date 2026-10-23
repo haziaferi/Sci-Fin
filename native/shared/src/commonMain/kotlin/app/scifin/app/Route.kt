@@ -55,9 +55,10 @@ sealed interface Route {
     /** §4.5's topic, read in Learn's second column (§4.8); on a phone topics open in place. */
     data class LearnTopic(val id: String) : Route
 
-    /** §9.1's loan calculator and §9.2's purchase calculator, off Learn. */
+    /** §9.1's loan calculator, §9.2's purchase calculator and §10.2's time calculator, off Learn. */
     data object LoanCalc : Route
     data object PurchaseCalc : Route
+    data object TimeWorthCalc : Route
 }
 
 enum class SettingsPage(val title: String) {

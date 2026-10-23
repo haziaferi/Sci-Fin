@@ -69,6 +69,7 @@ import app.scifin.ui.screens.LoanCalcScreen
 import app.scifin.ui.screens.LockGate
 import app.scifin.ui.screens.CopyPasswordPrompt
 import app.scifin.ui.screens.PurchaseCalcScreen
+import app.scifin.ui.screens.TimeWorthCalcScreen
 import app.scifin.ui.screens.OnboardingSheet
 import app.scifin.ui.screens.ReportsScreen
 import app.scifin.ui.screens.SettingsPageScreen
@@ -193,6 +194,7 @@ private fun RouteScreen(route: Route, state: UiState, store: AppStore) {
         is Route.RecurringEditor -> RecurringEditorScreen(r, state, store)
         Route.LoanCalc -> LoanCalcScreen(state, store)
         Route.PurchaseCalc -> PurchaseCalcScreen(state, store)
+        Route.TimeWorthCalc -> TimeWorthCalcScreen(state, store)
         is Route.TabRoute -> TabRootScreen(r.tab, state, store)
     }
 }

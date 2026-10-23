@@ -84,8 +84,8 @@ def audit_run_ok(s):  # negative: every ref of the run exists in the audit
     return s.replace("## 14\\. Document Notes", "## 14\\. Document Notes\n\nSee audit §2.1, §3.3/§4.1–§4.2.", 1)
 
 
-def prototype_only_built(s):  # a symbol only the prototype has is a warning, not a silent pass
-    return s.replace("## 14\\. Document Notes", "## 14\\. Document Notes\n\n`monthlyEquivalent()` does it.", 1)
+def prototype_only_built(s):  # a symbol only the prototype has is a warning, not a silent pass (monthlyEquivalent() was, until §10 built it, 2026-10-23)
+    return s.replace("## 14\\. Document Notes", "## 14\\. Document Notes\n\n`overtimePrefillRate()` does it.", 1)
 
 
 def dp_claim_wrong(s):  # a counted claim that no longer matches the tree

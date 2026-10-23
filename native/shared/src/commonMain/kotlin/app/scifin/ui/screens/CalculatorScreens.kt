@@ -25,6 +25,7 @@ import app.scifin.app.Sheet
 import app.scifin.app.UiState
 import app.scifin.engine.Accounts
 import app.scifin.engine.LoanDraft
+import app.scifin.engine.TimeWorth
 import app.scifin.engine.monthsLabel
 import app.scifin.engine.plusMonthsClamped
 import app.scifin.model.AccountType
@@ -205,4 +206,51 @@ fun PurchaseCalcScreen(state: UiState, store: AppStore) {
         }
         InfoNote("This screen changes nothing on its own — no balance moves and nothing is created. To commit to a payment, go to the card itself, where the balance and its payoff outlook live.", Modifier.padding(top = t.spacing.gap))
     }
+}
+
+/**
+ * §10.2: what extra hours come to, as a reflection rather than a claim. The rate is always enterable; with Income
+ * on, a month's pay over the expected hours pre-fills it, and nothing here is saved or created.
+ */
+@Composable
+fun TimeWorthCalcScreen(state: UiState, store: AppStore) {
+    val t = LocalTokens.current
+    val d = state.data ?: return
+    val cur = d.settings.currency
+    var hoursText by rememberSaveable { mutableStateOf("10") }
+    var expectedText by rememberSaveable { mutableStateOf(TimeWorth.DEFAULT_EXPECTED_HOURS.toInt().toString()) }
+    var rateText by rememberSaveable { mutableStateOf("") }
+    val hours = parseHours(hoursText) ?: 0.0
+    val prefill = TimeWorth.prefillRate(d.settings, parseHours(expectedText) ?: TimeWorth.DEFAULT_EXPECTED_HOURS)
+    // a typed rate wins; an empty field falls back to the pre-fill, shown as the field's placeholder
+    val rate = parseMoney(rateText) ?: prefill ?: 0L
+    val (month, year) = TimeWorth.worth(rate, hours)
+    Page(null) {
+        TopRow("What your time is worth", onBack = { store.back() })
+        FieldGroup { FieldLabel("Extra hours in a typical month"); TextField(hoursText, { hoursText = it }, prefix = "#", keyboard = KeyboardType.Decimal, label = "Extra hours in a typical month") }
+        if (TimeWorth.monthlyEquivalent(d.settings) != null) FieldGroup {
+            FieldLabel("Hours you’d normally expect in a month")
+            TextField(expectedText, { expectedText = it }, prefix = "#", keyboard = KeyboardType.Decimal, label = "Hours you’d normally expect in a month")
+            Caption("Only used to work out a starting rate from what you told the app you earn. Change the rate directly below if you’d rather.", Modifier.padding(top = t.spacing.u * 0.75f))
+        }
+        FieldGroup {
+            FieldLabel("What an hour of your time is worth")
+            TextField(rateText, { rateText = it }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = "What an hour of your time is worth", placeholder = prefill?.let { moneyText(it) } ?: "e.g. 22.00")
+            Caption(if (prefill != null) "Worked out from your income and the hours above — a starting point, fully editable." else "Your figure, entered directly. The app doesn’t need Income switched on for this.", Modifier.padding(top = t.spacing.u * 0.75f))
+        }
+        SectionLabel("What those hours come to")
+        CardBox {
+            Figure("In a month", formatMoney(month, cur), "${hoursLabel(hours)} at ${formatMoney(rate, cur)}")
+            Figure("Over a year", formatMoney(year, cur), "at the same rate and the same hours")
+        }
+        InfoNote("This is a reflection, not a claim. It changes nothing in the app, creates nothing, and isn’t a statement about what you’re owed — what asking costs isn’t the same for everyone.", Modifier.padding(top = t.spacing.gap))
+    }
+}
+
+/** Hours typed with a comma or a point; negative or unreadable is no figure. */
+private fun parseHours(v: String): Double? = v.trim().replace(',', '.').toDoubleOrNull()?.takeIf { it >= 0 }
+
+private fun hoursLabel(h: Double): String {
+    val n = if (h % 1.0 == 0.0) h.toLong().toString() else h.toString()
+    return "$n hour${if (h == 1.0) "" else "s"}"
 }

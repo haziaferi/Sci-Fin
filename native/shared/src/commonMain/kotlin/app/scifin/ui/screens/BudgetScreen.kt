@@ -98,8 +98,9 @@ private fun EnvelopesView(d: ProfileData, state: UiState, store: AppStore) {
     IncomeSection(d, store, today)
     RecurringSection(d, store, today)
     Column(Modifier.padding(top = t.spacing.gap)) {
-        LearnLink("Why split money into categories?", { store.push(Route.LearnTopic("why-categories")) })
+        // in the order of the sections they speak to -- Goals sit above anything category-related -- which is Learn's order too (§4.5)
         LearnLink("Why naming a goal helps", { store.push(Route.LearnTopic("name-your-goal")) })
+        LearnLink("Why split money into categories?", { store.push(Route.LearnTopic("why-categories")) })
     }
 }
 
