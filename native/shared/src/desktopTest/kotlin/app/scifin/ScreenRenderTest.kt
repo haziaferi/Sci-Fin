@@ -162,6 +162,7 @@ class ScreenRenderTest {
         st.push(Route.LoanCalc); render("loan-calc", st, h = 1400)
         st.openSheet(Sheet.LoanBorrow(LoanDraft())); render("loan-borrow", st, h = 900)
         st.closeSheet(); st.selectTab(Tab.LEARN); st.push(Route.PurchaseCalc); render("purchase-calc", st, h = 1200)
+        st.back(); st.push(Route.TimeWorthCalc); render("time-worth-calc", st, h = 1200)
     }
 
     @Test fun `low-distraction mode removes the entity icons and nothing else`() {

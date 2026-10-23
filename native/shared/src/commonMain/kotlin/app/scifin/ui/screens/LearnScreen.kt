@@ -34,6 +34,7 @@ import app.scifin.ui.Lucide
 import app.scifin.ui.LucideIcon
 import app.scifin.ui.components.Caption
 import app.scifin.ui.components.LEARN_LINK_DECORATION
+import app.scifin.ui.components.LearnLink
 import app.scifin.ui.components.NavRow
 import app.scifin.ui.components.Page
 import app.scifin.ui.components.SectionLabel
@@ -46,7 +47,8 @@ import app.scifin.ui.selectedWash
 import app.scifin.ui.shownDetail
 
 /**
- * §4.5's topics in their fixed order, each mapped to the §2.6 finding that supplies its
+ * §4.5's topics in their fixed order -- the order their links are met in the app, Budget from the top, then
+ * Categories, then Activity; topics no screen links to follow -- each mapped to the finding that supplies its
  * source line. Each body paragraph is checked against its audit section (§4.5).
  */
 data class LearnTopic(
@@ -56,17 +58,23 @@ data class LearnTopic(
     val body: List<String>,
     /** §9.3's country list, collapsed inside this topic's own body. Empty on every other topic. */
     val resources: List<CreditResource> = emptyList(),
+    /** A calculator the topic leads into (§10.2), as a link after its body. */
+    val calculator: Pair<String, Route>? = null,
 )
 
+/**
+ * §10.3's text: the prototype's, checked claim by claim against the sources in the research audit's §2.5 (2026-10-23).
+ * Declared before [LEARN_TOPICS], which reads it as it is built.
+ */
+private val TIME_WORTH_BODY = listOf(
+    "Plenty of people hold back from asking for a raise, overtime pay, or other fair compensation they have earned. For women, holding back is often a rational read of real circumstances. Studies find that women who ask can be judged more harshly for it than men who ask the same way, and that women who ask are less likely to get what they asked for. Add a documented wage gap and a larger share of unpaid care and household work, and asking can risk more while starting from less.",
+    "The wider pattern shows up across genders too. In 2025 studies of nearly 6,000 Americans deciding whether to haggle over everyday purchases, most said they sometimes pass up the chance: many wanted to save a fifth to a third of the price before it felt worth raising, and about half would pay more just to skip the conversation. Asked why they didn’t push for more pay, people most often say they were happy with the offer or didn’t feel comfortable asking.",
+    "None of which makes not asking a mistake. Sometimes it is the accurate reading: job security is genuinely at stake, the power imbalance is genuinely real, or your role has no paid-overtime arrangement to point to in the first place. This card is not here to tell you to ask.",
+    "What it can do is make the number visible: what the time you are giving away comes to, in your own figures. What you do with that, including nothing, is yours to decide.",
+)
+private const val TIME_WORTH_SOURCE = "Grounded in research on what happens when women ask, including Babcock & Laschever’s Women Don’t Ask; on negotiation avoidance, including a 2025 paper in Negotiation and Conflict Management Research; and on Pew Research Center survey data."
+
 val LEARN_TOPICS = listOf(
-    LearnTopic(
-        "why-no-red", "Why nothing turns red", "Grounded in research on financial shame and avoidance, including work by Gladstone and colleagues.",
-        listOf(
-            "Most budgeting tools mark the moment you pass a limit, often in red, and often as the only feedback they give. Research on financial shame and the “ostrich effect” finds that feedback framed as failure tends to backfire: people who feel ashamed about money stop looking at it, and not looking makes the situation worse.",
-            "So this app shows the same fact either way. Going past your plan is drawn as a tick at the plan and a hatched fill beyond it — on the same bar, in the same colours, in the same tone. The information is all there; the verdict is not.",
-            "The pattern is a shape rather than a colour, so it still reads with colour blindness.",
-        ),
-    ),
     LearnTopic(
         "name-your-goal", "Why naming a goal helps", "Grounded in future self-continuity research, including work by Hal Hershfield.",
         listOf(
@@ -84,6 +92,15 @@ val LEARN_TOPICS = listOf(
         ),
     ),
     LearnTopic(
+        "why-no-red", "Why nothing turns red", "Grounded in research on financial shame and avoidance, including work by Gladstone and colleagues.",
+        listOf(
+            "Most budgeting tools mark the moment you pass a limit, often in red, and often as the only feedback they give. Research on financial shame and the “ostrich effect” finds that feedback framed as failure tends to backfire: people who feel ashamed about money stop looking at it, and not looking makes the situation worse.",
+            "So this app shows the same fact either way. Going past your plan is drawn as a tick at the plan and a hatched fill beyond it — on the same bar, in the same colours, in the same tone. The information is all there; the verdict is not.",
+            "The pattern is a shape rather than a colour, so it still reads with colour blindness.",
+        ),
+    ),
+    LearnTopic("credit-score", CREDIT_TITLE, "Credit invisibility — research by the Consumer Financial Protection Bureau", CREDIT_BODY, CREDIT_RESOURCES),
+    LearnTopic(
         "well-being", "Financial well-being over adherence", "Grounded in the Consumer Financial Protection Bureau’s research defining financial well-being.",
         listOf(
             "Many budgeting apps quietly define success as adherence: did you follow the plan exactly. That means you’ve failed the moment real life doesn’t cooperate, which it often doesn’t.",
@@ -91,7 +108,10 @@ val LEARN_TOPICS = listOf(
             "That’s why no month here is graded, and why Reports open on how long your Savings would cover you rather than on a spending breakdown. The numbers are information, not a report card.",
         ),
     ),
-    LearnTopic("credit-score", CREDIT_TITLE, "Credit invisibility — research by the Consumer Financial Protection Bureau", CREDIT_BODY, CREDIT_RESOURCES),
+    LearnTopic(
+        "time-worth", "What your time is worth, and why asking is hard", TIME_WORTH_SOURCE, TIME_WORTH_BODY,
+        calculator = "Work out what your extra hours come to" to Route.TimeWorthCalc,
+    ),
 )
 
 
@@ -125,22 +145,24 @@ fun LearnScreen(
                     LucideIcon(Lucide.CHEVRON_RIGHT, tint = p.txt2, size = t.icons.md, modifier = Modifier.rotate(if (isOpen) 90f else 0f))
                 }
                 if (isOpen) Column(Modifier.padding(start = t.spacing.u * 1.5f, end = t.spacing.u * 1.5f, bottom = t.spacing.u * 1.25f), verticalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
-                    TopicBody(topic, initialListOpen)
+                    TopicBody(topic, openRoute, initialListOpen)
                 }
             }
         }
         SectionLabel("Calculators")
         NavRow(Lucide.LANDMARK, "What a loan actually costs", "Compare financing against saving", decorative = true) { openRoute(Route.LoanCalc) }
         NavRow(Lucide.CREDIT_CARD, "Putting a purchase on a card", "What financing this one thing costs", decorative = true) { openRoute(Route.PurchaseCalc) }
+        NavRow(Lucide.ZAP, "What your time is worth", "What extra hours come to", decorative = true) { openRoute(Route.TimeWorthCalc) }
     }
 }
 
-/** A topic's text, its country list where it has one, and its source line: the same in place and in the pane. */
+/** A topic's text, its country list or calculator where it has one, and its source line: the same in place and in the pane. */
 @Composable
-private fun TopicBody(topic: LearnTopic, initialListOpen: Boolean = false) {
+private fun TopicBody(topic: LearnTopic, openRoute: (Route) -> Unit, initialListOpen: Boolean = false) {
     val t = LocalTokens.current; val p = t.palette
     for (para in topic.body) Text(para, color = p.txt2, fontSize = t.type.body, lineHeight = t.type.body * 1.6, modifier = Modifier.measureCap(t))
     if (topic.resources.isNotEmpty()) CreditResourceList(topic.resources, initialListOpen)
+    topic.calculator?.let { (label, route) -> LearnLink(label, { openRoute(route) }) }
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.u / 2)) {
         LucideIcon(Lucide.INFO, tint = p.txt2, size = t.icons.xs); Text(topic.source, color = p.txt2, fontSize = t.type.caption, modifier = Modifier.measureCap(t))
     }
@@ -153,7 +175,7 @@ fun LearnTopicScreen(route: Route.LearnTopic, store: AppStore) {
     val topic = LEARN_TOPICS.firstOrNull { it.id == route.id } ?: LEARN_TOPICS.first()
     Page(null) {
         TopRow(topic.title, onBack = { store.back() })
-        Column(verticalArrangement = Arrangement.spacedBy(t.spacing.gap)) { TopicBody(topic) }
+        Column(verticalArrangement = Arrangement.spacedBy(t.spacing.gap)) { TopicBody(topic, opener(store)) }
     }
 }
 

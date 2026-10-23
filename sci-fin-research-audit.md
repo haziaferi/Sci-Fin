@@ -68,6 +68,18 @@ The **"ostrich effect"** describes the well-replicated tendency to avoid checkin
 
 <cite index="10-1,12-1">Hershfield's "future self-continuity" research (including neuroimaging) finds people who feel less psychologically connected to their future selves save less — the brain processes "future me" more like a stranger than an extension of the current self.</cite> <cite index="16-1">This sense of connection to one's future self is trait-like but also malleable, which is why it's been a productive target for intervention.</cite> Interventions that strengthen this connection (visualization, concreteness, vivid framing of what the money is *for*) have shown measurable effects on saving behavior in controlled studies.
 
+### 2.5 Asking for what you've earned
+
+*Added 2026-10-23 for the Learn topic on time and asking (spec §10), from a fresh check of the primary sources rather than the original audit.*
+
+Babcock & Laschever's *Women Don't Ask* (2003) made the case that women initiate pay negotiations far less often than men — in their Carnegie Mellon cohort, 57% of men negotiated a starting salary against 7% of women. Later evidence complicates the "don't ask" half. In Australian workplace data, Artz, Goodall & Oswald (2018) found women ask for raises as often as men but succeed less often (15% against 20%); Pew (2023) found a small gap in asking (28% against 32%) and, among those who asked, women more often got only the original offer. Bowles, Babcock & Lai (2007) showed why caution can be rational: evaluators penalised women more than men for asking for higher pay.
+
+Avoiding the conversation is common across genders. Hunsaker, Zhang & Lee (2025), across five studies of nearly 6,000 US adults deciding whether to negotiate purchases, found 77% have passed up a chance to negotiate; people wanted savings of 21–36% of the price before negotiating felt worthwhile, and about half would pay a premium to avoid it. Their prompt comparing the saving with the person's own hourly wage did not change willingness to negotiate. Asked why they didn't negotiate pay, people most often say they were satisfied with the offer (39%) or uncomfortable asking (38%; women 42%, men 33%) (Pew, 2023).
+
+The surrounding circumstances are documented unevenly. The wage gap is solid (EU 12.0% in 2023; in the US women earn 83% of men's median weekly earnings, 2024), and so is unpaid care (ILO: women do about three-quarters of it). The "pink tax" is contested (NYC DCA 2015 against Moshary, Tuchman & Bhatia 2023), and a disproportionate share of household *financial* labour is not established.
+
+*Why this matters:* the topic can honestly call caution rational, but on the grounds of backlash and lower returns rather than a claim that women ask less. The calculator should show the number without presenting it as a nudge — the 2025 hourly-wage prompt did not move anyone. The wage gap and unpaid care are supportable; the pink tax and financial labour, as stated, are not.
+
 ---
 
 ## 3. What actually makes a budgeting habit stick
@@ -181,6 +193,14 @@ Standard accessibility guidelines (WCAG) were built primarily around visual/moto
 - Sussman, A.B. & O'Brien, R.L. (2016). *Knowing When to Spend: Unintended Financial Consequences of Earmarking to Encourage Savings.* Journal of Marketing Research.
 - Beierlein & colleagues (2025); PMC study on Self-Determination Theory applied to personal financial management motivation.
 - CFPB (2015, 2017). *Financial Well-Being Scale* and technical report.
+- Babcock, L. & Laschever, S. (2003). *Women Don't Ask: Negotiation and the Gender Divide.* Princeton University Press.
+- Bowles, H.R., Babcock, L. & Lai, L. (2007). *Social incentives for gender differences in the propensity to initiate negotiations: Sometimes it does hurt to ask.* Organizational Behavior and Human Decision Processes, 103(1), 84–103.
+- Artz, B., Goodall, A.H. & Oswald, A.J. (2018). *Do Women Ask?* Industrial Relations, 57(4), 611–636.
+- Hunsaker, D.A., Zhang, H. & Lee, A.J. (2025). *Beyond Propensity: Thresholds, Costs, and Interventions in Negotiation Avoidance.* Negotiation and Conflict Management Research, 18(4), 37–56. https://ncmr.lps.library.cmu.edu/article/id/911/
+- Pew Research Center (2023). *When negotiating starting salaries, most U.S. women and men don't ask for higher pay.*
+- Eurostat (2025). *Gender pay gap statistics*; U.S. Bureau of Labor Statistics (2025). *Highlights of women's earnings in 2024.*
+- ILO (2018). *Care work and care jobs for the future of decent work.*
+- NYC Department of Consumer Affairs (2015). *From Cradle to Cane: The Cost of Being a Female Consumer*; Moshary, S., Tuchman, A. & Bhatia, N. (2023). *Gender-based pricing in consumer packaged goods: a pink tax?* Marketing Science.
 - Irrational Labs — field experiment case study on budgeting engagement decay.
 - econbrew.com, medium.com/@stefanneculai — behavioral breakdowns of why budgeting apps fail.
 - Understood.org, CHADD.org, Relational Psych, JobCannon — ADHD and money management / executive function.

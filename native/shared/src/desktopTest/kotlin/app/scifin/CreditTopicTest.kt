@@ -50,15 +50,15 @@ class CreditTopicTest {
         assertTrue(CREDIT_RESOURCES.all { it.checked.year >= 2026 }, "an entry has no plausible check date")
     }
 
-    @Test fun `the topic is last, carries a real body, and says what it will not do`() {
-        val last = LEARN_TOPICS.last()
-        assertEquals("credit-score", last.id, "§4.5's order puts the credit topic last")
-        assertEquals(CREDIT_TITLE, last.title)
-        assertTrue(last.body.size >= 4, "the body is the five paragraphs §9.3's bullets ask for")
-        val all = last.body.joinToString(" ").lowercase()
+    @Test fun `the topic carries a real body, and says what it will not do`() {
+        // §4.5's order since 2026-10-23 follows the links: the credit topic's is on Activity, after Budget's and Categories'
+        val topic = LEARN_TOPICS.single { it.id == "credit-score" }
+        assertEquals(CREDIT_TITLE, topic.title)
+        assertTrue(topic.body.size >= 4, "the body is the five paragraphs §9.3's bullets ask for")
+        val all = topic.body.joinToString(" ").lowercase()
         assertTrue("credit invisible" in all, "the topic never names the phenomenon it exists to name")
         assertTrue("no recommendation" in all, "§9.3 forbids a behavioural recommendation; the body has to say so")
-        assertTrue(CREDIT_RESOURCES === last.resources, "the list has to sit with the topic")
+        assertTrue(CREDIT_RESOURCES === topic.resources, "the list has to sit with the topic")
         assertTrue(LEARN_TOPICS.count { it.resources.isNotEmpty() } == 1, "only the credit topic carries a country list")
     }
 
