@@ -235,7 +235,7 @@ private fun CatchUpCard(state: UiState, d: ProfileData, store: AppStore) {
     }
 }
 
-/** §11.3's prompt is up; the floating + steps aside while it is. Budget home only: the tab bar stays reachable under it. */
+/** §11.3's prompt is up; the floating + and the desktop's Add step aside while it is. Budget home only: the tab bar stays reachable under it. */
 internal fun goalPromptShows(state: UiState): Boolean {
     val d = state.data ?: return false
     val s = d.settings

@@ -10,6 +10,8 @@ import app.scifin.app.Sheet
 import app.scifin.app.Tab
 import app.scifin.data.buildInMemorySciFinDatabase
 import app.scifin.model.AppState
+import app.scifin.model.ProfileData
+import app.scifin.ui.screens.goalPromptShows
 import app.scifin.ui.LocalProbe
 import app.scifin.ui.SciFinApp
 import kotlinx.coroutines.CoroutineScope
@@ -31,9 +33,8 @@ import kotlin.test.assertTrue
 class DesktopAddTest {
     private val out = File("build/desktop-add").apply { mkdirs() }
 
-    private fun store(): AppStore {
+    private fun store(p: ProfileData = Fixture.profile.let { it.copy(settings = it.settings.copy(goalPromptDismissed = true)) }): AppStore {
         val db = buildInMemorySciFinDatabase()
-        val p = Fixture.profile.let { it.copy(settings = it.settings.copy(goalPromptDismissed = true)) }
         runBlocking { db.dao().save(p); db.dao().upsertAppState(AppState(activeProfileId = p.profileId)) }
         return AppStore(AppSession(db, RecordingScheduler(), FakeClock(Fixture.simDate), Ids("d")::next), db, CoroutineScope(SupervisorJob() + Dispatchers.Unconfined))
             .also { runBlocking { it.start() } }
@@ -78,6 +79,16 @@ class DesktopAddTest {
             st.selectTab(Tab.REPORTS)
             assertNull(frame(st, w, h, 40, "reports-$w")["el:add"], "Reports has none at $w")
         }
+    }
+
+    @Test fun `while the goal prompt is up the desktop Add is not drawn over it`() {
+        val p = Fixture.profile.let { it.copy(goals = emptyList(), settings = it.settings.copy(onboardingComplete = true, goalPromptDismissed = false, catchUpSummaryPending = false)) }
+        val st = store(p)
+        st.selectTab(Tab.BUDGET)
+        assertTrue(goalPromptShows(st.state.value), "the fixture should raise the prompt")
+        assertNull(frame(st, 1084, 721, 40, "budget-prompt")["el:add"])
+        runBlocking { st.dispatch { it.copy(settings = it.settings.copy(goalPromptDismissed = true)) }.join() }
+        assertNotNull(frame(st, 1084, 721, 40, "budget-prompt-answered")["el:add"], "and back once it is answered")
     }
 
     @Test fun `the desktop Add opens the last area and target, and the phone keeps its floating +`() {
