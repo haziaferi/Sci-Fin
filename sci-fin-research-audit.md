@@ -80,6 +80,16 @@ The surrounding circumstances are documented unevenly. The wage gap is solid (EU
 
 *Why this matters:* the topic can honestly call caution rational, but on the grounds of backlash and lower returns rather than a claim that women ask less. The calculator should show the number without presenting it as a nudge — the 2025 hourly-wage prompt did not move anyone. The wage gap and unpaid care are supportable; the pink tax and financial labour, as stated, are not.
 
+### 2.6 What the monthly payment hides
+
+*Added 2026-10-23 for the Learn topic on borrowing (spec §9.1, §9.2), from a fresh check of the primary sources.*
+
+Stango & Zinman (2009) describe **exponential growth bias** — the tendency to treat compounding as if it were linear — which leads people to underestimate the interest rate implied by a loan's payments; in US survey data, more-biased households borrow more and save less (correlational). Argyle, Nadauld & Palmer (2020), studying about 500,000 US used-car loans through discontinuities in lenders' terms, found demand more sensitive to the loan's length than to its rate, borrowers bunching at round monthly payments, and many spending lower payments on larger loans — for borrowers who were not short of cash as well as for those who were.
+
+For cards, Stewart (2009) found among 248 UK cardholders that the minimum correlated with partial repayments, and in a hypothetical-statement experiment (413 participants) that leaving the minimum off raised mean partial repayments by 70%, with the share paying in full unchanged. Keys & Wang (2019), using a quarter of the US general-purpose card market (2008–2013), found 29% of accounts regularly pay at or near the minimum, and that at least 22% of near-minimum payers (9% of all accounts) respond to changes in the minimum formula in a way consistent with anchoring rather than a tight budget alone; the CARD Act's three-year repayment disclosure was taken up by fewer than 1% of accounts.
+
+*Why this matters:* the topic can say the monthly payment hides the cost and that a printed minimum pulls repayments down. It cannot claim that a payoff table fixes this — Stewart proposed one without testing it, and the CARD Act disclosure barely moved behaviour. Some near-minimum payers are genuinely constrained, which supports keeping existing balances neutral. The saving-first lean is the app's stance, reasoned from these findings, not a finding itself.
+
 ---
 
 ## 3. What actually makes a budgeting habit stick
@@ -200,6 +210,10 @@ Standard accessibility guidelines (WCAG) were built primarily around visual/moto
 - Pew Research Center (2023). *When negotiating starting salaries, most U.S. women and men don't ask for higher pay.*
 - Eurostat (2025). *Gender pay gap statistics*; U.S. Bureau of Labor Statistics (2025). *Highlights of women's earnings in 2024.*
 - ILO (2018). *Care work and care jobs for the future of decent work.*
+- Stango, V. & Zinman, J. (2009). *Exponential Growth Bias and Household Finance.* Journal of Finance, 64(6), 2807–2849.
+- Argyle, B., Nadauld, T.D. & Palmer, C. (2020). *Monthly Payment Targeting and the Demand for Maturity.* Review of Financial Studies, 33(11), 5416–5462.
+- Stewart, N. (2009). *The Cost of Anchoring on Credit-Card Minimum Repayments.* Psychological Science, 20(1), 39–41.
+- Keys, B.J. & Wang, J. (2019). *Minimum payments and debt paydown in consumer credit cards.* Journal of Financial Economics, 131(3), 528–548.
 - NYC Department of Consumer Affairs (2015). *From Cradle to Cane: The Cost of Being a Female Consumer*; Moshary, S., Tuchman, A. & Bhatia, N. (2023). *Gender-based pricing in consumer packaged goods: a pink tax?* Marketing Science.
 - Irrational Labs — field experiment case study on budgeting engagement decay.
 - econbrew.com, medium.com/@stefanneculai — behavioral breakdowns of why budgeting apps fail.

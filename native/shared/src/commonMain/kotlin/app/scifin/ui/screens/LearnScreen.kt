@@ -58,8 +58,8 @@ data class LearnTopic(
     val body: List<String>,
     /** §9.3's country list, collapsed inside this topic's own body. Empty on every other topic. */
     val resources: List<CreditResource> = emptyList(),
-    /** A calculator the topic leads into (§10.2), as a link after its body. */
-    val calculator: Pair<String, Route>? = null,
+    /** The calculators the topic leads into (§9.1, §9.2, §10.2), as links after its body. */
+    val calculators: List<Pair<String, Route>> = emptyList(),
 )
 
 /**
@@ -72,6 +72,15 @@ private val TIME_WORTH_BODY = listOf(
     "None of which makes not asking a mistake. Sometimes it is the accurate reading: job security is genuinely at stake, the power imbalance is genuinely real, or your role has no paid-overtime arrangement to point to in the first place. This card is not here to tell you to ask.",
     "What it can do is make the number visible: what the time you are giving away comes to, in your own figures. What you do with that, including nothing, is yours to decide.",
 )
+/** §9's topic (owner, 2026-10-23): written from the sources in the research audit's §2.6, declared before [LEARN_TOPICS] like the above. */
+private val BORROWING_BODY = listOf(
+    "This app leans toward saving for things rather than borrowing for them. That’s a deliberate point of view, and it comes from one finding repeated across studies: when borrowing is judged by its monthly payment, the full cost stays out of sight, and people tend to underestimate it.",
+    "With a loan, the monthly payment is the number that gets the attention. In studies of car loans, buyers were swayed more by a longer term than by a lower interest rate, settled on round monthly amounts, and often spent a lower payment on a bigger loan. Interest also builds faster than intuition expects: shown a loan’s payments, people tend to guess its interest rate too low, and those who misjudge it most tend to borrow more and save less.",
+    "With a card, the number doing the work is the minimum printed on the statement. In one experiment, people paying part of a bill said they would pay much less when a minimum was shown than when it wasn’t; those paying in full were unaffected. Across a large share of real accounts, payments sit at or near the minimum, and for some people the minimum itself, rather than a tight month, seems to set the amount. Printing a larger, faster payment on statements moved very few.",
+    "So the calculators here lead with the whole cost. For a loan, that’s what it repays in total and in interest, beside the same monthly amount saved instead. For a purchase on a card, it starts with waiting and paying cash, then shows how long the balance takes to clear and what it costs at a payment you choose. A card’s own screen shows the same outlook for its balance: paid in full, at a fixed amount, and at the minimum, so the minimum is one option among several. If you already carry a loan or a card balance, that’s an ordinary part of life, and these numbers are here to help you plan it, not to judge it.",
+)
+private const val BORROWING_SOURCE = "Grounded in research on exponential growth bias (Stango & Zinman), on monthly payment targeting in car loans (Argyle, Nadauld & Palmer), and on anchoring to credit-card minimum payments, including work by Neil Stewart and by Keys & Wang."
+
 private const val TIME_WORTH_SOURCE = "Grounded in research on what happens when women ask, including Babcock & Laschever’s Women Don’t Ask; on negotiation avoidance, including a 2025 paper in Negotiation and Conflict Management Research; and on Pew Research Center survey data."
 
 val LEARN_TOPICS = listOf(
@@ -99,6 +108,10 @@ val LEARN_TOPICS = listOf(
             "The pattern is a shape rather than a colour, so it still reads with colour blindness.",
         ),
     ),
+    LearnTopic(
+        "borrowing", "What borrowing really costs", BORROWING_SOURCE, BORROWING_BODY,
+        calculators = listOf("Work out what a loan costs" to Route.LoanCalc, "Work out what a purchase on a card costs" to Route.PurchaseCalc),
+    ),
     LearnTopic("credit-score", CREDIT_TITLE, "Credit invisibility — research by the Consumer Financial Protection Bureau", CREDIT_BODY, CREDIT_RESOURCES),
     LearnTopic(
         "well-being", "Financial well-being over adherence", "Grounded in the Consumer Financial Protection Bureau’s research defining financial well-being.",
@@ -110,7 +123,7 @@ val LEARN_TOPICS = listOf(
     ),
     LearnTopic(
         "time-worth", "What your time is worth, and why asking is hard", TIME_WORTH_SOURCE, TIME_WORTH_BODY,
-        calculator = "Work out what your extra hours come to" to Route.TimeWorthCalc,
+        calculators = listOf("Work out what your extra hours come to" to Route.TimeWorthCalc),
     ),
 )
 
@@ -162,7 +175,7 @@ private fun TopicBody(topic: LearnTopic, openRoute: (Route) -> Unit, initialList
     val t = LocalTokens.current; val p = t.palette
     for (para in topic.body) Text(para, color = p.txt2, fontSize = t.type.body, lineHeight = t.type.body * 1.6, modifier = Modifier.measureCap(t))
     if (topic.resources.isNotEmpty()) CreditResourceList(topic.resources, initialListOpen)
-    topic.calculator?.let { (label, route) -> LearnLink(label, { openRoute(route) }) }
+    for ((label, route) in topic.calculators) LearnLink(label, { openRoute(route) })
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.u / 2)) {
         LucideIcon(Lucide.INFO, tint = p.txt2, size = t.icons.xs); Text(topic.source, color = p.txt2, fontSize = t.type.caption, modifier = Modifier.measureCap(t))
     }

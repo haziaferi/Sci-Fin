@@ -209,6 +209,7 @@ fun AccountDetailScreen(route: Route.AccountDetail, state: UiState, store: AppSt
                     if (a.autoUpdateFromPayments) Caption("Auto-updates as its linked expense sweeps — interest and principal are split from the live balance each cycle, so it survives extra payments and corrections.")
                 }
             }
+            LearnLink(BORROWING_LINK, { store.push(Route.LearnTopic("borrowing")) })
         }
         InfoNote("Accounts are informational — they never feed Savings, Goal or Category math directly.", Modifier.padding(top = t.spacing.gap))
     }
@@ -225,6 +226,9 @@ private fun DetailRow(label: String, value: String, caption: String?) {
         }
     }
 }
+
+/** The borrowing topic's link, on a loan's and a card's own screen (§4.5, topic 7). */
+private const val BORROWING_LINK = "What borrowing really costs"
 
 fun rateTypeLabel(r: RateType) = when (r) { RateType.FIXED -> "Fixed"; RateType.VARIABLE -> "Variable"; RateType.INTEREST_ONLY -> "Interest-only" }
 
@@ -269,6 +273,8 @@ private fun PayoffPanel(a: Account, cur: String, store: AppStore) {
             }
         }
     }
+    // under the outlook it explains, above the credit note and its topic (§4.5's order, owner 2026-10-23)
+    LearnLink(BORROWING_LINK, { store.push(Route.LearnTopic("borrowing")) })
     InfoNote("In places that score credit, paying this off in full each cycle also reports payment history — not something this app is telling you to do, just part of the picture.", Modifier.padding(top = t.spacing.gap))
     LearnLink("How credit scoring works, and who it leaves out", { store.push(Route.LearnTopic("credit-score")) })
 }
