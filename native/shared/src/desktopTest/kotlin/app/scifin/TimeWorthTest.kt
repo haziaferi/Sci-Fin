@@ -16,7 +16,7 @@ class TimeWorthTest {
     private val settings = Fixture.profile.settings
 
     @Test fun `Learn's order follows its links -- Budget top down, Categories, Activity -- then the unlinked topics`() {
-        assertEquals(listOf("name-your-goal", "why-categories", "why-no-red", "credit-score", "well-being", "time-worth"), LEARN_TOPICS.map { it.id })
+        assertEquals(listOf("name-your-goal", "why-categories", "why-no-red", "borrowing", "credit-score", "well-being", "time-worth"), LEARN_TOPICS.map { it.id })
         // Budget's two links read in the order of the sections they speak to, Goals above categories
         val budget = File("src/commonMain/kotlin/app/scifin/ui/screens/BudgetScreen.kt").readText()
         assertTrue(budget.indexOf("LearnTopic(\"name-your-goal\")") in 0 until budget.indexOf("LearnTopic(\"why-categories\")"))
@@ -24,9 +24,9 @@ class TimeWorthTest {
 
     @Test fun `the topic leads into its calculator, which Learn's list offers too`() {
         val topic = LEARN_TOPICS.single { it.id == "time-worth" }
-        assertEquals(Route.TimeWorthCalc, topic.calculator?.second)
+        assertEquals(listOf(Route.TimeWorthCalc), topic.calculators.map { it.second })
         assertTrue(topic.body.size >= 3 && topic.resources.isEmpty())
-        assertTrue(LEARN_TOPICS.count { it.calculator != null } == 1, "only §10's topic leads into a calculator")
+        assertEquals(setOf("time-worth", "borrowing"), LEARN_TOPICS.filter { it.calculators.isNotEmpty() }.map { it.id }.toSet(), "only §10's and §9's topics lead into calculators")
         assertTrue("Route.TimeWorthCalc" in File("src/commonMain/kotlin/app/scifin/ui/screens/LearnScreen.kt").readText().substringAfter("SectionLabel(\"Calculators\")"))
     }
 
