@@ -1095,7 +1095,7 @@ Not a new privacy/security concept in its own right: this is local, single\-owne
 
 A Profile is a genuinely separate environment, not just a separate set of financial figures with a shared device\-level shell — a parent's Profile can reasonably carry her own text scale or currency, exactly as it carries her own income figure, rather than inheriting whoever's device it happens to be viewed on. One wrap point, not a device\-level/profile\-level split. **ImportState (§4.3, §12) is inside the wrap (corrected 2026\-09\-14):** the prototype had left `importedKeys` and `payeeRules` outside it, which would have made a statement imported into one Profile arrive as "already imported" in another — exactly the shared\-ledger failure this section exists to prevent. The only state above the wrap is what a backup file (§4.7) carries beside the array: the schema version, the active Profile's id, and the two last\-export/last\-restore dates.
 
-## 9\. Loan, Credit Cards & Credit Score (Deferred — sketched, not built)
+## 9\. Loan, Credit Cards & Credit Score (~~Deferred — sketched, not built~~ built: both calculators and the payoff outlook 2026\-09\-14, §13.3; the credit topic 2026\-09\-23, §9.3; the borrowing topic 2026\-10\-23, §4.5)
 
 ### 9\.1 Loan feature (Decided, resolved 2026\-07\-20; rate\-type handling and created\-entity fields specified 2026\-09\-02)
 
