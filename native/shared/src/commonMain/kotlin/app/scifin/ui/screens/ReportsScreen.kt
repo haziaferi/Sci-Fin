@@ -23,6 +23,7 @@ import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontWeight
 import app.scifin.app.AppStore
+import app.scifin.app.Route
 import app.scifin.app.Tab
 import app.scifin.app.UiState
 import app.scifin.engine.Reports
@@ -157,6 +158,8 @@ private fun BufferReport(d: ProfileData, store: AppStore) {
         if (open) InlineLearn(listOf("At your typical spend over the last three complete months, today’s Savings would last about $coverage day${if (coverage == 1) "" else "s"}. Goal contributions are counted as money that has left the pool, so this is the conservative reading."), null)
     }
     InfoNote("This is a live figure: it counts from today back to the oldest ${currencyNoun(d.settings.currency)} still sitting in Savings, so it rises while money sits untouched. That’s the intended reading — money that sits is getting older, and a figure that only moved when you did would be measuring activity, not cushion.", Modifier.padding(top = t.spacing.u * 1.5f))
+    // §13.1 item 4 (owner, 2026-10-25): each view's reading is a Learn topic, linked last in its side column
+    LearnLink("Why money on hand matters", { store.push(Route.LearnTopic("money-on-hand")) }, Modifier.padding(top = t.spacing.gap))
     })
 }
 
@@ -213,6 +216,7 @@ private fun IncomeExpenseReport(d: ProfileData, store: AppStore) {
     TwoBarColumns(pts.map { Triple(it.month.month.shortName(), it.income, it.expenses) })
     }, supporting = {
     InfoNote("One accent, two opacities — income and expenses aren’t a good/bad pair, just two different things.", Modifier.padding(top = t.spacing.gap))
+    LearnLink("Why uneven months are normal", { store.push(Route.LearnTopic("uneven-months")) }, Modifier.padding(top = t.spacing.gap))
     })
 }
 
