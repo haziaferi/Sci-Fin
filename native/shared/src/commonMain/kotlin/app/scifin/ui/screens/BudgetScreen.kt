@@ -122,7 +122,7 @@ private fun GoalsSection(d: ProfileData, store: AppStore) {
                 // progressCaption's two parts, apart: the amount in the figure column, the words under the bar
                 val figure = formatMoney(if (target != null) abs(g.saved - target) else g.saved, cur)
                 val words = when {
-                    target == null -> tr("saved so far — no target, just a running tally")
+                    target == null -> tr("saved so far — a running total with no set figure")
                     g.saved > target -> tr("past goal")
                     else -> tr("left of goal")
                 }
@@ -155,7 +155,7 @@ private fun IncomeSection(d: ProfileData, store: AppStore, today: LocalDate) {
     Column(Modifier.tutAnchor("income-section"), verticalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
         SectionLabel(tr("Income"))
         if (!d.settings.incomeEnabled) {
-            PlaceholderCard(tr("Off by default. Turn it on in Settings to track paychecks and let this section come back."))
+            PlaceholderCard(tr("Off by default. Turn it on in Settings to track income in this section."))
             return@Column
         }
         if (Hourly.isHourly(d.settings)) { HourlyIncomeSection(d, store, today); return@Column }

@@ -1,5 +1,6 @@
 package app.scifin.app
 
+import app.scifin.i18n.I18n
 import app.scifin.data.SciFinDao
 import app.scifin.data.SciFinDatabase
 import app.scifin.engine.Clock
@@ -121,6 +122,8 @@ class AppSession(
      */
     suspend fun syncNotifications(d: ProfileData) {
         notify.withLock {
+            // the bodies are composed now, in the Profile's language -- also in a background run with no screen (§2.7)
+            I18n.current = I18n.resolve(d.settings.language)
             val regs = Reminders.registrations(d, Reminders.localNow(clock))
             if (regs != lastReminders) { scheduler.syncReminders(regs); lastReminders = regs }
             val nm = d.settings.newMonthNotificationEnabled

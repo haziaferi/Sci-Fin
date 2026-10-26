@@ -131,7 +131,7 @@ private fun BufferReport(d: ProfileData, store: AppStore) {
     val today = store.clock.today()
     if (d.savings.amount == null) {
         // §3.1: while Savings is null, one plain line -- never a zero
-        InfoNote(tr("The figure appears once Savings has a value."))
+        InfoNote(tr("The figure appears after you first set your Savings."))
         return
     }
     // §5.1: months before the opening lot are already left out by the engine; a zero after it is drawn
@@ -158,9 +158,9 @@ private fun BufferReport(d: ProfileData, store: AppStore) {
             if (open) tr("Hide how long this would cover you") else tr("Show how long this would cover you"), { open = !open },
             Modifier.padding(top = t.spacing.u * 1.25f, start = t.spacing.u * 0.25f).semantics { role = Role.Button; toggleableState = ToggleableState(open) },
         )
-        if (open) InlineLearn(listOf(trp("At your typical spend over the last three complete months, today’s Savings would last about {0} day. Goal contributions are counted as money that has left the pool, so this is the conservative reading.", "At your typical spend over the last three complete months, today’s Savings would last about {0} days. Goal contributions are counted as money that has left the pool, so this is the conservative reading.", coverage)), null)
+        if (open) InlineLearn(listOf(trp("At your typical spend over the last three complete months, today’s Savings would last about {0} day. Goal contributions have a specific purpose, so they are not part of the Savings total.", "At your typical spend over the last three complete months, today’s Savings would last about {0} days. Goal contributions have a specific purpose, so they are not part of the Savings total.", coverage)), null)
     }
-    InfoNote(trf("This is a live figure: it counts from today back to the oldest {0} still sitting in Savings, so it rises while money sits untouched. That’s the intended reading — money that sits is getting older, and a figure that only moved when you did would be measuring activity, not cushion.", currencyNoun(d.settings.currency)), Modifier.padding(top = t.spacing.u * 1.5f))
+    InfoNote(trf("This is a live figure: it counts the days from today back to the oldest {0} still in Savings. It rises until Savings drops below that money. This way money that stays put “ages” and becomes a “cushion” that can absorb future surprises.", currencyNoun(d.settings.currency)), Modifier.padding(top = t.spacing.u * 1.5f))
     // §13.1 item 4 (owner, 2026-10-25): each view's reading is a Learn topic, linked last in its side column
     LearnLink(tr("Why money on hand matters"), { store.push(Route.LearnTopic("money-on-hand")) }, Modifier.padding(top = t.spacing.gap))
     })
@@ -188,8 +188,8 @@ private fun SpendingReport(d: ProfileData, store: AppStore) {
             Text(formatMoney(r.amount, cur), color = p.txt, fontSize = t.type.body, fontWeight = FontWeight.Bold)
         }
         InfoNote(
-            if (s.net <= 0) tr("Nothing net left Savings this month — money came back in at least as fast as it went out, so there are no shares to draw.")
-            else tr("One of these nets out negative this month — a correction or a reversal returned more than went out — so the figures are shown plainly rather than as shares of a whole."),
+            if (s.net <= 0) tr("Nothing net left Savings this month: money coming in matched or exceeded money going out, so there are no shares to show.")
+            else tr("One of these is negative this month: a correction or a reversal brought in more than was logged going out. The figures are listed as they are, not as shares of a total."),
             Modifier.padding(top = t.spacing.u * 1.25f),
         )
         return
@@ -218,7 +218,7 @@ private fun IncomeExpenseReport(d: ProfileData, store: AppStore) {
     }
     TwoBarColumns(pts.map { Triple(it.month.month.shortName(), it.income, it.expenses) })
     }, supporting = {
-    InfoNote(tr("One accent, two opacities — income and expenses aren’t a good/bad pair, just two different things."), Modifier.padding(top = t.spacing.gap))
+    InfoNote(tr("One colour, two opacities — income and expenses are two different things, not an alternation of good and bad."), Modifier.padding(top = t.spacing.gap))
     LearnLink(tr("Why uneven months are normal"), { store.push(Route.LearnTopic("uneven-months")) }, Modifier.padding(top = t.spacing.gap))
     })
 }
@@ -236,12 +236,12 @@ private fun SavingsVsOwedReport(d: ProfileData, store: AppStore) {
                 LucideIcon(Lucide.LANDMARK, tint = p.txt2, size = t.icons.sm); FigureLabel(tr("Savings vs. Owed"))
             }
             AmountText(formatMoney(Reports.savingsVsOwedNow(d), cur), color = p.acc, fontSize = t.type.figure, fontWeight = FontWeight.Bold)
-            Caption(tr("Unallocated Savings minus Credit and Loan balances — a dip is drawn no differently than a rise. Money held in Goals is not counted."))
+            Caption(tr("Savings minus Credit and Loan balances — a dip is drawn the same way as a rise."))
             Sparkline(trend.map { it.value }, trend.map { it.month.month.shortName() })
         }
     }
     }, supporting = {
-    if (owedNoteShown(d.accounts)) InfoNote(tr("Off by default — with no Credit or Loan accounts, this would just be Savings again under a different name."), Modifier.padding(top = t.spacing.u * 1.5f))
+    if (owedNoteShown(d.accounts)) InfoNote(tr("Off by default when there are no Credit or Loan accounts."), Modifier.padding(top = t.spacing.u * 1.5f))
     })
 }
 

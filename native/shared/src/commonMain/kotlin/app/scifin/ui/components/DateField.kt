@@ -2,6 +2,7 @@
 
 package app.scifin.ui.components
 
+import app.scifin.i18n.I18n
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -51,27 +52,27 @@ fun DateField(value: LocalDate?, placeholder: String = "", onChange: (LocalDate)
         LucideIcon(Lucide.CALENDAR, tint = p.txt2, size = t.spacing.u * 2)
     }
     if (open) {
-        // pinned to English until the app is localised: one language per screen
-        val state = remember { DatePickerState(locale = englishCalendarLocale(), initialSelectedDateMillis = value?.let { it.toEpochDays() * DAY_MS }) }
-        EnglishLocaleScope { DatePickerDialog(
+        // in the app's language, not the device's (§2.7): one language per screen
+        val state = remember(I18n.current) { DatePickerState(locale = appCalendarLocale(), initialSelectedDateMillis = value?.let { it.toEpochDays() * DAY_MS }) }
+        AppLocaleScope { DatePickerDialog(
             onDismissRequest = { open = false },
             confirmButton = { TextButton(onClick = { state.selectedDateMillis?.let { onChange(LocalDate.fromEpochDays(it / DAY_MS)) }; open = false }) { Text(tr("Done")) } },
             dismissButton = { TextButton(onClick = { open = false }) { Text(tr("Cancel")) } },
-        ) { DatePicker(state = state, dateFormatter = remember { englishFormatter() }, title = { Text(tr("Select date"), modifier = Modifier.padding(start = t.spacing.u * 3, top = t.spacing.u * 2)) }) } }
+        ) { DatePicker(state = state, dateFormatter = remember(I18n.current) { appFormatter() }, title = { Text(tr("Select date"), modifier = Modifier.padding(start = t.spacing.u * 3, top = t.spacing.u * 2)) }) } }
     }
 }
 
-/** The English calendar locale, for the picker's month grid. */
-expect fun englishCalendarLocale(): CalendarLocale
+/** The app's language as a calendar locale (§2.7), for the picker's month grid -- not the device's. */
+expect fun appCalendarLocale(): CalendarLocale
 
-/** Runs [content] under an English platform configuration where the platform has one (Android); a pass-through elsewhere. */
+/** Runs [content] under the app's language where the platform has a configuration for it (Android); a pass-through elsewhere. */
 @Composable
-expect fun EnglishLocaleScope(content: @Composable () -> Unit)
+expect fun AppLocaleScope(content: @Composable () -> Unit)
 
-/** Material's formatter, with the platform locale it is handed swapped for English (the headline and the month/year line). */
-private fun englishFormatter(): DatePickerFormatter {
+/** Material's formatter, with the platform locale it is handed swapped for the app's (the headline and the month/year line). */
+private fun appFormatter(): DatePickerFormatter {
     val base = DatePickerDefaults.dateFormatter()
-    val en = englishCalendarLocale()
+    val en = appCalendarLocale()
     return object : DatePickerFormatter {
         override fun formatDate(dateMillis: Long?, locale: CalendarLocale, forContentDescription: Boolean) = base.formatDate(dateMillis, en, forContentDescription)
         override fun formatMonthYear(monthMillis: Long?, locale: CalendarLocale) = base.formatMonthYear(monthMillis, en)

@@ -1,5 +1,6 @@
 package app.scifin.model
 
+import app.scifin.i18n.tr
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -64,9 +65,15 @@ enum class ThemeMode(val token: String) {
 
 /** §2.5: the four themes. The token is what Settings stores; the palettes live in the UI layer. Swiss Blue is the default. */
 @Serializable
-enum class Theme(val token: String, val label: String) {
-    @SerialName("swiss-blue") SWISS_BLUE("swiss-blue", "Swiss Blue"), @SerialName("daylight") DAYLIGHT("daylight", "Daylight"),
-    @SerialName("tallow-tome") TALLOW_TOME("tallow-tome", "Tallow & Tome"), @SerialName("dusk") DUSK("dusk", "Dusk");
+enum class Theme(val token: String) {
+    @SerialName("swiss-blue") SWISS_BLUE("swiss-blue"), @SerialName("daylight") DAYLIGHT("daylight"),
+    @SerialName("tallow-tome") TALLOW_TOME("tallow-tome"), @SerialName("dusk") DUSK("dusk");
+
+    /** The name shown in Appearance, in the current language (§2.7). */
+    val label: String get() = when (this) {
+        SWISS_BLUE -> tr("Swiss Blue"); DAYLIGHT -> tr("Daylight"); TALLOW_TOME -> tr("Tallow & Tome"); DUSK -> tr("Dusk")
+    }
+
     companion object {
         /** §2.5: a stored or imported token from an earlier theme set is read as the nearest new theme by hue, never rejected. */
         private val legacy = mapOf(

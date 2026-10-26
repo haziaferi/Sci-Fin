@@ -103,7 +103,7 @@ fun LoanCalcScreen(state: UiState, store: AppStore) {
         FieldGroup { FieldLabel(tr("Term (months)")); TextField(termText, { v -> termText = v; v.trim().toIntOrNull()?.takeIf { it >= 1 }?.let { draft = draft.copy(termMonths = it) } }, prefix = "#", keyboard = KeyboardType.Number, label = tr("Term (months)")) }
         FieldGroup { FieldLabel(tr("Rate type")); ChipRow(RateType.entries.map { it.token to rateTypeLabel(it) }, draft.rateType.token) { v -> draft = draft.copy(rateType = RateType.of(v)) } }
         when (draft.rateType) {
-            RateType.VARIABLE -> FeasibilityNote(tr("The app can’t know future rate resets, so the payment it carries is the one as of today. Update the recurring expense when a reset happens — it will settle the difference for you."))
+            RateType.VARIABLE -> FeasibilityNote(tr("The payment uses today’s rate. When the rate is revised, update the recurring expense: the difference is settled automatically."))
             RateType.INTEREST_ONLY -> FeasibilityNote(tr("Interest-only: the payment covers interest and nothing else, so the whole principal is still owed at the end of the period."))
             RateType.FIXED -> Unit
         }
@@ -123,7 +123,7 @@ fun LoanCalcScreen(state: UiState, store: AppStore) {
             Button(tr("Get loan"), ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { store.openSheet(Sheet.LoanBorrow(draft)) }
             Button(tr("Reset"), ButtonKind.GHOST) { draft = LoanDraft(); principalText = moneyText(draft.principal); loanRateText = rateText(draft.rate, 1); termText = draft.termMonths.toString() }
         }
-        InfoNote(tr("Exploring costs nothing and creates nothing. “Get loan” creates a real loan account and its payment together, in one step; “Save for it” creates a goal. Either way you confirm first."), Modifier.padding(top = t.spacing.gap))
+        InfoNote(tr("Here you explore options; nothing is created until you choose. “Get loan” creates a real loan account and its payment together, in one step; “Save for it” creates a goal. Either way you confirm first."), Modifier.padding(top = t.spacing.gap))
     }
 }
 
@@ -208,7 +208,7 @@ fun PurchaseCalcScreen(state: UiState, store: AppStore) {
             ChipRow(cards.map { it.id to it.name }, acctId ?: "") { acctId = it }
             Button(tr("Open this card’s payoff outlook"), ButtonKind.SECONDARY, enabled = acctId != null, modifier = Modifier.fillMaxWidth().padding(top = t.spacing.u * 0.75f)) { acctId?.let { store.push(Route.AccountDetail(it)) } }
         }
-        InfoNote(tr("This screen changes nothing on its own — no balance moves and nothing is created. To commit to a payment, go to the card itself, where the balance and its payoff outlook live."), Modifier.padding(top = t.spacing.gap))
+        InfoNote(tr("This screen is for comparing; it changes no balance. To commit to a payment, open the card, where you find its balance and payoff outlook."), Modifier.padding(top = t.spacing.gap))
     }
 }
 
@@ -243,7 +243,7 @@ fun TimeWorthCalcScreen(state: UiState, store: AppStore) {
             Caption(when {
                 prefill != null && Hourly.isHourly(d.settings) -> tr("Your hourly rate from Settings — a starting point, fully editable.")
                 prefill != null -> tr("Worked out from your income and the hours above — a starting point, fully editable.")
-                else -> tr("Your figure, entered directly. The app doesn’t need Income switched on for this.")
+                else -> tr("Your figure, entered directly. This works with Income off too.")
             }, Modifier.padding(top = t.spacing.u * 0.75f))
         }
         SectionLabel(tr("What those hours come to"))

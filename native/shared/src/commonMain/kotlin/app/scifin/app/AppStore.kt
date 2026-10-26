@@ -152,7 +152,7 @@ private fun CopySchedule.summary(pinOn: Boolean) = CopySummary(
 private val DONE: Job = Job().apply { complete() }
 
 private val READ_FAILED: String get() = tr("Could not read that file. It may have moved, or the app may no longer have access to it.")
-private val NOT_A_STATEMENT: String get() = tr("That file doesn’t look like a bank statement the app can read (CSV or OFX). Nothing was imported.")
+private val NOT_A_STATEMENT: String get() = tr("The app doesn’t recognise that file as a bank statement (CSV or OFX). Nothing was imported.")
 
 /** §4.3: a statement parsed and annotated, under review. */
 data class ImportReview(val fileName: String, val format: String, val rows: List<ReviewRow>)
@@ -561,7 +561,7 @@ class AppStore(
         val isOfx = Regex("<STMTTRN>", RegexOption.IGNORE_CASE).containsMatchIn(picked.text) || Regex("\\.(ofx|qfx)$", RegexOption.IGNORE_CASE).containsMatchIn(picked.name)
         val rows = attempt(::importFailed, NOT_A_STATEMENT) { if (isOfx) Import.parseOFX(picked.text) else Import.parseCSV(picked.text) } ?: return@launch
         if (rows.isEmpty()) {
-            _state.update { it.copy(importReview = null, importError = if (isOfx) tr("No transactions found in that OFX file.") else tr("That file doesn’t look like a bank statement the app can read: a CSV needs a header row naming at least a date column and an amount (or separate debit and credit columns). Nothing was imported.")) }
+            _state.update { it.copy(importReview = null, importError = if (isOfx) tr("No transactions found in that OFX file.") else tr("The app doesn’t recognise that file as a bank statement: a CSV needs a header row naming at least a date column and an amount column (or separate debit and credit columns). Nothing was imported.")) }
             return@launch
         }
         val review = Import.annotate(d, rows).sortedByDescending { it.row.date }

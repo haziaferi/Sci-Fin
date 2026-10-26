@@ -91,6 +91,6 @@ class ActivityStoreTest {
         val store = AppStore(AppSession(db, RecordingScheduler(), clock, ids::next), db, this, OneFile(PickedFile("x.csv", "hello")))
         store.start(); store.createProfile("Ana", Theme.SWISS_BLUE, false).join(); store.completeOnboarding().join()
         store.pickStatement().join()
-        assertNull(store.state.value.importReview); assertTrue(store.state.value.importError!!.startsWith("That file doesn’t look like a bank statement"))
+        assertNull(store.state.value.importReview); assertTrue(store.state.value.importError!!.startsWith("The app doesn’t recognise that file as a bank statement"))
     }
 }

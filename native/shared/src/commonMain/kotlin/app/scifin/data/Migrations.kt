@@ -113,4 +113,11 @@ val SCIFIN_MIGRATIONS: Array<Migration> = arrayOf(
             connection.execSQL("CREATE INDEX IF NOT EXISTS `index_shifts_profileId` ON `shifts` (`profileId`)")
         }
     },
+
+    /** 9 → 10: §2.7's language per Profile. Every existing Profile follows the device, which is what null says. */
+    object : Migration(9, 10) {
+        override fun migrate(connection: SQLiteConnection) {
+            connection.execSQL("ALTER TABLE settings ADD COLUMN language TEXT")
+        }
+    },
 )

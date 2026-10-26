@@ -43,7 +43,7 @@ private fun kindLabel(kind: String) = when (kind) {
 @Composable
 internal fun TrashPage(state: UiState, store: AppStore) {
     val t = LocalTokens.current
-    InfoNote(trf("Deleted things wait here for {0} days, then go for good — a notification says so ten days before. While here they do nothing: a payment doesn’t sweep or remind, and nothing counts towards any figure. Restore puts one back as it was.", Trash.KEPT_DAYS))
+    InfoNote(trf("Deleted items stay here for {0} days, then are erased for good — a notification tells you ten days before. Items in the Trash are inactive and change nothing in the app. You can restore them until they are erased.", Trash.KEPT_DAYS))
     if (state.trash.isEmpty()) {
         Caption(tr("Nothing is in the Trash."), Modifier.padding(top = t.spacing.gap))
         return

@@ -178,17 +178,17 @@ class AndroidNotificationScheduler(
         mgr.createNotificationChannel(
             NotificationChannel(
                 CHANNEL_REMINDERS, tr("Due-date reminders"), NotificationManager.IMPORTANCE_DEFAULT
-            ).apply { description = tr("A quiet note before a recurring expense is due.") }
+            ).apply { description = tr("You get a notification before a recurring expense is due.") }
         )
         mgr.createNotificationChannel(
             NotificationChannel(
                 CHANNEL_NEW_MONTH, tr("New month"), NotificationManager.IMPORTANCE_DEFAULT
-            ).apply { description = tr("One gentle ping on the 1st of each month.") }
+            ).apply { description = tr("You get one notification on the 1st of each month.") }
         )
         mgr.createNotificationChannel(
             NotificationChannel(
                 CHANNEL_COPIES, tr("Automatic copies"), NotificationManager.IMPORTANCE_DEFAULT
-            ).apply { description = tr("Said once when an automatic copy could not be written.") }
+            ).apply { description = tr("You get one notification when an automatic copy can’t be made.") }
         )
     }
 }

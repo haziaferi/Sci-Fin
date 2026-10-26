@@ -78,7 +78,7 @@ class OnboardingTest {
 class CurrencyLandingOrderTest {
     @Test fun `the landing puts Currency before Look and the settings page keeps Look first`() {
         assertEquals("currency", appearanceSections(currencyFirst = true).first())
-        assertEquals(listOf("look", "mode", "currency", "density", "motion", "distraction"), appearanceSections(currencyFirst = false))
+        assertEquals(listOf("look", "mode", "language", "currency", "density", "motion", "distraction"), appearanceSections(currencyFirst = false))
         assertEquals(appearanceSections(false).toSet(), appearanceSections(true).toSet())
     }
 }
@@ -93,7 +93,7 @@ class TutorialStopThreeTest {
         val goals = TUTORIAL_STOPS[1]; val recurring = TUTORIAL_STOPS[3]
         assertEquals("goals-section", goals.anchor); assertEquals("recurring-section", recurring.anchor)
         assertEquals(listOf("Goals: near or far. Add to one whenever you like, like a piggy bank."), goals.lines)
-        assertEquals(listOf("Recurring Expenses: your flat-fee bills. What’s due this month leaves Savings on the 1st, up front; anything billed less often is set aside a little each month — no surprise charges."), recurring.lines)
-        for (s in listOf(goals, recurring)) assertTrue(s.lines.sumOf { it.length } <= 260, "${s.anchor} is ${s.lines.sumOf { it.length }} characters; the window took ten lines at 320")
+        assertEquals(listOf("Recurring Expenses: bills and payments on a regular schedule, for a fixed amount. What’s due this month is logged as leaving Savings on the 1st, ahead of the actual due dates spread over the following 30 days or so; anything paid less often is set aside automatically in equal parts each month."), recurring.lines)
+        for (s in listOf(goals, recurring)) assertTrue(s.lines.sumOf { it.length } <= 340, "${s.anchor} is ${s.lines.sumOf { it.length }} characters; the owner's Recurring line, 330 in Italian, is the longest that fits a 360x780 phone (ItalianRenderTest)")
     }
 }

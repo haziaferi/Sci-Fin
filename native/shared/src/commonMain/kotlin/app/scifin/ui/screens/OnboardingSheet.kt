@@ -39,12 +39,12 @@ import app.scifin.i18n.tr
  */
 
 private val ONBOARDING_TITLE: String get() = tr("Sci-Fin stands for Scientific-Finance")
-private val ONBOARDING_DESCRIPTION: String get() = tr("This app is built starting from scientific research regarding how we think about money and focuses on savings.")
+private val ONBOARDING_DESCRIPTION: String get() = tr("This app grows out of scientific research on how we perceive money. Its structure centres on saving.")
 private val ONBOARDING_NAME_LABEL: String get() = tr("Name this profile")
 private val ONBOARDING_NAME_PLACEHOLDER: String get() = tr("Your name or a label")
 private val ONBOARDING_THEME_LABEL: String get() = tr("Choose a theme:")
 private val ONBOARDING_THEME_CAPTION: String get() = tr("You can always change it in Settings.")
-private val ONBOARDING_RESTORE: String get() = tr("Restore from a backup")
+private val ONBOARDING_RESTORE: String get() = tr("Restore a backup")
 private val DAMAGED_TITLE: String get() = tr("Sci-Fin can’t read its data")
 private val DAMAGED_BODY: String get() = tr("The file has been kept as a copy.")
 private val DAMAGED_RESTORE: String get() = tr("Restore a backup")
@@ -61,7 +61,7 @@ fun OnboardingSheet(route: Route.Onboarding, state: UiState, store: AppStore) {
     // and the same Confirm/Cancel pair the Settings route shows, so nothing is decided twice.
     // A file with a password asks for it first (§4.7), in the same sheet.
     if (state.pendingBackup != null || state.lockedBackup != null) {
-        SheetScaffold(title = tr("Restore backup"), onDismiss = null) { BackupOpen(state, store) }
+        SheetScaffold(title = tr("Restore a backup"), onDismiss = null) { BackupOpen(state, store) }
         return
     }
 

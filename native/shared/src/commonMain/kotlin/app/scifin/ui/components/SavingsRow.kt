@@ -38,7 +38,7 @@ fun SavingsRow(d: ProfileData, store: AppStore) {
             slot = if (LocalWidthClass.current != WidthClass.COMPACT)
                 ({ RowAdd(tr("Add to Savings")) { store.openSheet(Sheet.Entry("savings")) } }) else null,
         )
-        if (unset) PlainNote(tr("The app’s core functions depend on this figure being real. Log money in whenever you’re ready — no rush."))
+        if (unset) PlainNote(tr("The app’s core functions are based on this figure. Enter your current savings to set it."))
     }
 }
 

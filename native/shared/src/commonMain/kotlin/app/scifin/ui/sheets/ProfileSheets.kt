@@ -43,7 +43,7 @@ fun DeleteProfileSheet(sheet: Sheet.DeleteProfile, state: UiState, store: AppSto
     val name = state.profiles.firstOrNull { it.id == sheet.id }?.name ?: ""
     SheetScaffold(title = tr("Delete profile"), onDismiss = store::closeSheet) {
         Text(
-            trf("Delete {0}? Everything in it goes with it — its Savings, its goals and categories, its accounts and its whole ledger. Nothing moves into another profile. It waits in the Trash for 30 days, untouched, and Settings › Trash can bring it back.", name),
+            trf("Delete {0}? The profile and everything in it — Savings, goals, categories, accounts and the whole ledger — moves to the Trash. No other profile is affected. This profile stays in the Trash for 30 days and can be restored from Settings › Trash.", name),
             color = p.txt, fontSize = t.type.body, lineHeight = t.type.body * 1.5, modifier = Modifier.padding(bottom = t.spacing.pad),
         )
         ButtonRow {

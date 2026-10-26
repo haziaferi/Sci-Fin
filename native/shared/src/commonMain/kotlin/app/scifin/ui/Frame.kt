@@ -1,5 +1,6 @@
 package app.scifin.ui
 
+import app.scifin.i18n.I18n
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import app.scifin.i18n.tr
@@ -108,6 +109,10 @@ val LocalWidthClass = staticCompositionLocalOf { WidthClass.COMPACT }
 @Composable
 fun SciFinApp(store: AppStore, targetDp: Int, systemDark: Boolean = isSystemInDarkTheme()) {
     val state by store.state.collectAsState()
+    // §2.7: the open Profile's language, or the device's before a Profile exists and on the PIN gate. Set here, before
+    // anything below reads it, so the first frame is already in it; an unchanged value writes nothing.
+    val language = I18n.preview ?: state.data?.takeIf { !state.locked }?.let { I18n.resolve(it.settings.language) } ?: I18n.device()
+    if (I18n.current != language) I18n.current = language
     // The palette and the type ramp do not depend on the width, so the ground can be painted
     // before anything is measured; the spacing and icon tokens do (§2.5's screen factor),
     // so the real token set is built inside the box, from the width of the content area itself.

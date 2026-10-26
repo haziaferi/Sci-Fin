@@ -7,15 +7,17 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import app.scifin.i18n.I18n
 import java.util.Locale
 
-actual fun englishCalendarLocale(): CalendarLocale = Locale.ENGLISH
+actual fun appCalendarLocale(): CalendarLocale = Locale.forLanguageTag(I18n.current.tag)
 
-/** The dialog's headline and its OK/Cancel strings read the configuration, so the configuration is English inside it. */
+/** The dialog's headline and its OK/Cancel strings read the configuration, so the configuration is the app's language inside it. */
 @Composable
-actual fun EnglishLocaleScope(content: @Composable () -> Unit) {
+actual fun AppLocaleScope(content: @Composable () -> Unit) {
     val base = LocalConfiguration.current
     val ctx = LocalContext.current
-    val (config, enCtx) = remember(base, ctx) { Configuration(base).apply { setLocale(Locale.ENGLISH) }.let { it to ctx.createConfigurationContext(it) } }
+    val lang = I18n.current
+    val (config, enCtx) = remember(base, ctx, lang) { Configuration(base).apply { setLocale(Locale.forLanguageTag(lang.tag)) }.let { it to ctx.createConfigurationContext(it) } }
     CompositionLocalProvider(LocalConfiguration provides config, LocalContext provides enCtx) { content() }
 }
