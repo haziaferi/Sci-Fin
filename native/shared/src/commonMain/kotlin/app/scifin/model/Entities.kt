@@ -209,6 +209,8 @@ data class Settings(
     val lastPaydayHandled: LocalDate? = null,
     /** The payday notification, sent only while income is not recorded by itself (owner, 2026-10-26). */
     @ColumnInfo(defaultValue = "1") val paydayNotificationEnabled: Boolean = true,
+    /** §2.7: the language this Profile is shown in (`en`, `it`); null follows the device. */
+    val language: String? = null,
 )
 
 /**
@@ -320,4 +322,4 @@ data class TrashItem(
 )
 
 /** §12's storage version, carried by the Room database and the backup file. Every bump has a Migration (data/Migrations.kt); the history is in the spec. */
-const val SCHEMA_VERSION = 9
+const val SCHEMA_VERSION = 10

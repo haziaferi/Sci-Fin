@@ -4,6 +4,7 @@ import app.scifin.engine.moneyText
 import app.scifin.i18n.CATALOGUES
 import app.scifin.i18n.I18n
 import app.scifin.i18n.Language
+import app.scifin.i18n.SHIPPED
 import app.scifin.i18n.tr
 import app.scifin.i18n.trf
 import app.scifin.i18n.trp
@@ -68,13 +69,29 @@ class LocalisationTest {
         assertTrue(raw.isEmpty(), "${raw.size} raw strings reach the screen:\n" + raw.take(25).joinToString("\n"))
     }
 
-    @Test fun `every shipped catalogue holds every key`() {
+    /** The Learn topics' keys, which a catalogue's interface part does not hold (§2.7 step 3). */
+    private val learnKeys: Set<String> by lazy {
+        sources.filter { (f, _) -> f.name == "LearnScreen.kt" || f.name == "CreditTopic.kt" }.flatMap { (_, text) ->
+            CALL.findAll(text).map { it.groupValues[2] } + PLURAL.findAll(text).flatMap { sequenceOf(it.groupValues[1], it.groupValues[2]) }
+        }.map(::unescape).toSet()
+    }
+
+    @Test fun `every shipped catalogue holds every key, and every catalogue keeps its placeholders`() {
         for ((lang, cat) in CATALOGUES) {
-            val missing = keys - cat.keys
-            assertTrue(missing.isEmpty(), "${lang.label} is missing ${missing.size}: ${missing.take(10)}")
+            if (lang in SHIPPED) {
+                val missing = keys - cat.keys
+                assertTrue(missing.isEmpty(), "${lang.label} is missing ${missing.size}: ${missing.take(10)}")
+            }
             val holes = cat.filter { (en, it) -> Regex("""\{\d+}""").findAll(en).map { m -> m.value }.toSet() != Regex("""\{\d+}""").findAll(it).map { m -> m.value }.toSet() }
             assertTrue(holes.isEmpty(), "${lang.label} drops or adds a placeholder: ${holes.keys.take(5)}")
+            val stale = cat.keys - keys
+            assertTrue(stale.isEmpty(), "${lang.label} translates text the app no longer has: ${stale.take(10)}")
         }
+    }
+
+    @Test fun `the Italian interface holds every key outside the Learn topics`() {
+        val missing = keys - learnKeys - CATALOGUES.getValue(Language.IT).keys
+        assertTrue(missing.isEmpty(), "Italian is missing ${missing.size}: ${missing.take(15)}")
     }
 
     @Test fun `English text comes back unchanged, placeholders and plurals included`() {

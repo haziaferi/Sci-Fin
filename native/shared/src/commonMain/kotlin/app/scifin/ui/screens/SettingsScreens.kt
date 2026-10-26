@@ -1,5 +1,8 @@
 package app.scifin.ui.screens
 
+import app.scifin.i18n.SUPPORTED
+import app.scifin.i18n.Language
+import app.scifin.i18n.I18n
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.semantics.Role
@@ -85,6 +88,8 @@ fun cadenceLabel(c: IncomeCadence) = when (c) {
 }
 
 fun ordinal(n: Int): String {
+    // §2.7: Italian names the day by its number ("il giorno 5"); the suffix is English's
+    if (I18n.current == Language.IT) return n.toString()
     val r = n % 100
     val suffix = if (r in 11..13) "th" else when (n % 10) { 1 -> "st"; 2 -> "nd"; 3 -> "rd"; else -> "th" }
     return "$n$suffix"
@@ -156,6 +161,13 @@ internal fun AppearancePage(d: ProfileData, store: AppStore, currencyFirst: Bool
             "mode" -> SettingRow(if (t.dark) Lucide.MOON else Lucide.SUN, tr("Appearance"), tr("System follows your device")) {
                 PillToggle(listOf("system" to tr("Auto"), "light" to tr("Light"), "dark" to tr("Dark")), s.mode.token) { v -> store.updateSettings { it.copy(mode = ThemeMode.of(v)) } }
             }
+            // §2.7: the device's language unless this Profile chooses one; each language is named in itself
+            "language" -> if (SUPPORTED.size > 1) FieldGroup {
+                FieldLabel(tr("Language"))
+                ChipRow(listOf("" to trf("Device ({0})", I18n.device().label)) + SUPPORTED.map { it.tag to it.label }, s.language ?: "") { v ->
+                    store.updateSettings { it.copy(language = v.ifEmpty { null }) }
+                }
+            }
             "currency" -> SettingRow(Lucide.BANKNOTE, tr("Currency"), tr("Symbol only — amounts don’t convert")) {
                 PillToggle(listOf("USD" to "$", "EUR" to "€"), s.currency) { v -> store.updateSettings { it.copy(currency = v) } }
             }
@@ -177,7 +189,7 @@ internal fun AppearancePage(d: ProfileData, store: AppStore, currencyFirst: Bool
  * asks about currency, so there -- and only there -- Currency leads.
  */
 fun appearanceSections(currencyFirst: Boolean): List<String> {
-    val base = listOf("look", "mode", "currency", "density", "motion", "distraction")
+    val base = listOf("look", "mode", "language", "currency", "density", "motion", "distraction")
     return if (currencyFirst) listOf("currency") + base.filter { it != "currency" } else base
 }
 

@@ -28,8 +28,8 @@ enum class Language(val tag: String, val label: String) {
     }
 }
 
-/** The languages a person can be shown: English, plus every language whose catalogue ships. */
-val SUPPORTED: List<Language> get() = listOf(Language.EN) + CATALOGUES.keys.sortedBy { it.ordinal }
+/** The languages a person can be shown: English, plus every language that ships. */
+val SUPPORTED: List<Language> get() = listOf(Language.EN) + SHIPPED.sortedBy { it.ordinal }
 
 object I18n {
     private var state by mutableStateOf(Language.EN)
@@ -38,6 +38,9 @@ object I18n {
     var current: Language
         get() = state
         set(value) { state = value }
+
+    /** Renders and tests only: show this language whatever the Profile and [SHIPPED] say. */
+    var preview: Language? = null
 
     /** The device's language where the app has it, else English. */
     fun device(): Language = Language.of(runCatching { Locale.current.language }.getOrNull())?.takeIf { it in SUPPORTED } ?: Language.EN
