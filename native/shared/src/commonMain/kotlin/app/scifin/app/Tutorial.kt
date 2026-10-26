@@ -35,7 +35,7 @@ val TUTORIAL_STOPS: List<TutorialStop> get() = listOf(
     TutorialStop(Tab.BUDGET, "envelopes", anchor = "income-section", mock = { d -> if (!d.settings.incomeEnabled) tr("Income — off") else null },
         lines = listOf(tr("Off by default, you can turn it on in Settings: a set amount, deposited for you or logged by hand, or pay by the hour, logged as you work it."))),
     TutorialStop(Tab.BUDGET, "envelopes", anchor = "recurring-section",
-        lines = listOf(tr("Recurring Expenses: bills and payments on a regular schedule, for a fixed amount. What’s due this month is logged as leaving Savings on the 1st, ahead of its due dates; anything paid less often is set aside automatically in equal parts each month."))),
+        lines = listOf(tr("Recurring Expenses: bills and payments on a regular schedule, for a fixed amount. What’s due this month is logged as leaving Savings on the 1st, ahead of the actual due dates spread over the following 30 days or so; anything paid less often is set aside automatically in equal parts each month."))),
     TutorialStop(Tab.BUDGET, "categories", anchor = "categories-list",
         lines = listOf(tr("What you set aside and what you spent. Categories give every purchase a place, month after month. Every entry is a piece of the puzzle."))),
     TutorialStop(Tab.ACTIVITY, anchor = "accounts-section",

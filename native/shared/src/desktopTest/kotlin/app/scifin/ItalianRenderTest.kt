@@ -72,4 +72,12 @@ class ItalianRenderTest {
             assertTrue(render(st, name).isNotEmpty(), "$name drew nothing")
         }
     }
+
+    /** The longest tour stop, Recurring Expenses, on a phone-sized frame: the window has to leave its section in view. */
+    @Test fun `the recurring tour stop fits a phone in Italian`() {
+        I18n.preview = Language.IT
+        val st = store()
+        st.selectTab(Tab.BUDGET); st.startTutorial(fromOnboarding = false); repeat(3) { st.tutorialNext() }
+        assertTrue(render(st, "tour-recurring", h = 780).isNotEmpty())
+    }
 }
