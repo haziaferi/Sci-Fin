@@ -100,7 +100,10 @@ class HourlyIncomeTest {
         assertNull(Income.noIncomeLoggedDays(d, LocalDate(2026, 12, 31)))
         val switched = Hourly.setType(profileWith().let { it.copy(settings = it.settings.copy(incomeEnabled = true, incomeAutoDeposit = true)) }, IncomeType.HOURLY, clock.today)
         assertFalse(switched.settings.incomeAutoDeposit)
-        assertEquals(clock.today.plusDays(-1), switched.settings.lastPaydayHandled, "no payday behind the switch is asked about")
+        assertEquals(clock.today, switched.settings.lastPaydayHandled, "no payday behind the switch, nor on its day, is asked about")
+        val onPayday = Hourly.setType(hourly().let { it.copy(settings = it.settings.copy(incomeType = IncomeType.SALARIED)) }, IncomeType.HOURLY, LocalDate(2026, 11, 13))
+        assertNull(Hourly.duePayday(onPayday, LocalDate(2026, 11, 13)), "switching on a payday does not ask about it")
+        assertNotNull(Hourly.duePayday(onPayday, LocalDate(2026, 11, 27)))
     }
 
     @Test fun `leaving hourly settles the logged hours -- confirmed now, or discarded`() {
