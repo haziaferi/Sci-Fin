@@ -81,6 +81,22 @@ private val BORROWING_BODY = listOf(
 )
 private const val BORROWING_SOURCE = "Grounded in research on exponential growth bias (Stango & Zinman), on monthly payment targeting in car loans (Argyle, Nadauld & Palmer), and on anchoring to credit-card minimum payments, including work by Neil Stewart and by Keys & Wang."
 
+/** Reports' reading (§13.1 item 4, owner 2026-10-25): Age of Money's and Income vs Expenses' topics, from the research audit's §2.7 and §2.8. */
+private val MONEY_ON_HAND_BODY = listOf(
+    "Research on money and well-being usually looks at income. One study looked instead at what people actually had on hand. Matching the bank records of 585 UK customers with their own answers, it found that people with more in their current and savings accounts felt more secure about money: less likely to lose sleep over it, more confident about it. That sense of security went with being more satisfied with life, even allowing for income, investments, debt and spending. It was a snapshot, so it shows the two go together, not that one causes the other.",
+    "Other research looks at the opposite state. In lab games where some players were given fewer turns or less time, those players focused harder on the problem in front of them and borrowed more readily from later rounds. The shortfall pulled attention towards itself. A broader claim, that money worries make people think less well in general, has not held up well when other teams tried to repeat the studies, so it isn’t made here.",
+    "This app reads the two together as pointing at room: some distance between money arriving and money being needed. Money that has sat a while is money that hasn’t yet had to be called on. That’s what Age of Money describes: how long the oldest money in your Savings has been there and, if you want it, how long today’s Savings would cover you at your usual spending.",
+    "It’s a cushion, not a score. It rises by itself on quiet days and falls when you use what you set aside, which is what Savings is for. A short figure describes your circumstances right now, not you, and nothing here claims that watching it will change how you feel.",
+)
+private const val MONEY_ON_HAND_SOURCE = "Grounded in research on cash on hand and life satisfaction (Ruberton, Gladstone & Lyubomirsky) and on scarcity and attention, including work by Shah, Mullainathan & Shafir and the replication studies that followed."
+private val UNEVEN_MONTHS_BODY = listOf(
+    "Money rarely arrives in even monthly slices, and spending doesn’t either. In a year-long study that followed low- and moderate-income US households in detail, the typical household had about five months when its income was more than a quarter above or below its own average. In bank data on 100,000 US account holders across the income range, 41% saw their income swing by more than 30% from one month to the next. Spending swung even more, and the highest earners were as uneven as the lowest.",
+    "The two lines don’t move together, either. In the household study, most spending peaks came in months without an income peak, and a third came in months when income was below average. Some months simply hold more: a tax bill, the end-of-year season, a month with an extra payday in it.",
+    "Where pay is regular, spending tends to follow it. Studies of US pension and food-assistance payments found spending rose when the money arrived. Data from a personal-finance app showed much of that rise is just bills that fall due around payday, with the rest mostly among people who had less on hand.",
+    "So a month where expenses run past income is common, and on its own it isn’t a verdict. That’s why this view draws both in one colour at two strengths, rather than as a good and a bad pair. They’re two different things that happen to share a chart.",
+)
+private const val UNEVEN_MONTHS_SOURCE = "Grounded in research on income and spending volatility, including the US Financial Diaries (Morduch & Schneider) and the JPMorgan Chase Institute, and on how spending responds to payday, including work by Stephens, Shapiro, and Gelman and colleagues."
+
 private const val TIME_WORTH_SOURCE = "Grounded in research on what happens when women ask, including Babcock & Laschever’s Women Don’t Ask; on negotiation avoidance, including a 2025 paper in Negotiation and Conflict Management Research; and on Pew Research Center survey data."
 
 val LEARN_TOPICS = listOf(
@@ -113,6 +129,8 @@ val LEARN_TOPICS = listOf(
         calculators = listOf("Work out what a loan costs" to Route.LoanCalc, "Work out what a purchase on a card costs" to Route.PurchaseCalc),
     ),
     LearnTopic("credit-score", CREDIT_TITLE, "Credit invisibility — research by the Consumer Financial Protection Bureau", CREDIT_BODY, CREDIT_RESOURCES),
+    LearnTopic("money-on-hand", "Why money on hand matters", MONEY_ON_HAND_SOURCE, MONEY_ON_HAND_BODY),
+    LearnTopic("uneven-months", "Why uneven months are normal", UNEVEN_MONTHS_SOURCE, UNEVEN_MONTHS_BODY),
     LearnTopic(
         "well-being", "Financial well-being over adherence", "Grounded in the Consumer Financial Protection Bureau’s research defining financial well-being.",
         listOf(

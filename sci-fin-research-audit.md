@@ -58,6 +58,8 @@ Behavioral economist Richard Thaler's **mental accounting** research shows peopl
 
 *Why this matters:* an app that adds cognitive load (dense tables, jargon, many decisions per session) is hardest to use exactly when someone is most financially stressed and most needs it to work.
 
+*Narrowed 2026-10-25 (see §2.7): the attention-capture part of scarcity holds up reasonably well in replication; the broader "bandwidth tax" — that scarcity depletes cognitive capacity in general — does not, and no Learn topic relies on it.*
+
 ### 2.3 People look away from bad financial news
 
 The **"ostrich effect"** describes the well-replicated tendency to avoid checking financial information when it might be bad news. <cite index="70-1">People tend to underestimate the negative effects of ignoring risk, relying instead on hopeful assumptions that things will work out.</cite> Separately, research on shame specifically (as distinct from guilt) finds <cite index="72-1">shame is tightly linked to avoidance — people who feel ashamed about financial difficulty tend to withdraw and disengage from financial information altogether, which then worsens their situation further.</cite> This creates a vicious cycle: falling behind → shame → avoidance → falling further behind.
@@ -89,6 +91,26 @@ Stango & Zinman (2009) describe **exponential growth bias** — the tendency to 
 For cards, Stewart (2009) found among 248 UK cardholders that the minimum correlated with partial repayments, and in a hypothetical-statement experiment (413 participants) that leaving the minimum off raised mean partial repayments by 70%, with the share paying in full unchanged. Keys & Wang (2019), using a quarter of the US general-purpose card market (2008–2013), found 29% of accounts regularly pay at or near the minimum, and that at least 22% of near-minimum payers (9% of all accounts) respond to changes in the minimum formula in a way consistent with anchoring rather than a tight budget alone; the CARD Act's three-year repayment disclosure was taken up by fewer than 1% of accounts.
 
 *Why this matters:* the topic can say the monthly payment hides the cost and that a printed minimum pulls repayments down. It cannot claim that a payoff table fixes this — Stewart proposed one without testing it, and the CARD Act disclosure barely moved behaviour. Some near-minimum payers are genuinely constrained, which supports keeping existing balances neutral. The saving-first lean is the app's stance, reasoned from these findings, not a finding itself.
+
+### 2.7 What money on hand buys
+
+*Added 2026-10-25 for the Learn topic linked from Reports' Age of Money view (spec §5.1), from a fresh check of the primary sources.*
+
+Ruberton, Gladstone & Lyubomirsky (2016) paired the account records of 585 UK bank customers with their Satisfaction With Life Scale responses. Higher balances in current and savings accounts predicted higher perceived financial well-being — less lost sleep over money, more confidence about it — which in turn predicted higher life satisfaction, controlling for income, investments, spending, indebtedness and demographics. The data are correlational, and the authors say so; their "minimal buffer" reading rests partly on a log scale.
+
+Shah, Mullainathan & Shafir (2012) found in lab games that scarcity focuses attention on the pressing problem and leads to over-borrowing; their own high-powered replication reproduced the over-borrowing, though evidence for attentional neglect is weaker (de Bruijn & Antonides, 2022). The broader bandwidth claim of Mani et al. (2013) is contested: Wicherts & Zand Scholten (2013) could not reproduce it with income analysed continuously; its fluid-intelligence effect did not hold in replications (Dalton et al. 2019; Fehr et al. 2019, via de Bruijn & Antonides); low-income households tested before payday showed no cognitive deficit (Carvalho, Meier & Wang, 2016); and an audit of 20 scarcity-priming studies found 4 significant replications (O'Donnell et al., 2021).
+
+*Why this matters:* the topic can say cash on hand goes with feeling secure, and that scarcity pulls attention towards itself. It cannot say money worries impair thinking in general, or that a higher Age of Money improves well-being. Calling the figure a cushion rather than a score is the app's own reading of these findings, not a finding itself.
+
+### 2.8 Uneven months
+
+*Added 2026-10-25 for the Learn topic linked from Reports' Income vs Expenses view (spec §5.4), from a fresh check of the primary sources.*
+
+In the US Financial Diaries (Hannagan & Morduch, 2015; 244 low- and moderate-income households), income was more than 25% above or below a household's own average in about five months of the year; 61% of spending spikes fell in months without an income spike, and 33% in months when income was below average. In JPMorgan Chase Institute data (2015; 100,000 account holders), 41% saw month-to-month income swings over 30%, consumption was more volatile still, the highest earners were as volatile as the lowest, and income and consumption changes "did not move in tandem".
+
+Where pay is regular, spending rises when it arrives: Stephens (2003) for Social Security recipients in Consumer Expenditure Survey diaries, mainly those relying on it, with small effects; Shapiro (2005) for food-stamp recipients, whose calorie intake fell 10–15% over the benefit month. Gelman et al. (2014), using personal-finance app data, found most of the response comes from regular bills falling due when pay arrives, with the rest concentrated among people with less liquidity.
+
+*Why this matters:* the topic can say uneven months are common across incomes, and that spending following pay is partly just bill timing. It should not prescribe smoothing: Stephens judged the losses small, and the residual falls on people with less on hand — a fact about their circumstances, not their choices.
 
 ---
 
@@ -214,6 +236,17 @@ Standard accessibility guidelines (WCAG) were built primarily around visual/moto
 - Argyle, B., Nadauld, T.D. & Palmer, C. (2020). *Monthly Payment Targeting and the Demand for Maturity.* Review of Financial Studies, 33(11), 5416–5462.
 - Stewart, N. (2009). *The Cost of Anchoring on Credit-Card Minimum Repayments.* Psychological Science, 20(1), 39–41.
 - Keys, B.J. & Wang, J. (2019). *Minimum payments and debt paydown in consumer credit cards.* Journal of Financial Economics, 131(3), 528–548.
+- Ruberton, P.M., Gladstone, J. & Lyubomirsky, S. (2016). *How your bank balance buys happiness: The importance of "cash on hand" to life satisfaction.* Emotion, 16(5), 575–580.
+- Shah, A.K., Mullainathan, S. & Shafir, E. (2012). *Some consequences of having too little.* Science, 338(6107), 682–685.
+- Mani, A., Mullainathan, S., Shafir, E. & Zhao, J. (2013). *Poverty impedes cognitive function.* Science, 341, 976–980; Wicherts, J.M. & Zand Scholten, A. (2013). *Comment on "Poverty impedes cognitive function".* Science, 342, 1169.
+- Carvalho, L.S., Meier, S. & Wang, S.W. (2016). *Poverty and economic decision-making: Evidence from changes in financial resources at payday.* American Economic Review, 106(2), 260–284.
+- de Bruijn, E.-J. & Antonides, G. (2022). *Poverty and economic decision making: a review of scarcity theory.* Theory and Decision, 92, 5–37.
+- O'Donnell, M. et al. (2021). *Empirical audit and review and an assessment of evidentiary value in research on the psychological consequences of scarcity.* PNAS, 118(44), e2103313118.
+- Hannagan, A. & Morduch, J. (2015). *Income Gains and Month-to-Month Income Volatility: Household evidence from the US Financial Diaries.* NYU Financial Access Initiative.
+- JPMorgan Chase Institute (2015). *Weathering Volatility: Big Data on the Financial Ups and Downs of U.S. Individuals.*
+- Stephens, M. (2003). *"3rd of tha Month": Do Social Security recipients smooth consumption between checks?* American Economic Review, 93(1), 406–422.
+- Shapiro, J.M. (2005). *Is there a daily discount rate? Evidence from the food stamp nutrition cycle.* Journal of Public Economics, 89(2–3), 303–325.
+- Gelman, M., Kariv, S., Shapiro, M.D., Silverman, D. & Tadelis, S. (2014). *Harnessing naturally occurring data to measure the response of spending to income.* Science, 345(6193), 212–215.
 - NYC Department of Consumer Affairs (2015). *From Cradle to Cane: The Cost of Being a Female Consumer*; Moshary, S., Tuchman, A. & Bhatia, N. (2023). *Gender-based pricing in consumer packaged goods: a pink tax?* Marketing Science.
 - Irrational Labs — field experiment case study on budgeting engagement decay.
 - econbrew.com, medium.com/@stefanneculai — behavioral breakdowns of why budgeting apps fail.
