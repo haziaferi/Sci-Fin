@@ -130,7 +130,7 @@ fun SettingsScreen(state: UiState, store: AppStore) {
 @Composable
 fun SettingsPageScreen(route: Route.Settings, state: UiState, store: AppStore) {
     val d = state.data ?: return
-    val title = if (route.page == SettingsPage.BACKUP && (state.pendingBackup != null || state.lockedBackup != null)) tr("Restore backup") else route.page.title
+    val title = if (route.page == SettingsPage.BACKUP && (state.pendingBackup != null || state.lockedBackup != null)) tr("Restore a backup") else route.page.title
     Page(null) {
         TopRow(title, onBack = { store.back() })
         when (route.page) {
@@ -275,14 +275,14 @@ private fun NotificationsPage(d: ProfileData, state: UiState, store: AppStore) {
         Switch(imp.importReminderEnabled) { store.updateImportState { it.copy(importReminderEnabled = !it.importReminderEnabled) } }
     }
     if (imp.importReminderEnabled) Caption(
-        trf("On the {0} of each month: “Ready to import last month’s statement?” Nothing happens on its own — it opens the picker.", ordinal(imp.importReminderDay)),
+        trf("On the {0} of each month: “Ready to import last month’s statement?” Tapping it opens the file picker.", ordinal(imp.importReminderDay)),
         Modifier.padding(start = t.spacing.u * 0.25f, bottom = t.spacing.gap),
     )
     // §3.10: only while income is not recorded by itself (owner, 2026-10-26)
     if (Hourly.manualPayday(s)) SettingRow(Lucide.BANKNOTE, tr("Payday"), if (Hourly.isHourly(s)) tr("“Payday — confirm what arrived”") else tr("“Payday — log what arrived”")) {
         Switch(s.paydayNotificationEnabled) { store.updateSettings { it.copy(paydayNotificationEnabled = !it.paydayNotificationEnabled) } }
     }
-    Caption(tr("Per-expense due-date reminders are set on each Recurring Expense, since their lead time is per-item."),Modifier.padding(start = t.spacing.u * 0.25f, top = t.spacing.gap))
+    Caption(tr("Due-date reminders are set on each Recurring Expense; each one handles its own lead time."),Modifier.padding(start = t.spacing.u * 0.25f, top = t.spacing.gap))
 }
 
 @Composable
@@ -291,7 +291,7 @@ private fun BackupPage(state: UiState, store: AppStore) {
     if (BackupOpen(state, store)) return
     var exporting by rememberSaveable { mutableStateOf(false) }
     if (exporting) { ExportStep(state, store) { exporting = false }; return }
-    InfoNote(tr("A backup is one file holding every profile, every transaction and every setting. It stays where you put it — nothing is sent anywhere."))
+    InfoNote(tr("A backup is one file holding every profile, transaction and setting in the app at the time of export."))
     Button(tr("Export a backup"), ButtonKind.SECONDARY, modifier = Modifier.fillMaxWidth().padding(top = t.spacing.gap)) { exporting = true }
     Caption(
         if (state.lock != null) tr("The file is written with a password while the app PIN is on.") else tr("You can add a password to the file on the next step."),
@@ -300,7 +300,7 @@ private fun BackupPage(state: UiState, store: AppStore) {
     state.appState?.lastBackupExportDate?.let { Caption(trf("Last export: {0}.", formatDateFull(it)), Modifier.padding(start = t.spacing.u * 0.25f, top = t.spacing.u / 2)) }
     AutomaticCopy(state, store)
     Column(Modifier.padding(top = t.spacing.pad)) {
-        FieldLabel(tr("Restore from a backup"))
+        FieldLabel(tr("Restore a backup"))
         Button(tr("Choose a backup file"), ButtonKind.SECONDARY, modifier = Modifier.fillMaxWidth()) { store.pickBackup() }
     }
     state.backupError?.let { FeasibilityNote(it, Modifier.padding(top = t.spacing.gap)) }
@@ -336,26 +336,26 @@ private fun ProfilesPage(state: UiState, store: AppStore) {
         }
     }
     // §8.3: the two notes, read before "New profile" is tapped
-    FeasibilityNote(tr("A profile is for a genuinely separate pool of money — someone else’s, something you hold for someone else, or your own money bound by rules that make it wrong to mix with everyday Savings. A trust, an inheritance, a joint account."))
-    InfoNote(tr("Money you have simply set aside mentally isn’t this — it is still your everyday money, and a goal without a target fits it better. This starts a separate, empty environment with its own everything."))
+    FeasibilityNote(tr("A profile is for keeping apart money that is managed differently — a relative’s, money held for someone else, or your own under different rules, like an inheritance."))
+    InfoNote(tr("A new profile creates a separate, empty, fully independent environment. To set money aside from your current Savings, you can create a dedicated goal with no deadline."))
     AddRow(tr("New profile")) { store.push(Route.Onboarding(1, forNewProfile = true)) }
-    InfoNote(tr("Each profile is a separate environment, not a second view of the same money — its own Savings, ledger, reports and settings, right down to density and currency. Switching changes everything the app shows."))
+    InfoNote(tr("Each profile is an environment of its own, a sealed compartment that doesn’t interact with the others, with independent contents."))
 }
 
 /** §11.6's condensed replay page: a static recap, one line per stop, with the replay button under it. */
 @Composable
 private fun ReplaySummaryPage(store: AppStore) {
     val t = LocalTokens.current; val p = t.palette
-    InfoNote(tr("A static recap — not a live re-run. Replay the full tour below any time, and nothing here resets your data."))
+    InfoNote(tr("A static recap. You can replay the full tour below any time; your data stays intact."))
     // the prototype's nine lines, verbatim -- one per stop of TUTORIAL_STOPS, Profiles included (§11.6)
     val stops = listOf(
         Triple(Lucide.WALLET, tr("Savings"), tr("What you have available — never inflated.")),
         Triple(Lucide.BANKNOTE, tr("Income"), tr("Off by default. Manual or auto-deposit, your choice.")),
-        Triple(Lucide.REPEAT, tr("Recurring & Goals"), tr("Recurring deducts automatically; Goals are yours to add to anytime.")),
+        Triple(Lucide.REPEAT, tr("Recurring & Goals"), tr("Recurring expenses are taken automatically; you add money to Goals whenever you like.")),
         Triple(Lucide.TAG, tr("Categories"), tr("What you set aside and what you spent.")),
-        Triple(Lucide.CREDIT_CARD, tr("Activity"), tr("A clear window on credit cards and loans, no noise.")),
+        Triple(Lucide.CREDIT_CARD, tr("Activity"), tr("A view of credit cards and loans.")),
         Triple(Lucide.LIGHTBULB, tr("Learn"), tr("The science behind the app — look here first.")),
-        Triple(Lucide.BAR_CHART_3, tr("Reports"), tr("Visual and written syntheses of money in relation to time.")),
+        Triple(Lucide.BAR_CHART_3, tr("Reports"), tr("Visual and written summaries of how money moves over time.")),
         Triple(Lucide.SLIDERS_HORIZONTAL, tr("Appearance"), tr("Density, motion, low-distraction — all personal.")),
         Triple(Lucide.USERS, tr("Profiles"), tr("For money bound by different rules — someone else’s, or your own held apart.")),
     )

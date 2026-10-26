@@ -90,7 +90,7 @@ fun CategoryEditorScreen(route: Route.CategoryEditor, state: UiState, store: App
         FieldGroup { FieldLabel(tr("Planned this month")); TextField(plannedText, { v -> plannedText = v; draft = draft.copy(planned = parseMoney(v) ?: 0) }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = tr("Planned this month")) }
         FieldGroup {
             FieldLabel(tr("Spent so far this month")); TextField(spentText, { v -> spentText = v; draft = draft.copy(spent = parseMoney(v) ?: 0) }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = tr("Spent so far this month"))
-            Caption(tr("Changing this moves the difference to or from Savings — same mechanism as logging a purchase, just from this screen instead."), Modifier.padding(top = t.spacing.u * 0.75f))
+            Caption(tr("Edit it to log money in or out of Savings, as with a purchase."), Modifier.padding(top = t.spacing.u * 0.75f))
         }
         if (!isNew) Button(tr("Log a purchase"), ButtonKind.SECONDARY, modifier = Modifier.fillMaxWidth().padding(bottom = t.spacing.u * 1.25f)) { store.openSheet(Sheet.Entry("cat:${original.id}")) }
         Row(Modifier.fillMaxWidth().padding(top = t.spacing.pad), horizontalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
@@ -107,7 +107,7 @@ fun DeleteCategorySheet(sheet: Sheet.DeleteCategory, state: UiState, store: AppS
     val d = state.data ?: return
     val c = d.categories.firstOrNull { it.id == sheet.id } ?: return
     SheetScaffold(title = tr("Delete category"), onDismiss = store::closeSheet) {
-        Text(trf("Delete {0}? This month’s spend is not un-spent — only the category itself goes away.", c.name), color = p.txt, fontSize = t.type.body, lineHeight = t.type.body * 1.5, modifier = Modifier.padding(bottom = t.spacing.gap))
+        Text(trf("Delete {0}? Only the category is removed; this month’s spending stays as logged.", c.name), color = p.txt, fontSize = t.type.body, lineHeight = t.type.body * 1.5, modifier = Modifier.padding(bottom = t.spacing.gap))
         Caption(TRASH_LINE, Modifier.padding(bottom = t.spacing.pad))
         ButtonRow {
             Button(tr("Cancel"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.closeSheet() }

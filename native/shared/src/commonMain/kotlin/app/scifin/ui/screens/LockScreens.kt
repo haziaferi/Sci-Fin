@@ -176,7 +176,7 @@ private fun ForgotPin(state: UiState, store: AppStore, onCancel: () -> Unit) {
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
         FeasibilityNote(
             tr("This deletes every profile, every transaction and every setting on this device, and the app’s own safety copies. It can’t be undone.") + " " +
-                tr("Sci-Fin then opens as new, where you can restore a backup file."),
+                tr("Sci-Fin then resets to its starting state, where you can restore a backup file."),
         )
         Caption(if (exported != null) trf("Your last export from this device was on {0}. Anything logged since then won’t be in it.", formatDateFull(exported)) else tr("No backup has been exported from this device, so nothing here can be brought back."))
         FieldGroup { FieldLabel(trf("Type {0} to confirm", word)); TextField(typed, { typed = it }, placeholder = word, label = trf("Type {0} to confirm", word)) }

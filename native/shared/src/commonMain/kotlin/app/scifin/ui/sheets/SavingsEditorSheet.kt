@@ -47,13 +47,13 @@ fun SavingsEditorSheet(d: ProfileData, store: AppStore) {
     val ready = typedWordMatches(typed, "UPDATE") && parsed != null
 
     SheetScaffold(title = tr("Savings"), onDismiss = store::closeSheet) {
-        InfoNote(tr("This sets the figure directly. Recording something that happened is what the + buttons are for — this is for corrections."), Modifier.padding(bottom = t.spacing.gap * 1.2f))
+        InfoNote(tr("Here you can set or correct the Savings figure directly. To log money in or out, use the + button."), Modifier.padding(bottom = t.spacing.gap * 1.2f))
         FieldGroup { FieldLabel(tr("Savings amount")); TextField(value, { value = it }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = tr("Savings amount")) }
         Caption(
             when {
                 delta == null -> tr("Enter the amount.")
                 delta == 0L -> tr("No change yet.")
-                else -> trf("Logs a {0}{1} correction — the signed difference, never the new total.", if (delta > 0) "+" else "−", formatMoney(if (delta < 0) -delta else delta, cur))
+                else -> trf("Logs a {0}{1} correction: the difference between the new figure and the current one.", if (delta > 0) "+" else "−", formatMoney(if (delta < 0) -delta else delta, cur))
             },
             Modifier.padding(start = t.spacing.u * 0.25f, bottom = t.spacing.u * 1.25f),
         )

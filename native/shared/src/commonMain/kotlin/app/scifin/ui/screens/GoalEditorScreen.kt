@@ -194,9 +194,9 @@ fun GoalEditorScreen(route: Route.GoalEditor, state: UiState, store: AppStore) {
                     val frame = Goals.frame(d, monthly, draft.id, Recurring.scheduledTotal(d, today), today)
                     val line = when (frame) {
                         is GoalFrame.IncomeOn -> trf("With {0} received so far this month, minus recurring expenses and other goals’ commitments, you have roughly {1} available. This goal asks for {2}/mo.", formatMoney(Income.receivedThisMonth(d, today), cur), formatMoney(frame.available, cur), formatMoney(monthly, cur))
-                        is GoalFrame.IncomeOff -> trf("Recurring expenses plus other goals’ commitments plus this one come to {0}/mo, weighed against your Savings of {1}. Income is off, so this is a plain comparison, not a division.", formatMoney(frame.committed, cur), formatMoney(frame.savings, cur))
+                        is GoalFrame.IncomeOff -> trf("Recurring expenses + other goals’ commitments + this one = {0}/mo, against your Savings of {1}. Income is off, so the two figures are compared directly.", formatMoney(frame.committed, cur), formatMoney(frame.savings, cur))
                     }
-                    InlineLearn(listOf(line, tr("You can still save it as-is — the app doesn’t block this either way.")), null)
+                    InlineLearn(listOf(line, tr("You can still save it as it is.")), null)
                 }
                 Goals.sustainability(d, monthly, today)?.let { s ->
                     Column(Modifier.fillMaxWidth().padding(top = t.spacing.gap)) {

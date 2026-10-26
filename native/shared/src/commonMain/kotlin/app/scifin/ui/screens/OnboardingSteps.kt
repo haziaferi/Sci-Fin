@@ -22,8 +22,8 @@ import app.scifin.i18n.tr
 /* §11.1's steps 2 and 4; step 3 is the tutorial (TutorialOverlay.kt). */
 
 private val PERMISSION_TITLE: String get() = tr("One more thing before the tour")
-private val PERMISSION_BODY: String get() = tr("Sci-Fin can send a single, quiet notification on the 1st of each month — nothing else, ever, unless you choose to turn more on later.")
-private val CURRENCY_LEAD: String get() = tr("What currency should amounts show in? Change this — or anything else — anytime in Settings.")
+private val PERMISSION_BODY: String get() = tr("Sci-Fin sends one notification on the 1st of each month, unless you choose to turn on more later.")
+private val CURRENCY_LEAD: String get() = tr("What currency should amounts show in? You can change it anytime in Settings.")
 private val CONTINUE_TO_APP: String get() = tr("Continue to Sci-Fin")
 
 /**

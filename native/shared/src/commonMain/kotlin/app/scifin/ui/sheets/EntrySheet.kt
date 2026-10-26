@@ -237,7 +237,7 @@ fun EntrySheet(sheet: Sheet.Entry, d: ProfileData, store: AppStore) {
         val readout = if (shift) (if (hours != null && rate != null) trf("{0} · {1} before deductions", hoursShort(hours), formatMoney(Hourly.gross(listOf(app.scifin.model.Shift("", "", date, hours, rate))), cur)) else null)
             else moves?.joinToString(" · ") { (n, a) -> "$n ${if (a > 0) "+" else "−"}${formatMoney(if (a < 0) -a else a, cur)}" }
         Text(readout ?: "", color = p.txt2, fontSize = t.type.caption, modifier = Modifier.padding(top = t.spacing.u * 0.5f).probeAs("entry-readout"))
-        val captions = if (shift) listOf(tr("Nothing reaches Savings until payday, when you confirm what arrived."))
+        val captions = if (shift) listOf(tr("The pay for these hours is logged as income to Savings on payday, after you confirm what arrived."))
             else Entry.captions(d, target, direction, amount, note, pair) { formatMoney(it, cur) }
         for (c in captions) Caption(c, Modifier.padding(top = t.spacing.u * 0.5f))
     }

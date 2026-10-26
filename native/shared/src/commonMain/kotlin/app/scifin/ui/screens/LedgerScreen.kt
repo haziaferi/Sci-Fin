@@ -134,7 +134,7 @@ fun LedgerScreen(state: UiState, store: AppStore) {
                 }
             }
         }
-        InfoNote(tr("This log is written automatically and never edited through itself — tap an entry to open the thing it touched and correct it there. A delete appears only on a mistake that was undone by its own exact opposite within two days."), Modifier.padding(top = t.spacing.gap))
+        InfoNote(tr("This log is written automatically and can’t be edited directly. Instead, select an entry to correct it on its own page. “Delete” appears only when a mistake was cancelled by an equal and opposite entry within two days."), Modifier.padding(top = t.spacing.gap))
     }
 }
 
@@ -150,8 +150,8 @@ fun DeletePairSheet(sheet: Sheet.DeletePair, state: UiState, store: AppStore) {
     val word = tr("DELETE")
     val ready = typedWordMatches(typed, "DELETE")
     SheetScaffold(title = tr("Remove both entries"), onDismiss = store::closeSheet) {
-        FeasibilityNote(trf("{0} — {1} and {2}, logged within two days of each other. They describe something that never happened, so both go and every figure they touched is put back.", tr(a.targetLabel.ifEmpty { "Savings" }), formatMoney(a.amount, cur), formatMoney(b.amount, cur)))
-        Caption(tr("No current balance changes: the two already summed to zero. Trend points you have already seen will move, which is the point. Both wait in the Trash for 30 days."), Modifier.padding(top = t.spacing.gap, bottom = t.spacing.u * 1.25f))
+        FeasibilityNote(trf("{0} — {1} and {2}, logged within two days of each other. One corrects the other, so both are removed and every figure they changed returns to its previous value.", tr(a.targetLabel.ifEmpty { "Savings" }), formatMoney(a.amount, cur), formatMoney(b.amount, cur)))
+        Caption(tr("None of the current balances change: the two already summed to zero. The trend points you have seen so far will move. Both stay in the Trash for 30 days."), Modifier.padding(top = t.spacing.gap, bottom = t.spacing.u * 1.25f))
         FieldGroup { FieldLabel(trf("Type {0} to confirm", word)); TextField(typed, { typed = it }, placeholder = word, label = trf("Type {0} to confirm", word)) }
         ButtonRow {
             Button(tr("Cancel"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.closeSheet() }

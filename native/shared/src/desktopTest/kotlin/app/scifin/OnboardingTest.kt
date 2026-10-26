@@ -93,7 +93,7 @@ class TutorialStopThreeTest {
         val goals = TUTORIAL_STOPS[1]; val recurring = TUTORIAL_STOPS[3]
         assertEquals("goals-section", goals.anchor); assertEquals("recurring-section", recurring.anchor)
         assertEquals(listOf("Goals: near or far. Add to one whenever you like, like a piggy bank."), goals.lines)
-        assertEquals(listOf("Recurring Expenses: your flat-fee bills. What’s due this month leaves Savings on the 1st, up front; anything billed less often is set aside a little each month — no surprise charges."), recurring.lines)
+        assertEquals(listOf("Recurring Expenses: bills and payments on a regular schedule, for a fixed amount. What’s due this month is logged as leaving Savings on the 1st, ahead of its due dates; anything paid less often is set aside automatically in equal parts each month."), recurring.lines)
         for (s in listOf(goals, recurring)) assertTrue(s.lines.sumOf { it.length } <= 260, "${s.anchor} is ${s.lines.sumOf { it.length }} characters; the window took ten lines at 320")
     }
 }

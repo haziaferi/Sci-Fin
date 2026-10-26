@@ -158,7 +158,7 @@ fun ActivityScreen(state: UiState, store: AppStore) {
     }
 }
 
-private val ACCOUNTS_NOTE: String get() = tr("Accounts are informational — they never feed Savings, Goal or Category math directly (a Loan’s auto-update only keeps its own tracked balance honest). Choose one for its detail and, on a card, its payoff outlook.")
+private val ACCOUNTS_NOTE: String get() = tr("Accounts are informational — they create no money in or out in the Savings, Goal or Category math (a Loan’s auto-update only keeps its own balance correct). Select one to see its detail and, for a card, its payoff outlook.")
 
 /** §4.4: the note's first clause on screen, the rest in a sheet. */
 @Composable
@@ -248,7 +248,7 @@ private fun PayoffPanel(a: Account, cur: String, store: AppStore) {
             FieldGroup {
                 FieldLabel(tr("Interest rate (APR)"))
                 TextField(aprText, { v -> aprText = v; val r = parseRate(v); if (r != null || v.isBlank()) store.setAccountApr(a.id, r) }, prefix = "%", placeholder = tr("e.g. 21.9"), keyboard = KeyboardType.Decimal, label = tr("Interest rate (APR)"))
-                Caption(tr("Kept on this account, so the outlook is here next time rather than blank."), Modifier.padding(top = t.spacing.u * 0.75f))
+                Caption(tr("Saved on this account for next time."), Modifier.padding(top = t.spacing.u * 0.75f))
             }
             val apr = a.apr
             if (apr == null || a.balance <= 0) {
@@ -278,7 +278,7 @@ private fun PayoffPanel(a: Account, cur: String, store: AppStore) {
     }
     // under the outlook it explains, above the credit note and its topic (§4.5's order, owner 2026-10-23)
     LearnLink(BORROWING_LINK, { store.push(Route.LearnTopic("borrowing")) })
-    InfoNote(tr("In places that score credit, paying this off in full each cycle also reports payment history — not something this app is telling you to do, just part of the picture."), Modifier.padding(top = t.spacing.gap))
+    InfoNote(tr("In countries that have credit scores, paying it off in full each cycle also adds to your payment history."), Modifier.padding(top = t.spacing.gap))
     LearnLink(tr("How credit scoring works, and who it leaves out"), { store.push(Route.LearnTopic("credit-score")) })
 }
 
@@ -338,7 +338,7 @@ fun AccountEditorScreen(route: Route.AccountEditor, state: UiState, store: AppSt
         FieldGroup { FieldLabel(tr("Type")); Segmented(listOf("credit" to tr("Credit"), "loan" to tr("Loan")), draft.type.token, { v -> draft = Accounts.retype(draft, AccountType.of(v)); loanRateText = ""; aprText = ""; principalText = ""; termText = "" }) }
         FieldGroup {
             FieldLabel(tr("Balance owed")); TextField(balanceText, { v -> balanceText = v; draft = draft.copy(balance = parseMoney(v) ?: 0) }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = tr("Balance owed"))
-            Caption(tr("Directly editable at any time — logging a payment stays available as a lower-friction nudge too."), Modifier.padding(top = t.spacing.u * 0.75f))
+            Caption(tr("Editable at any time. You can also log a payment."), Modifier.padding(top = t.spacing.u * 0.75f))
         }
         if (draft.type == AccountType.LOAN) {
             SectionLabel(tr("Loan terms"))
@@ -410,7 +410,7 @@ fun RetypeCascadeSheet(sheet: Sheet.RetypeCascade, state: UiState, store: AppSto
     val amount = formatMoney(back, cur)
     DeleteWithReturnSheet(
         title = tr("Change to a credit account"),
-        question = trf("Change {0} to Credit? This also removes the {1}/month payment “{2}” — a credit account can’t keep a loan’s tracked figure honest.", sheet.draft.name, formatMoney(linked.amount, cur), linked.name) +
+        question = trf("Change {0} to Credit? This also removes the {1}/month payment “{2}” — a credit account can’t track a loan’s balance.", sheet.draft.name, formatMoney(linked.amount, cur), linked.name) +
             (if (back > 0) " " + trf("Add {0} back to Savings? That’s what’s actually been swept for the current period.", amount) else ""),
         hasReturn = back > 0,
         confirmAddBack = deleteAddBackCopy(amount, trf("“{0}”", linked.name), trash = false),

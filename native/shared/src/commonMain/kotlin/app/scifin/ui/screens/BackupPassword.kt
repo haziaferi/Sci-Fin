@@ -127,7 +127,7 @@ fun ExportStep(state: UiState, store: AppStore, onDone: () -> Unit) {
     }
     var choice by rememberSaveable { mutableStateOf(if (copies) "copies" else if (pinOn) "new" else "none") }
     val draft = remember { PasswordDraft() }
-    if (pinOn) InfoNote(tr("While the app PIN is on, a backup file is always written with a password, so the file is no easier to read than the app."))
+    if (pinOn) InfoNote(tr("While the app PIN is on, a backup file is always written with a password."))
     if (options.size > 1) FieldGroup {
         FieldLabel(tr("Protect the file"))
         ChipRow(options, choice) { choice = it }
@@ -180,7 +180,7 @@ fun AutomaticCopy(state: UiState, store: AppStore) {
         Modifier.padding(start = t.spacing.u * 0.25f, top = t.spacing.u / 2, bottom = t.spacing.gap),
     )
     when {
-        c.paused -> FeasibilityNote(tr("Paused: the app PIN is on, and the copies have no password yet. Nothing is written until one is set, so a copy is never easier to read than the app."))
+        c.paused -> FeasibilityNote(tr("Paused: the app PIN is on, and the copies have no password yet. Nothing is written until you set one."))
         c.lastError != null -> FeasibilityNote(trf("The last copy could not be written. {0}", tr(c.lastError)))
     }
     Caption(c.lastCopy?.let { trf("Last copy: {0}.", formatDateFull(it)) } ?: tr("No copy written yet."), Modifier.padding(bottom = t.spacing.gap))
@@ -215,7 +215,7 @@ fun AutomaticCopy(state: UiState, store: AppStore) {
 fun CopyPasswordPrompt(store: AppStore) {
     val draft = remember { PasswordDraft() }
     SheetScaffold(title = tr("A password for the copies"), onDismiss = { store.dismissCopyPasswordPrompt() }) {
-        InfoNote(tr("The app PIN is now on, so automatic copies are paused until they have a password of their own — a copy must never be easier to read than the app. Choose one, with a hint to show whenever a copy is opened."))
+        InfoNote(tr("The app PIN is now on, so automatic copies are paused until they have a password. Choose one and, optionally, add a hint, shown whenever a copy is opened."))
         PasswordFields(draft, HINT_IN_COPIES)
         ButtonRow {
             Button(tr("Later"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.dismissCopyPasswordPrompt() }

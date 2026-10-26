@@ -62,7 +62,7 @@ fun ImportScreen(state: UiState, store: AppStore) {
                 Button(tr("Choose a statement file"), ButtonKind.SECONDARY, modifier = Modifier.fillMaxWidth()) { store.pickStatement() }
             }
             state.importError?.let { FeasibilityNote(it, Modifier.padding(top = t.spacing.gap)) }
-            Caption(tr("OFX is worth preferring where your bank offers it: it carries the bank’s own transaction id, so re-importing an overlapping period can identify duplicates exactly rather than by resemblance."), Modifier.padding(top = t.spacing.gap))
+            Caption(tr("If your bank offers it, choose OFX: it carries the bank’s own transaction id, so if you re-import an overlapping period, duplicates are identified exactly rather than by resemblance."), Modifier.padding(top = t.spacing.gap))
             state.importDone?.let { done ->
                 InfoNote(importSummary(done.count, done.out, done.inn, cur), Modifier.padding(top = t.spacing.gap))
                 LearnLink(tr("See them in the Activity log"), { store.push(Route.Ledger) })
