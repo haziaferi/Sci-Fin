@@ -9,6 +9,7 @@ import app.scifin.model.DateMode
 import app.scifin.model.Density
 import app.scifin.model.GoalMode
 import app.scifin.model.IncomeCadence
+import app.scifin.model.IncomeType
 import app.scifin.model.RateType
 import app.scifin.model.Theme
 import app.scifin.model.ThemeMode
@@ -33,6 +34,8 @@ class Converters {
     @TypeConverter fun stringToCadence(s: String?) = s?.let { Cadence.of(it) }
     @TypeConverter fun incomeCadenceToString(c: IncomeCadence?) = c?.token
     @TypeConverter fun stringToIncomeCadence(s: String?) = s?.let { IncomeCadence.of(it) }
+    @TypeConverter fun incomeTypeToString(t: IncomeType?) = t?.token
+    @TypeConverter fun stringToIncomeType(s: String?) = s?.let { IncomeType.of(it) }
     @TypeConverter fun dateModeToString(d: DateMode?) = d?.token
     @TypeConverter fun stringToDateMode(s: String?) = s?.let { DateMode.of(it) }
     @TypeConverter fun goalModeToString(g: GoalMode?) = g?.token

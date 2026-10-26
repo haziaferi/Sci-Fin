@@ -30,6 +30,8 @@ import app.scifin.app.Tab
 import app.scifin.app.UiState
 import app.scifin.model.Density
 import app.scifin.model.IncomeCadence
+import app.scifin.engine.Hourly
+import app.scifin.model.IncomeType
 import app.scifin.model.ProfileData
 import app.scifin.model.ThemeMode
 import app.scifin.notify.NotificationPermission
@@ -93,7 +95,7 @@ fun SettingsScreen(state: UiState, store: AppStore) {
     val t = LocalTokens.current
     val s = d.settings
     val modeCaption = when (s.mode) { ThemeMode.SYSTEM -> "Auto (${if (t.dark) "dark" else "light"})"; ThemeMode.DARK -> "Dark"; ThemeMode.LIGHT -> "Light" }
-    val incomeCaption = if (s.incomeEnabled) "On · ${cadenceLabel(s.incomeCadence).lowercase()}" else "Off"
+    val incomeCaption = if (s.incomeEnabled) "On · ${if (s.incomeType == IncomeType.HOURLY) "by the hour, " else ""}${cadenceLabel(s.incomeCadence).lowercase()}" else "Off"
     val open = opener(store)
     // §4.8: the page the second column shows, marked on its row; null on a single column
     val shown = if (LocalSecondColumn.current) (shownDetail(state) as? Route.Settings)?.page else null
@@ -185,15 +187,35 @@ private fun IncomePage(d: ProfileData, store: AppStore) {
     }
     if (!s.incomeEnabled) return
     val semi = s.incomeCadence == IncomeCadence.SEMIMONTHLY
-    // A local draft, committed on every valid change and deliberately NOT keyed on s.income: re-keying resets the field mid-typing and drops digits.
-    var amountText by remember { mutableStateOf(if (s.income > 0) moneyText(s.income) else "") }
+    val hourly = s.incomeType == IncomeType.HOURLY
+    // §3.10 (owner, 2026-10-26): a known paycheck, or hours logged and confirmed each payday
     FieldGroup {
-        FieldLabel("Per-paycheck amount")
-        TextField(amountText, { v ->
-            amountText = v
-            val m = if (v.isBlank()) 0L else parseMoney(v) ?: return@TextField
-            store.updateSettings { it.copy(income = m) }
-        }, prefix = currencySymbol(s.currency), keyboard = KeyboardType.Decimal, label = "Per-paycheck amount")
+        FieldLabel("Paid")
+        ChipRow(listOf(IncomeType.SALARIED.token to "A set amount", IncomeType.HOURLY.token to "By the hour"), s.incomeType.token) { v -> store.setIncomeType(IncomeType.of(v)) }
+    }
+    if (hourly) {
+        // the same local-draft rule as the paycheck amount below
+        var rateText by remember { mutableStateOf(if (s.hourlyRate > 0) moneyText(s.hourlyRate) else "") }
+        FieldGroup {
+            FieldLabel("Per hour")
+            TextField(rateText, { v ->
+                rateText = v
+                val m = if (v.isBlank()) 0L else parseMoney(v) ?: return@TextField
+                store.setHourlyRate(m)
+            }, prefix = currencySymbol(s.currency), keyboard = KeyboardType.Decimal, label = "Per hour")
+            Caption("Each shift starts from this rate and can be changed when you log it.", Modifier.padding(top = t.spacing.u * 0.75f))
+        }
+    } else {
+        // A local draft, committed on every valid change and deliberately NOT keyed on s.income: re-keying resets the field mid-typing and drops digits.
+        var amountText by remember { mutableStateOf(if (s.income > 0) moneyText(s.income) else "") }
+        FieldGroup {
+            FieldLabel("Per-paycheck amount")
+            TextField(amountText, { v ->
+                amountText = v
+                val m = if (v.isBlank()) 0L else parseMoney(v) ?: return@TextField
+                store.updateSettings { it.copy(income = m) }
+            }, prefix = currencySymbol(s.currency), keyboard = KeyboardType.Decimal, label = "Per-paycheck amount")
+        }
     }
     FieldGroup {
         FieldLabel("Cadence")
@@ -207,6 +229,13 @@ private fun IncomePage(d: ProfileData, store: AppStore) {
     if (semi) FieldGroup {
         FieldLabel("Second payday")
         DateField(s.incomePayDate2, placeholder = "Choose a date") { day -> store.updateSettings { it.copy(incomePayDate2 = day) } }
+    }
+    if (hourly) {
+        Caption(
+            "Log hours whenever you work them; they reach Savings on payday, when you confirm what arrived. The estimate is hours × rate before deductions until your first payday, then it follows what your recent paydays brought.",
+            Modifier.padding(start = t.spacing.u * 0.25f, bottom = t.spacing.gap),
+        )
+        return
     }
     SettingRow(Lucide.REPEAT, "Auto-deposit every payday", "Off by default — manual keeps the pre-fill, not the auto-tag") {
         Switch(s.incomeAutoDeposit) { store.setAutoDeposit(!s.incomeAutoDeposit) }
@@ -234,6 +263,10 @@ private fun NotificationsPage(d: ProfileData, state: UiState, store: AppStore) {
         "On the ${ordinal(imp.importReminderDay)} of each month: “Ready to import last month’s statement?” Nothing happens on its own — it opens the picker.",
         Modifier.padding(start = t.spacing.u * 0.25f, bottom = t.spacing.gap),
     )
+    // §3.10: only while income is not recorded by itself (owner, 2026-10-26)
+    if (Hourly.manualPayday(s)) SettingRow(Lucide.BANKNOTE, "Payday", if (Hourly.isHourly(s)) "“Payday — confirm what arrived”" else "“Payday — log what arrived”") {
+        Switch(s.paydayNotificationEnabled) { store.updateSettings { it.copy(paydayNotificationEnabled = !it.paydayNotificationEnabled) } }
+    }
     Caption("Per-expense due-date reminders are set on each Recurring Expense, since their lead time is per-item.", Modifier.padding(start = t.spacing.u * 0.25f, top = t.spacing.gap))
 }
 

@@ -59,6 +59,9 @@ data class Movement(
     val isIncome: Boolean = false,
     /** null = today (device-local day, §12). */
     val date: LocalDate? = null,
+    /** §3.10's metadata, on an hourly payday only. */
+    val hoursWorked: Double? = null,
+    val rate: Money? = null,
 )
 
 /** The engine's clock, injected so every rule about "now" is testable. */
@@ -96,6 +99,8 @@ object Ledger {
             key = m.key.stored,
             targetLabel = m.targetLabel,
             isIncome = m.isIncome,
+            hoursWorked = m.hoursWorked,
+            rate = m.rate,
         )
         val effect = savingsEffect(tx)
         var next = d.copy(transactions = d.transactions + tx)

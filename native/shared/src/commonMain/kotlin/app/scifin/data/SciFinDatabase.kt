@@ -26,6 +26,7 @@ import app.scifin.model.RecurringExpense
 import app.scifin.model.SCHEMA_VERSION
 import app.scifin.model.Savings
 import app.scifin.model.Settings
+import app.scifin.model.Shift
 import app.scifin.model.Transaction
 import kotlinx.coroutines.Dispatchers
 
@@ -41,7 +42,7 @@ import kotlinx.coroutines.Dispatchers
 @Database(
     entities = [
         Profile::class, Savings::class, Goal::class, Category::class, RecurringExpense::class,
-        Account::class, Transaction::class, Settings::class, ImportState::class, AppState::class, AppLock::class, CopySchedule::class, TrashItem::class,
+        Account::class, Transaction::class, Settings::class, ImportState::class, AppState::class, AppLock::class, CopySchedule::class, TrashItem::class, Shift::class,
     ],
     version = SCHEMA_VERSION,
     exportSchema = true,
@@ -100,6 +101,7 @@ interface SciFinDao {
     @Query("SELECT * FROM recurring_expenses WHERE profileId = :id") suspend fun recurringExpenses(id: String): List<RecurringExpense>
     @Query("SELECT * FROM accounts WHERE profileId = :id") suspend fun accounts(id: String): List<Account>
     @Query("SELECT * FROM transactions WHERE profileId = :id ORDER BY date, loggedAt") suspend fun transactions(id: String): List<Transaction>
+    @Query("SELECT * FROM shifts WHERE profileId = :id ORDER BY date, id") suspend fun shifts(id: String): List<Shift>
 
     @Upsert suspend fun upsertProfile(p: Profile)
     @Upsert suspend fun upsertSavings(s: Savings)
@@ -110,12 +112,14 @@ interface SciFinDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertRecurringExpenses(e: List<RecurringExpense>)
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertAccounts(a: List<Account>)
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertTransactions(t: List<Transaction>)
+    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertShifts(s: List<Shift>)
 
     @Query("DELETE FROM goals WHERE profileId = :id") suspend fun deleteGoals(id: String)
     @Query("DELETE FROM categories WHERE profileId = :id") suspend fun deleteCategories(id: String)
     @Query("DELETE FROM recurring_expenses WHERE profileId = :id") suspend fun deleteRecurringExpenses(id: String)
     @Query("DELETE FROM accounts WHERE profileId = :id") suspend fun deleteAccounts(id: String)
     @Query("DELETE FROM transactions WHERE profileId = :id") suspend fun deleteTransactions(id: String)
+    @Query("DELETE FROM shifts WHERE profileId = :id") suspend fun deleteShifts(id: String)
     @Query("DELETE FROM profiles WHERE id = :id") suspend fun deleteProfile(id: String)
     @Query("DELETE FROM savings WHERE profileId = :id") suspend fun deleteSavings(id: String)
     @Query("DELETE FROM settings WHERE profileId = :id") suspend fun deleteSettings(id: String)
@@ -135,6 +139,7 @@ interface SciFinDao {
             recurringExpenses = recurringExpenses(id),
             accounts = accounts(id),
             transactions = transactions(id),
+            shifts = shifts(id),
         )
     }
 
@@ -151,12 +156,13 @@ interface SciFinDao {
         deleteRecurringExpenses(id); insertRecurringExpenses(d.recurringExpenses)
         deleteAccounts(id); insertAccounts(d.accounts)
         deleteTransactions(id); insertTransactions(d.transactions)
+        deleteShifts(id); insertShifts(d.shifts.map { it.copy(profileId = id) })
     }
 
     @RoomTransaction
     suspend fun deleteProfileWhole(id: String) {
         deleteGoals(id); deleteCategories(id); deleteRecurringExpenses(id); deleteAccounts(id)
-        deleteTransactions(id); deleteSavings(id); deleteSettings(id); deleteImportState(id)
+        deleteTransactions(id); deleteShifts(id); deleteSavings(id); deleteSettings(id); deleteImportState(id)
         deleteProfile(id)
     }
 

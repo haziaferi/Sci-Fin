@@ -16,6 +16,8 @@ data class ProfileData(
     val recurringExpenses: List<RecurringExpense> = emptyList(),
     val accounts: List<Account> = emptyList(),
     val transactions: List<Transaction> = emptyList(),
+    /** §3.10's hours logged since the last payday that paid them. */
+    val shifts: List<Shift> = emptyList(),
 ) {
     val profileId: String get() = profile.id
 

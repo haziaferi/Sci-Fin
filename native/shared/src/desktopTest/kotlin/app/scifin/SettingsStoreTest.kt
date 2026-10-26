@@ -1,5 +1,6 @@
 package app.scifin
 
+import app.scifin.engine.PAYDAY_REMINDER_KEY
 import app.scifin.app.AppSession
 import app.scifin.app.AppStore
 import app.scifin.app.Files
@@ -52,19 +53,21 @@ class SettingsStoreTest {
         assertEquals(NotificationPermission.GRANTED, store.state.value.notificationPermission)
     }
 
-    @Test fun `income on, cadence, then off clears the set through the engine, and the unchanged schedule is not re-sent`() = runTest {
+    @Test fun `income on, cadence, then off clears the set through the engine, and the payday notification follows it`() = runTest {
         val sched = RecordingScheduler()
         val store = fresh(sched = sched, scope = this)
         val before = sched.syncs
         store.setIncomeEnabled(true).join()
         store.updateSettings { it.copy(income = moneyOf(1450.0), incomePayDate = LocalDate(2026, 9, 25)) }.join()
+        // §3.10 (owner, 2026-10-26): income recorded by hand is notified on payday
+        assertEquals(LocalDate(2026, 9, 25), sched.reminders.single { it.expenseId == PAYDAY_REMINDER_KEY }.dueDate)
         store.setIncomeCadence(IncomeCadence.SEMIMONTHLY).join()
         var s = store.state.value.data!!.settings
         assertTrue(s.incomeEnabled); assertEquals(IncomeCadence.SEMIMONTHLY, s.incomeCadence); assertEquals(LocalDate(2026, 9, 14), s.incomeEnabledDate)
         store.setIncomeEnabled(false).join()
         s = store.state.value.data!!.settings
         assertFalse(s.incomeEnabled); assertEquals(0L, s.income); assertNull(s.incomePayDate); assertNull(s.incomeEnabledDate)
-        assertEquals(before, sched.syncs)
+        assertTrue(sched.syncs > before && sched.reminders.none { it.expenseId == PAYDAY_REMINDER_KEY }, "off takes the payday notification with it")
     }
 
     @Test fun `export writes one file holding every Profile, and restoring it replaces the device`() = runTest {

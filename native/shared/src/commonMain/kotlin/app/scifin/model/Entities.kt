@@ -201,6 +201,30 @@ data class Settings(
     @ColumnInfo(defaultValue = "0") val catchUpSwept: Money = 0,
     /** The notices, one per line as `name<TAB>note`. */
     @ColumnInfo(defaultValue = "''") val catchUpEnded: String = "",
+    /** §3.10 (owner, 2026-10-26): salaried keeps §3.3's amount and cadence; hourly logs shifts and confirms each payday. */
+    @ColumnInfo(defaultValue = "'salaried'") val incomeType: IncomeType = IncomeType.SALARIED,
+    /** Hourly only: the rate a new shift starts from, per hour. */
+    @ColumnInfo(defaultValue = "0") val hourlyRate: Money = 0,
+    /** The last payday whose prompt was answered (hourly) or whose entry was offered (salaried, manual). */
+    val lastPaydayHandled: LocalDate? = null,
+    /** The payday notification, sent only while income is not recorded by itself (owner, 2026-10-26). */
+    @ColumnInfo(defaultValue = "1") val paydayNotificationEnabled: Boolean = true,
+)
+
+/**
+ * §3.10's logged hours (owner, 2026-10-26): a shift moves nothing; the payday that covers its date turns it into
+ * income once the person confirms what arrived. Carried by a backup, like every other thing the person entered.
+ */
+@Serializable
+@Entity(tableName = "shifts", indices = [Index("profileId")])
+data class Shift(
+    @PrimaryKey val id: String,
+    val profileId: String,
+    /** The day the hours were worked; a payday covers every shift dated on or before it. */
+    val date: LocalDate,
+    val hours: Double,
+    /** Per hour, editable per shift so a differently paid one needs no concept of its own. */
+    val rate: Money,
 )
 
 /** §4.3's ImportState, one per Profile (§12). */
@@ -296,4 +320,4 @@ data class TrashItem(
 )
 
 /** §12's storage version, carried by the Room database and the backup file. Every bump has a Migration (data/Migrations.kt); the history is in the spec. */
-const val SCHEMA_VERSION = 8
+const val SCHEMA_VERSION = 9

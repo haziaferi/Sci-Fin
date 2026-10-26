@@ -27,6 +27,9 @@ const val NOTIFY_HOUR = 9
 /** The reserved registration key for §4.3's import reminder; never a RecurringExpense id. */
 const val IMPORT_REMINDER_KEY = "import:reminder"
 
+/** The reserved registration key for §3.10's payday notification (owner, 2026-10-26). */
+const val PAYDAY_REMINDER_KEY = "income:payday"
+
 /** One armed due-date reminder, before it becomes a platform registration. */
 data class ReminderEntry(val expenseId: String, val name: String, val amount: Money, val dueDate: LocalDate, val fireDate: LocalDate)
 
@@ -74,6 +77,12 @@ object Reminders {
         }
         val importDay = nextImportReminder(d, now.date)?.let { if (it.atTime(at) > now) it else nextImportReminder(d, now.date.plusDays(1)) }
         importDay?.let { day -> out.add(ReminderRegistration(IMPORT_REMINDER_KEY, "Sci-Fin", IMPORT_REMINDER_BODY, day, day.atTime(at))) }
+        // §3.10: only while income is not recorded by itself -- hourly, or salaried without auto-deposit
+        val s = d.settings
+        if (Hourly.manualPayday(s) && s.paydayNotificationEnabled) {
+            val next = Income.nextOccurrence(s, now.date)?.let { if (it.atTime(at) > now) it else Income.nextOccurrence(s, now.date.plusDays(1)) }
+            next?.let { day -> out.add(ReminderRegistration(PAYDAY_REMINDER_KEY, "Sci-Fin", paydayBody(s), day, day.atTime(at))) }
+        }
         return out
     }
 
@@ -89,4 +98,6 @@ object Reminders {
         clock.today().atTime(clock.now().toLocalDateTime(TimeZone.currentSystemDefault()).time)
 
     const val IMPORT_REMINDER_BODY = "Ready to import last month’s statement?"
+
+    fun paydayBody(s: app.scifin.model.Settings): String = if (Hourly.isHourly(s)) "Payday — confirm what arrived" else "Payday — log what arrived"
 }
