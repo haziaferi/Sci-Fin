@@ -121,8 +121,8 @@ object Hourly {
     }
 
     /**
-     * §3.3's type switch. Hourly has no auto-deposit -- what arrives varies -- and starts counting paydays from today,
-     * so none behind it is asked about; back to salaried keeps §3.3's own rules. Shifts must be settled first.
+     * §3.3's type switch. Hourly has no auto-deposit -- what arrives varies -- and starts counting paydays after today,
+     * so none behind it, nor today's, is asked about; back to salaried keeps §3.3's own rules. Shifts must be settled first.
      */
     fun setType(d: ProfileData, type: IncomeType, today: LocalDate): ProfileData {
         val s = d.settings
@@ -132,7 +132,8 @@ object Hourly {
             incomeType = type,
             incomeAutoDeposit = false,
             lastIncomeDepositDate = null,
-            lastPaydayHandled = if (type == IncomeType.HOURLY) today.minusDays(1) else null,
+            // today's payday, if it is one, belongs to the type being left
+            lastPaydayHandled = if (type == IncomeType.HOURLY) today else null,
         ))
     }
 

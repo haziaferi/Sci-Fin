@@ -30,7 +30,7 @@ val TUTORIAL_STOPS = listOf(
     TutorialStop(Tab.BUDGET, "envelopes", anchor = "goals-section",
         lines = listOf("Goals: near or far. Add to one whenever you like, like a piggy bank.")),
     TutorialStop(Tab.BUDGET, "envelopes", anchor = "income-section", mock = { d -> if (!d.settings.incomeEnabled) "Income — off" else null },
-        lines = listOf("Off by default, you can turn it on in Settings and choose between manual and automated recurring deposits.")),
+        lines = listOf("Off by default, you can turn it on in Settings: a set amount, deposited for you or logged by hand, or pay by the hour, logged as you work it.")),
     TutorialStop(Tab.BUDGET, "envelopes", anchor = "recurring-section",
         lines = listOf("Recurring Expenses: your flat-fee bills. What’s due this month leaves Savings on the 1st, up front; anything billed less often is set aside a little each month — no surprise charges.")),
     TutorialStop(Tab.BUDGET, "categories", anchor = "categories-list",
