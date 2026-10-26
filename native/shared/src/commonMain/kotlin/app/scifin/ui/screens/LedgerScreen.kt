@@ -1,5 +1,9 @@
 package app.scifin.ui.screens
 
+import app.scifin.i18n.typedWordMatches
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
+import app.scifin.i18n.trp
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -49,8 +53,8 @@ import app.scifin.ui.formatMoney
 import kotlinx.datetime.LocalDate
 import app.scifin.ui.components.Dropdown
 
-private val TARGETS = listOf("all" to "Everything", "savings" to "Savings", "goal" to "Goals", "cat" to "Categories", "rec" to "Recurring", "acct" to "Accounts")
-private val RANGES = listOf("1m" to "This month", "3m" to "3 months", "12m" to "12 months", "all" to "All")
+private val TARGETS get() = listOf("all" to tr("Everything"), "savings" to tr("Savings"), "goal" to tr("Goals"), "cat" to tr("Categories"), "rec" to tr("Recurring"), "acct" to tr("Accounts"))
+private val RANGES get() = listOf("1m" to tr("This month"), "3m" to tr("3 months"), "12m" to tr("12 months"), "all" to tr("All"))
 
 /** Where a row leads: the thing it touched, if it still exists (§7.3: corrections happen there, never in the log). */
 private fun deepLink(t: Transaction, d: ProfileData): Route? {
@@ -90,15 +94,15 @@ fun LedgerScreen(state: UiState, store: AppStore) {
     }.sortedWith(compareByDescending<Transaction> { it.date }.thenByDescending { it.loggedAt })
 
     Page(null) {
-        TopRow("Activity log", onBack = { store.back() })
-        FieldGroup { TextField(q, { q = it }, placeholder = "Search payee or label…") }
+        TopRow(tr("Activity log"), onBack = { store.back() })
+        FieldGroup { TextField(q, { q = it }, placeholder = tr("Search payee or label…")) }
         // §7.3: the two filters as two dropdowns side by side
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
-            Column(Modifier.weight(1f)) { FieldLabel("Show"); Dropdown(TARGETS, target, { target = it }) }
-            Column(Modifier.weight(1f)) { FieldLabel("Range"); Dropdown(RANGES, range, { range = it }) }
+            Column(Modifier.weight(1f)) { FieldLabel(tr("Show")); Dropdown(TARGETS, target, { target = it }) }
+            Column(Modifier.weight(1f)) { FieldLabel(tr("Range")); Dropdown(RANGES, range, { range = it }) }
         }
-        SectionLabel("${rows.size} ${if (rows.size == 1) "entry" else "entries"}")
-        if (rows.isEmpty()) InfoNote("Nothing matches those filters.")
+        SectionLabel(trp("{0} entry", "{0} entries", rows.size))
+        if (rows.isEmpty()) InfoNote(tr("Nothing matches those filters."))
         for (tx in rows) {
             val eff = Ledger.savingsEffect(tx)
             val link = deepLink(tx, d)
@@ -116,21 +120,21 @@ fun LedgerScreen(state: UiState, store: AppStore) {
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Column(Modifier.weight(1f)) {
-                    Text(tx.targetLabel.ifEmpty { "Savings" }, color = p.txt, fontSize = t.type.body, fontWeight = FontWeight.Bold)
-                    Text(formatDate(tx.date) + (payeeNote?.let { " · $it" } ?: "") + (if (tx.isIncome) " · income" else "") + (note?.let { " · $it" } ?: ""), color = p.txt2, fontSize = t.type.caption)
+                    Text(tr(tx.targetLabel.ifEmpty { "Savings" }), color = p.txt, fontSize = t.type.body, fontWeight = FontWeight.Bold)
+                    Text(formatDate(tx.date) + (payeeNote?.let { " · " + tr(it) } ?: "") + (if (tx.isIncome) " · " + tr("income") else "") + (note?.let { " · $it" } ?: ""), color = p.txt2, fontSize = t.type.caption)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.u * 1.25f)) {
                     Column(horizontalAlignment = Alignment.End) {
                         if (eff == 0L) {
                             Text(formatMoney(tx.amount, cur), color = p.txt, fontSize = t.type.body, fontWeight = FontWeight.Bold)
-                            Text(if (tx.key.startsWith("spend:")) "from ${tx.targetLabel}" else "tracked only", color = p.txt2, fontSize = t.type.caption)
+                            Text(if (tx.key.startsWith("spend:")) trf("from {0}", tr(tx.targetLabel)) else tr("tracked only"), color = p.txt2, fontSize = t.type.caption)
                         } else Text((if (eff > 0) "+" else "") + formatMoney(eff, cur), color = if (note != null) p.txt2 else p.txt.copy(alpha = if (eff < 0) 0.92f else 1f), fontSize = t.type.body, fontWeight = FontWeight.Bold)
                     }
-                    pairs[tx.id]?.let { other -> RoundIconButton(Lucide.TRASH_2, "Delete this pair") { store.openSheet(Sheet.DeletePair(tx.id, other)) } }
+                    pairs[tx.id]?.let { other -> RoundIconButton(Lucide.TRASH_2, tr("Delete this pair")) { store.openSheet(Sheet.DeletePair(tx.id, other)) } }
                 }
             }
         }
-        InfoNote("This log is written automatically and never edited through itself — tap an entry to open the thing it touched and correct it there. A delete appears only on a mistake that was undone by its own exact opposite within two days.", Modifier.padding(top = t.spacing.gap))
+        InfoNote(tr("This log is written automatically and never edited through itself — tap an entry to open the thing it touched and correct it there. A delete appears only on a mistake that was undone by its own exact opposite within two days."), Modifier.padding(top = t.spacing.gap))
     }
 }
 
@@ -143,17 +147,18 @@ fun DeletePairSheet(sheet: Sheet.DeletePair, state: UiState, store: AppStore) {
     val a = d.transactions.firstOrNull { it.id == sheet.id } ?: return
     val b = d.transactions.firstOrNull { it.id == sheet.otherId } ?: return
     var typed by remember { mutableStateOf("") }
-    val ready = typed.trim().uppercase() == "DELETE"
-    SheetScaffold(title = "Remove both entries", onDismiss = store::closeSheet) {
-        FeasibilityNote("${a.targetLabel.ifEmpty { "Savings" }} — ${formatMoney(a.amount, cur)} and ${formatMoney(b.amount, cur)}, logged within two days of each other. They describe something that never happened, so both go and every figure they touched is put back.")
-        Caption("No current balance changes: the two already summed to zero. Trend points you have already seen will move, which is the point. Both wait in the Trash for 30 days.", Modifier.padding(top = t.spacing.gap, bottom = t.spacing.u * 1.25f))
-        FieldGroup { FieldLabel("Type DELETE to confirm"); TextField(typed, { typed = it }, placeholder = "DELETE", label = "Type DELETE to confirm") }
+    val word = tr("DELETE")
+    val ready = typedWordMatches(typed, "DELETE")
+    SheetScaffold(title = tr("Remove both entries"), onDismiss = store::closeSheet) {
+        FeasibilityNote(trf("{0} — {1} and {2}, logged within two days of each other. They describe something that never happened, so both go and every figure they touched is put back.", tr(a.targetLabel.ifEmpty { "Savings" }), formatMoney(a.amount, cur), formatMoney(b.amount, cur)))
+        Caption(tr("No current balance changes: the two already summed to zero. Trend points you have already seen will move, which is the point. Both wait in the Trash for 30 days."), Modifier.padding(top = t.spacing.gap, bottom = t.spacing.u * 1.25f))
+        FieldGroup { FieldLabel(trf("Type {0} to confirm", word)); TextField(typed, { typed = it }, placeholder = word, label = trf("Type {0} to confirm", word)) }
         ButtonRow {
-            Button("Cancel", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.closeSheet() }
-            Button("Remove both", ButtonKind.SECONDARY, enabled = ready, modifier = Modifier.weight(1f)) { store.deletePair(a.id, b.id) }
+            Button(tr("Cancel"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.closeSheet() }
+            Button(tr("Remove both"), ButtonKind.SECONDARY, enabled = ready, modifier = Modifier.weight(1f)) { store.deletePair(a.id, b.id) }
         }
     }
 }
 
 /** §7.3: a row dated after today is a booked sweep, not a spend. */
-fun ledgerRowNote(date: LocalDate, today: LocalDate): String? = if (date > today) "scheduled" else null
+fun ledgerRowNote(date: LocalDate, today: LocalDate): String? = if (date > today) tr("scheduled") else null

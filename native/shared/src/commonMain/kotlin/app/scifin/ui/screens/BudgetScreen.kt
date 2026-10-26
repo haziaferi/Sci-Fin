@@ -26,6 +26,9 @@ import app.scifin.engine.Income
 import app.scifin.engine.Hourly
 import app.scifin.engine.Recurring
 import app.scifin.engine.Threshold
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
+import app.scifin.i18n.trp
 import app.scifin.model.ProfileData
 import app.scifin.ui.LocalTokens
 import app.scifin.ui.Lucide
@@ -80,7 +83,7 @@ fun BudgetScreen(state: UiState, store: AppStore) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(t.spacing.gap)) { CategoriesView(d, store) }
             }
         } else {
-            ViewSwitch(listOf("envelopes" to "Envelopes", "categories" to "Categories"), sub, { store.selectSub(it) }, Modifier.padding(bottom = t.spacing.gap * 1.3f))
+            ViewSwitch(listOf("envelopes" to tr("Envelopes"), "categories" to tr("Categories")), sub, { store.selectSub(it) }, Modifier.padding(bottom = t.spacing.gap * 1.3f))
             if (sub == "categories") CategoriesView(d, store) else EnvelopesView(d, state, store)
             FloatingAddRoom()
         }
@@ -101,8 +104,8 @@ private fun EnvelopesView(d: ProfileData, state: UiState, store: AppStore) {
     RecurringSection(d, store, today)
     Column(Modifier.padding(top = t.spacing.gap)) {
         // in the order of the sections they speak to -- Goals sit above anything category-related -- which is Learn's order too (§4.5)
-        LearnLink("Why naming a goal helps", { store.push(Route.LearnTopic("name-your-goal")) })
-        LearnLink("Why split money into categories?", { store.push(Route.LearnTopic("why-categories")) })
+        LearnLink(tr("Why naming a goal helps"), { store.push(Route.LearnTopic("name-your-goal")) })
+        LearnLink(tr("Why split money into categories?"), { store.push(Route.LearnTopic("why-categories")) })
     }
 }
 
@@ -112,16 +115,16 @@ private fun GoalsSection(d: ProfileData, store: AppStore) {
     val t = LocalTokens.current
     val cur = d.settings.currency
     Column(Modifier.tutAnchor("goals-section"), verticalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
-        SectionLabel("Goals")
+        SectionLabel(tr("Goals"))
         if (d.goals.isNotEmpty()) LedgerGroup {
             for (g in d.goals) {
                 val target = g.target
                 // progressCaption's two parts, apart: the amount in the figure column, the words under the bar
                 val figure = formatMoney(if (target != null) abs(g.saved - target) else g.saved, cur)
                 val words = when {
-                    target == null -> "saved so far — no target, just a running tally"
-                    g.saved > target -> "past goal"
-                    else -> "left of goal"
+                    target == null -> tr("saved so far — no target, just a running tally")
+                    g.saved > target -> tr("past goal")
+                    else -> tr("left of goal")
                 }
                 LedgerRow(
                     onClick = { store.push(Route.GoalEditor(g.id)) },
@@ -132,7 +135,7 @@ private fun GoalsSection(d: ProfileData, store: AppStore) {
                         }
                     },
                     figure = figure, probeName = "goal",
-                    slot = { RowAdd("Add to ${g.name}") { store.openSheet(Sheet.Entry("goal:${g.id}")) } },
+                    slot = { RowAdd(trf("Add to {0}", g.name)) { store.openSheet(Sheet.Entry("goal:${g.id}")) } },
                     under = {
                         if (target != null) Box(Modifier.padding(top = t.spacing.u * 0.75f)) { ProgressBar(g.saved, target) }
                         Caption(words, Modifier.padding(top = t.spacing.u * 0.5f))
@@ -140,7 +143,7 @@ private fun GoalsSection(d: ProfileData, store: AppStore) {
                 )
             }
         }
-        AddRow("New goal") { store.push(Route.GoalEditor(null)) }
+        AddRow(tr("New goal")) { store.push(Route.GoalEditor(null)) }
     }
 }
 
@@ -150,9 +153,9 @@ private fun IncomeSection(d: ProfileData, store: AppStore, today: LocalDate) {
     val t = LocalTokens.current; val p = t.palette
     val cur = d.settings.currency
     Column(Modifier.tutAnchor("income-section"), verticalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
-        SectionLabel("Income")
+        SectionLabel(tr("Income"))
         if (!d.settings.incomeEnabled) {
-            PlaceholderCard("Off by default. Turn it on in Settings to track paychecks and let this section come back.")
+            PlaceholderCard(tr("Off by default. Turn it on in Settings to track paychecks and let this section come back."))
             return@Column
         }
         if (Hourly.isHourly(d.settings)) { HourlyIncomeSection(d, store, today); return@Column }
@@ -161,13 +164,13 @@ private fun IncomeSection(d: ProfileData, store: AppStore, today: LocalDate) {
             name = {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.u / 2)) {
                     LucideIcon(Lucide.BANKNOTE, tint = p.txt2, size = t.icons.sm)
-                    LedgerLabel("Per paycheck (${cadenceLabel(d.settings.incomeCadence).lowercase()})")
+                    LedgerLabel(trf("Per paycheck ({0})", cadenceLabel(d.settings.incomeCadence).lowercase()))
                 }
             },
             figure = formatMoney(d.settings.income, cur), probeName = "income",
-            under = { Caption("${formatMoney(Income.receivedThisMonth(d, today), cur)} received so far this month", Modifier.padding(top = t.spacing.u * 0.5f)) },
+            under = { Caption(trf("{0} received so far this month", formatMoney(Income.receivedThisMonth(d, today), cur)), Modifier.padding(top = t.spacing.u * 0.5f)) },
         )
-        Income.noIncomeLoggedDays(d, today)?.let { days -> RuledNote("No income logged in the last $days ${if (days == 1) "day" else "days"}.") }
+        Income.noIncomeLoggedDays(d, today)?.let { days -> RuledNote(trp("No income logged in the last {0} day.", "No income logged in the last {0} days.", days)) }
     }
 }
 
@@ -177,7 +180,7 @@ private fun RecurringSection(d: ProfileData, store: AppStore, today: LocalDate) 
     val t = LocalTokens.current; val p = t.palette
     val cur = d.settings.currency
     Column(Modifier.tutAnchor("recurring-section"), verticalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
-        SectionLabel("Recurring expenses")
+        SectionLabel(tr("Recurring expenses"))
         LedgerGroup {
             LedgerRow(
                 onClick = { store.push(Route.RecurringList) },
@@ -185,22 +188,23 @@ private fun RecurringSection(d: ProfileData, store: AppStore, today: LocalDate) 
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.u * 1.125f)) {
                         EntityIcon(Lucide.REPEAT)
                         val n = d.recurringExpenses.size
-                        Text(if (n == 0) "No recurring expenses yet" else "$n recurring expense${if (n == 1) "" else "s"}", color = p.txt, fontSize = t.type.body, fontWeight = FontWeight.Bold)
+                        Text(if (n == 0) tr("No recurring expenses yet") else trp("{0} recurring expense", "{0} recurring expenses", n), color = p.txt, fontSize = t.type.body, fontWeight = FontWeight.Bold)
                     }
                 },
-                figure = if (d.recurringExpenses.isEmpty()) "" else "${formatMoney(Recurring.scheduledTotal(d, today), cur)}/mo", probeName = "recurring",
+                figure = if (d.recurringExpenses.isEmpty()) "" else trf("{0}/mo", formatMoney(Recurring.scheduledTotal(d, today), cur)), probeName = "recurring",
                 slot = { LucideIcon(Lucide.CHEVRON_RIGHT, tint = p.txt2, size = t.icons.sm) },
             )
         }
         // §3.5: the two plain figures always shown; the interpretation behind the disclosure
         Threshold.recurringNote(d, today)?.let { n ->
             var open by remember { mutableStateOf(false) }
-            val summary = "${formatMoney(n.scheduled, cur)} recurring · ${formatMoney(n.base, cur)} ${if (n.incomeOn) "income this month" else "Savings"}"
+            val summary = if (n.incomeOn) trf("{0} recurring · {1} income this month", formatMoney(n.scheduled, cur), formatMoney(n.base, cur))
+                else trf("{0} recurring · {1} Savings", formatMoney(n.scheduled, cur), formatMoney(n.base, cur))
             val detail = when {
-                n.incomeOn && n.baseIsEmpty -> "Usual at the start of the month, before the first paycheck arrives."
-                n.incomeOn -> "More than a third of what has landed so far. Common early in the month, before more income lands."
-                n.baseIsEmpty -> "There’s no cushion to draw them from."
-                else -> "More than a twelfth of your Savings. At that pace they alone would use up the balance in about a year."
+                n.incomeOn && n.baseIsEmpty -> tr("Usual at the start of the month, before the first paycheck arrives.")
+                n.incomeOn -> tr("More than a third of what has landed so far. Common early in the month, before more income lands.")
+                n.baseIsEmpty -> tr("There’s no cushion to draw them from.")
+                else -> tr("More than a twelfth of your Savings. At that pace they alone would use up the balance in about a year.")
             }
             DisclosureNote(summary, detail, open) { open = !open }
         }
@@ -225,17 +229,17 @@ private fun CatchUpCard(state: UiState, d: ProfileData, store: AppStore) {
     val s = state.catchUp ?: return
     val cur = d.settings.currency
     val parts = buildList {
-        if (s.deposits.count > 0) add("${s.deposits.count} deposit${if (s.deposits.count == 1) "" else "s"} added ${formatMoney(s.deposits.total, cur)}")
-        if (s.sweptTotal > 0) add("${s.monthsReplayed} month${if (s.monthsReplayed == 1) "" else "s"} of recurring expenses took ${formatMoney(s.sweptTotal, cur)}")
+        if (s.deposits.count > 0) add(trp("{0} deposit added {1}", "{0} deposits added {1}", s.deposits.count, formatMoney(s.deposits.total, cur)))
+        if (s.sweptTotal > 0) add(trp("{0} month of recurring expenses took {1}", "{0} months of recurring expenses took {1}", s.monthsReplayed, formatMoney(s.sweptTotal, cur)))
     }
     if (parts.isEmpty() && s.endedNow.isEmpty()) return
     Column(Modifier.fillMaxWidth().background(p.surf, RoundedCornerShape(t.radii.lg)).padding(horizontal = t.spacing.u * 1.5f, vertical = t.spacing.u * 1.25f)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Since you were last here", color = p.txt, fontSize = t.type.body, fontWeight = FontWeight.Bold)
-            RoundIconButton(Lucide.X, "Dismiss") { store.dismissCatchUpCard() }
+            Text(tr("Since you were last here"), color = p.txt, fontSize = t.type.body, fontWeight = FontWeight.Bold)
+            RoundIconButton(Lucide.X, tr("Dismiss")) { store.dismissCatchUpCard() }
         }
-        if (parts.isNotEmpty()) Caption(parts.joinToString(", and ") + ".", Modifier.padding(top = t.spacing.u * 0.75f))
-        for (ended in s.endedNow) Caption("${ended.name} — ${ended.note}", Modifier.padding(top = t.spacing.u * 0.75f))
+        if (parts.isNotEmpty()) Caption(parts.joinToString(tr(", and ")) + ".", Modifier.padding(top = t.spacing.u * 0.75f))
+        for (ended in s.endedNow) Caption(trf("{0} — {1}", ended.name, tr(ended.note)), Modifier.padding(top = t.spacing.u * 0.75f))
     }
 }
 
@@ -256,10 +260,10 @@ private fun GoalPrompt(d: ProfileData, state: UiState, store: AppStore) {
     if (!goalPromptShows(state)) return
     val t = LocalTokens.current
     SheetScaffold(title = null, onDismiss = null) {
-        Text("Is there something in particular you’d like to save up for?", color = t.palette.txt, fontSize = t.type.title, fontWeight = FontWeight.Bold, lineHeight = t.type.title * 1.25f, modifier = Modifier.padding(bottom = t.spacing.u * 1.25f))
+        Text(tr("Is there something in particular you’d like to save up for?"), color = t.palette.txt, fontSize = t.type.title, fontWeight = FontWeight.Bold, lineHeight = t.type.title * 1.25f, modifier = Modifier.padding(bottom = t.spacing.u * 1.25f))
         ButtonRow {
-            Button("Not right now", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.updateSettings { it.copy(goalPromptDismissed = true) } }
-            Button("Let’s set one up", modifier = Modifier.weight(1f)) { store.updateSettings { it.copy(goalPromptDismissed = true) }; store.push(Route.GoalEditor(null)) }
+            Button(tr("Not right now"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.updateSettings { it.copy(goalPromptDismissed = true) } }
+            Button(tr("Let’s set one up"), modifier = Modifier.weight(1f)) { store.updateSettings { it.copy(goalPromptDismissed = true) }; store.push(Route.GoalEditor(null)) }
         }
     }
 }

@@ -11,6 +11,9 @@ import app.scifin.app.AppStore
 import app.scifin.engine.ValidatedBackup
 import app.scifin.ui.LocalTokens
 import app.scifin.ui.formatDateFull
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
+import app.scifin.i18n.trp
 
 /**
  * §4.7's restore review: what the file holds, what restoring costs, and the Confirm/Cancel
@@ -26,12 +29,12 @@ fun BackupReview(pend: ValidatedBackup, store: AppStore) {
     Surface {
         Column(verticalArrangement = Arrangement.spacedBy(t.spacing.u / 2)) {
             Text(
-                "Backup from ${pend.exportedAt?.let { formatDateFull(it) } ?: "an unknown date"}",
+                pend.exportedAt?.let { trf("Backup from {0}", formatDateFull(it)) } ?: tr("Backup from an unknown date"),
                 color = p.txt2, fontSize = t.type.body, fontWeight = FontWeight.Bold,
             )
             Text(
-                "${pend.profiles.size} ${if (pend.profiles.size == 1) "profile" else "profiles"} · " +
-                    "$txCount ${if (txCount == 1) "transaction" else "transactions"}",
+                trp("{0} profile", "{0} profiles", pend.profiles.size) + " · " +
+                    trp("{0} transaction", "{0} transactions", txCount),
                 color = p.acc, fontSize = t.type.figure, fontWeight = FontWeight.Bold,
             )
             Caption(pend.profiles.joinToString(" · ") { it.profile.name })
@@ -39,11 +42,11 @@ fun BackupReview(pend: ValidatedBackup, store: AppStore) {
     }
     FeasibilityNote(BACKUP_REPLACE_NOTE, Modifier.padding(vertical = t.spacing.gap))
     ButtonRow {
-        Button("Cancel", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.cancelBackup() }
-        Button("Replace with this backup", modifier = Modifier.weight(1f)) { store.confirmBackup() }
+        Button(tr("Cancel"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.cancelBackup() }
+        Button(tr("Replace with this backup"), modifier = Modifier.weight(1f)) { store.confirmBackup() }
     }
 }
 
-const val BACKUP_REPLACE_NOTE =
-    "Restoring replaces everything on this device with what is in the file — every profile, every figure, every setting. " +
-        "What is here now will be gone. It is not merged."
+val BACKUP_REPLACE_NOTE: String get() =
+    tr("Restoring replaces everything on this device with what is in the file — every profile, every figure, every setting.") + " " +
+        tr("What is here now will be gone. It is not merged.")

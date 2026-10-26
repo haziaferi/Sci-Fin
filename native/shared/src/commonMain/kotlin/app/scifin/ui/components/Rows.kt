@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import app.scifin.i18n.tr
 import app.scifin.ui.LocalProbe
 import app.scifin.ui.LocalResting
 import app.scifin.ui.LocalTokens
@@ -193,7 +194,7 @@ fun TabTitle(icon: Lucide?, title: String, onSettings: () -> Unit) {
         if (icon != null) EntityIcon(icon, size = t.icons.lg)
         Text(title, color = p.txt, fontSize = t.type.title, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f).semantics { heading() })
         if (LocalWidthClass.current == WidthClass.COMPACT) Box(
-            Modifier.size(t.spacing.target).clickable(onClick = onSettings).semantics { contentDescription = "Settings"; role = Role.Button }.probeAs("settings-corner"),
+            Modifier.size(t.spacing.target).clickable(onClick = onSettings).semantics { contentDescription = tr("Settings"); role = Role.Button }.probeAs("settings-corner"),
             contentAlignment = Alignment.Center,
         ) { LucideIcon(Lucide.SETTINGS, tint = p.txt2, size = t.icons.md) }
     }
@@ -207,7 +208,7 @@ fun TopRow(title: String, onBack: (() -> Unit)?, trailing: (@Composable () -> Un
     @Suppress("NAME_SHADOWING") val onBack = if (LocalResting.current) null else onBack
     Row(Modifier.fillMaxWidth().padding(bottom = t.spacing.gap * 1.4f).heightIn(min = LocalHeaderMinHeight.current), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
         if (onBack != null) {
-            Box(Modifier.size(t.spacing.target).background(p.surf2, CircleShape).clickable(onClick = onBack).semantics { contentDescription = "Back"; role = Role.Button }, contentAlignment = Alignment.Center) { LucideIcon(Lucide.CHEVRON_LEFT, tint = p.txt2, size = t.icons.md) }
+            Box(Modifier.size(t.spacing.target).background(p.surf2, CircleShape).clickable(onClick = onBack).semantics { contentDescription = tr("Back"); role = Role.Button }, contentAlignment = Alignment.Center) { LucideIcon(Lucide.CHEVRON_LEFT, tint = p.txt2, size = t.icons.md) }
         }
         Text(title, color = p.txt, fontSize = t.type.title, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f).then(if (onBack != null) Modifier.padding(horizontal = t.spacing.gap) else Modifier).semantics { heading() })
         if (trailing != null) trailing() else if (onBack != null) Box(Modifier.size(t.spacing.target))

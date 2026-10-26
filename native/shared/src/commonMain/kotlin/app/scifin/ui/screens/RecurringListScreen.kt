@@ -1,5 +1,7 @@
 package app.scifin.ui.screens
 
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -37,8 +39,8 @@ import app.scifin.ui.formatDateFull
 import app.scifin.ui.formatMoney
 
 fun cadenceLabel(c: Cadence) = when (c) {
-    Cadence.WEEKLY -> "Weekly"; Cadence.BIWEEKLY -> "Every 2 weeks"; Cadence.SEMIMONTHLY -> "Twice a month"
-    Cadence.MONTHLY -> "Monthly"; Cadence.BIMONTHLY -> "Every 2 months"; Cadence.YEARLY -> "Yearly"
+    Cadence.WEEKLY -> tr("Weekly"); Cadence.BIWEEKLY -> tr("Every 2 weeks"); Cadence.SEMIMONTHLY -> tr("Twice a month")
+    Cadence.MONTHLY -> tr("Monthly"); Cadence.BIMONTHLY -> tr("Every 2 months"); Cadence.YEARLY -> tr("Yearly")
 }
 
 /** §4.3's drill-in: the month's scheduled total, one row per expense, the dashed "New" row. */
@@ -49,18 +51,18 @@ fun RecurringListScreen(state: UiState, store: AppStore) {
     val cur = d.settings.currency
     val total = Recurring.scheduledTotal(d, store.clock.today())
     Page(null) {
-        TopRow("Recurring expenses", onBack = { store.back() })
+        TopRow(tr("Recurring expenses"), onBack = { store.back() })
         Surface(Modifier.padding(bottom = t.spacing.gap * 1.3f)) {
             Column {
-                FigureLabel("Total")
+                FigureLabel(tr("Total"))
                 Text(buildAnnotatedString {
                     withStyle(SpanStyle(color = p.acc, fontSize = t.type.figure, fontWeight = FontWeight.Bold)) { append(formatMoney(total, cur)) }
-                    withStyle(SpanStyle(color = p.txt, fontSize = t.type.body)) { append("/mo") }
+                    withStyle(SpanStyle(color = p.txt, fontSize = t.type.body)) { append(tr("/mo")) }
                 })
             }
         }
         for (e in d.recurringExpenses) RecurringExpenseRow(e, cur) { store.push(Route.RecurringEditor(e.id)) }
-        AddRow("New recurring expense") { store.push(Route.RecurringEditor(null)) }
+        AddRow(tr("New recurring expense")) { store.push(Route.RecurringEditor(null)) }
     }
 }
 
@@ -79,8 +81,8 @@ internal fun RecurringExpenseRow(e: RecurringExpense, cur: String, onClick: () -
         Column(horizontalAlignment = Alignment.End) {
             Text(formatMoney(e.amount, cur), color = p.txt, fontSize = t.type.body, fontWeight = FontWeight.Bold)
             Text(cadenceLabel(e.cadence), color = p.txt2, fontSize = t.type.caption)
-            e.finishedAt?.let { Text("Ended ${formatDateFull(it)}", color = p.txt2, fontSize = t.type.caption) }
-                ?: e.endDate?.let { Text("Ends ${formatDateFull(it)}", color = p.txt2, fontSize = t.type.caption) }
+            e.finishedAt?.let { Text(trf("Ended {0}", formatDateFull(it)), color = p.txt2, fontSize = t.type.caption) }
+                ?: e.endDate?.let { Text(trf("Ends {0}", formatDateFull(it)), color = p.txt2, fontSize = t.type.caption) }
         }
     }
 }

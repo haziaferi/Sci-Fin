@@ -19,17 +19,19 @@ import app.scifin.ui.components.FieldGroup
 import app.scifin.ui.components.FieldLabel
 import app.scifin.ui.components.SheetScaffold
 import app.scifin.ui.components.TextField
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
 
 /** §8.3: rename. */
 @Composable
 fun RenameProfileSheet(sheet: Sheet.RenameProfile, state: UiState, store: AppStore) {
     val current = state.profiles.firstOrNull { it.id == sheet.id }?.name ?: ""
     var name by remember { mutableStateOf(current) }
-    SheetScaffold(title = "Rename profile", onDismiss = store::closeSheet) {
-        FieldGroup { FieldLabel("Name"); TextField(name, { name = it }, placeholder = "Mum’s pension, Joint account…", label = "Name") }
+    SheetScaffold(title = tr("Rename profile"), onDismiss = store::closeSheet) {
+        FieldGroup { FieldLabel(tr("Name")); TextField(name, { name = it }, placeholder = tr("Mum’s pension, Joint account…"), label = tr("Name")) }
         ButtonRow {
-            Button("Cancel", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.closeSheet() }
-            Button("Save", enabled = name.isNotBlank(), modifier = Modifier.weight(1f)) { store.renameProfile(sheet.id, name); store.closeSheet() }
+            Button(tr("Cancel"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.closeSheet() }
+            Button(tr("Save"), enabled = name.isNotBlank(), modifier = Modifier.weight(1f)) { store.renameProfile(sheet.id, name); store.closeSheet() }
         }
     }
 }
@@ -39,14 +41,14 @@ fun RenameProfileSheet(sheet: Sheet.RenameProfile, state: UiState, store: AppSto
 fun DeleteProfileSheet(sheet: Sheet.DeleteProfile, state: UiState, store: AppStore) {
     val t = LocalTokens.current; val p = t.palette
     val name = state.profiles.firstOrNull { it.id == sheet.id }?.name ?: ""
-    SheetScaffold(title = "Delete profile", onDismiss = store::closeSheet) {
+    SheetScaffold(title = tr("Delete profile"), onDismiss = store::closeSheet) {
         Text(
-            "Delete $name? Everything in it goes with it — its Savings, its goals and categories, its accounts and its whole ledger. Nothing moves into another profile. It waits in the Trash for 30 days, untouched, and Settings › Trash can bring it back.",
+            trf("Delete {0}? Everything in it goes with it — its Savings, its goals and categories, its accounts and its whole ledger. Nothing moves into another profile. It waits in the Trash for 30 days, untouched, and Settings › Trash can bring it back.", name),
             color = p.txt, fontSize = t.type.body, lineHeight = t.type.body * 1.5, modifier = Modifier.padding(bottom = t.spacing.pad),
         )
         ButtonRow {
-            Button("Cancel", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.closeSheet() }
-            Button("Delete", ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { store.deleteProfile(sheet.id) }
+            Button(tr("Cancel"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.closeSheet() }
+            Button(tr("Delete"), ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { store.deleteProfile(sheet.id) }
         }
     }
 }

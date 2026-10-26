@@ -30,6 +30,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import app.scifin.i18n.tr
 import app.scifin.ui.LocalProbe
 import app.scifin.ui.LocalTokens
 import app.scifin.ui.LocalWidthClass
@@ -114,7 +115,7 @@ fun FloatingAdd(modifier: Modifier = Modifier, onClick: () -> Unit) {
     val fill = t.palette.acc; val glyph = t.palette.onAcc
     Box(
         modifier.probeAs("fab").size(t.spacing.target).clip(CircleShape).background(fill).clickable(onClick = onClick)
-            .semantics { contentDescription = "Log"; role = Role.Button },
+            .semantics { contentDescription = tr("Log"); role = Role.Button },
         contentAlignment = Alignment.Center,
     ) { LucideIcon(Lucide.PLUS, tint = glyph, size = t.icons.lg) }
 }
@@ -169,7 +170,7 @@ fun SavingsLedgerRow(amount: String, onClick: () -> Unit, clickLabel: String, sl
     Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(t.radii.lg))) {
         LedgerRow(onClick = onClick, clickLabel = clickLabel, name = {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.u / 2)) {
-                LedgerLabel("Savings"); LucideIcon(Lucide.PENCIL, tint = p.txt3, size = t.spacing.u * 1.6f)
+                LedgerLabel(tr("Savings")); LucideIcon(Lucide.PENCIL, tint = p.txt3, size = t.spacing.u * 1.6f)
             }
         }, figure = amount, big = true, probeName = "savings", slot = slot)
     }

@@ -1,5 +1,6 @@
 package app.scifin.engine
 
+import app.scifin.i18n.stored
 import app.scifin.model.Account
 import app.scifin.model.AccountType
 import app.scifin.model.Money
@@ -46,12 +47,12 @@ object NewMonth {
         val paidOffForReal = acct != null && acct.autoUpdateFromPayments && acct.balance == 0L
         if (acct != null && acct.type == AccountType.LOAN && !paidOffForReal) {
             if (acct.rateType == RateType.INTEREST_ONLY)
-                return "The interest-only period has ended — this recurring expense has stopped. The principal is still outstanding."
+                return stored("The interest-only period has ended — this recurring expense has stopped. The principal is still outstanding.")
             if (acct.rateType == RateType.VARIABLE)
-                return "This recurring expense has reached the end of its term and stopped. Check the balance with your lender."
+                return stored("This recurring expense has reached the end of its term and stopped. Check the balance with your lender.")
         }
-        if (acct != null && acct.type == AccountType.LOAN) return "Loan paid off — this recurring expense has ended."
-        return "This recurring expense has ended."
+        if (acct != null && acct.type == AccountType.LOAN) return stored("Loan paid off — this recurring expense has ended.")
+        return stored("This recurring expense has ended.")
     }
 
     /**
@@ -87,7 +88,7 @@ object NewMonth {
                     next.accounts.firstOrNull { it.id == accId }?.let { acct ->
                         // §9.1: only an amortising loan is paid off by running to term; interest-only and variable keep what they owe
                         if (acct.balance != 0L && paysOffAtTerm(acct)) {
-                            next = Ledger.logAccountEdit(next, acct.id, acct.name, -acct.balance, "Loan finished", clock, ids(), first)
+                            next = Ledger.logAccountEdit(next, acct.id, acct.name, -acct.balance, stored("Loan finished"), clock, ids(), first)
                             next = next.copy(accounts = next.accounts.map { if (it.id == acct.id) it.copy(balance = 0) else it })
                         }
                     }

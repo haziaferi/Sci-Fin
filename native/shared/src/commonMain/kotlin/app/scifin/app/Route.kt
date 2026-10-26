@@ -2,14 +2,19 @@ package app.scifin.app
 
 import app.scifin.engine.LoanDraft
 import app.scifin.engine.Recurring
+import app.scifin.i18n.tr
 import app.scifin.model.Account
 
 /**
  * §4.1's five destinations, in the order the spec fixes them. The container that shows them
  * changes with width (§4.8 rule 1); the destinations, their order and their labels never do.
  */
-enum class Tab(val label: String) {
-    BUDGET("Budget"), ACTIVITY("Activity"), LEARN("Learn"), REPORTS("Reports"), SETTINGS("Settings");
+enum class Tab {
+    BUDGET, ACTIVITY, LEARN, REPORTS, SETTINGS;
+
+    val label: String get() = when (this) {
+        BUDGET -> tr("Budget"); ACTIVITY -> tr("Activity"); LEARN -> tr("Learn"); REPORTS -> tr("Reports"); SETTINGS -> tr("Settings")
+    }
 }
 
 /**
@@ -61,8 +66,13 @@ sealed interface Route {
     data object TimeWorthCalc : Route
 }
 
-enum class SettingsPage(val title: String) {
-    APPEARANCE("Appearance"), INCOME("Income"), NOTIFICATIONS("Notifications"), BACKUP("Data & backup"), SECURITY("Security & lock"), TRASH("Trash"), PROFILES("Profiles"), REPLAY("The tour, condensed");
+enum class SettingsPage {
+    APPEARANCE, INCOME, NOTIFICATIONS, BACKUP, SECURITY, TRASH, PROFILES, REPLAY;
+
+    val title: String get() = when (this) {
+        APPEARANCE -> tr("Appearance"); INCOME -> tr("Income"); NOTIFICATIONS -> tr("Notifications"); BACKUP -> tr("Data & backup")
+        SECURITY -> tr("Security & lock"); TRASH -> tr("Trash"); PROFILES -> tr("Profiles"); REPLAY -> tr("The tour, condensed")
+    }
 }
 
 /**

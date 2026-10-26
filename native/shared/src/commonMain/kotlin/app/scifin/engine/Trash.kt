@@ -1,5 +1,6 @@
 package app.scifin.engine
 
+import app.scifin.i18n.stored
 import app.scifin.model.Account
 import app.scifin.model.Category
 import app.scifin.model.Goal
@@ -66,7 +67,7 @@ object Trash {
     const val KEPT_DAYS = 30
     /** The notice that items are about to go for good (owner, 2026-10-20). */
     const val WARN_DAYS = 20
-    const val RESTORED = "Restored from the Trash"
+    val RESTORED = stored("Restored from the Trash")
 
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = false }
     fun encode(p: TrashPayload) = json.encodeToString(TrashPayload.serializer(), p)

@@ -1,5 +1,6 @@
 package app.scifin.engine
 
+import app.scifin.i18n.tr
 import app.scifin.model.AppLock
 import kotlin.io.encoding.Base64
 import kotlin.time.Duration
@@ -15,10 +16,14 @@ import kotlin.time.Duration.Companion.seconds
  */
 
 /** "Lock after leaving the app": leaving is switching away or minimising, not a notification shade. */
-enum class LockAfter(val token: String, val label: String, val wait: Duration) {
-    IMMEDIATELY("immediately", "Immediately", Duration.ZERO),
-    ONE_MINUTE("one_minute", "After 1 minute", 1.minutes),
-    FIVE_MINUTES("five_minutes", "After 5 minutes", 5.minutes);
+enum class LockAfter(val token: String, val wait: Duration) {
+    IMMEDIATELY("immediately", Duration.ZERO),
+    ONE_MINUTE("one_minute", 1.minutes),
+    FIVE_MINUTES("five_minutes", 5.minutes);
+
+    val label: String get() = when (this) {
+        IMMEDIATELY -> tr("Immediately"); ONE_MINUTE -> tr("After 1 minute"); FIVE_MINUTES -> tr("After 5 minutes")
+    }
 
     companion object {
         fun of(token: String): LockAfter = entries.firstOrNull { it.token == token } ?: ONE_MINUTE
@@ -85,7 +90,8 @@ object Pin {
 fun hintProblem(secret: String, hint: String, noun: String): String? {
     val h = hint.trim()
     if (h.isEmpty() || secret.isEmpty()) return null
-    return if (h.equals(secret.trim(), ignoreCase = true)) "The hint can’t be the $noun itself." else null
+    if (!h.equals(secret.trim(), ignoreCase = true)) return null
+    return if (noun == "PIN") tr("The hint can’t be the PIN itself.") else tr("The hint can’t be the password itself.")
 }
 
 /** PBKDF2-HMAC-SHA256, 32 bytes. The platform's own implementation (javax.crypto on both hosts). */

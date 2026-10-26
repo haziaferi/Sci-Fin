@@ -2,6 +2,8 @@ package app.scifin.ui.components
 
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
 import app.scifin.ui.probeSize
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -82,9 +84,14 @@ fun ProgressBar(amount: Money, reference: Money) {
 }
 
 fun progressCaption(amount: Money, reference: Money, refWord: String, currency: String): String {
-    if (amount == reference && reference > 0) return "As planned"
+    if (amount == reference && reference > 0) return tr("As planned")
     val diff = if (amount > reference) amount - reference else reference - amount
-    return "${formatMoney(diff, currency)} ${if (amount > reference) "past" else "left of"} $refWord"
+    val m = formatMoney(diff, currency)
+    // [refWord] is a token; "plan" (the only one in use) reads as whole sentences so a language can order them
+    return when {
+        refWord == "plan" -> if (amount > reference) trf("{0} past plan", m) else trf("{0} left of plan", m)
+        else -> if (amount > reference) trf("{0} past {1}", m, refWord) else trf("{0} left of {1}", m, refWord)
+    }
 }
 
 /** `.prow`: icon + name, the + (§3.6's entry on this row), the bar, the caption, an optional learn link. */
@@ -97,7 +104,7 @@ fun ProgressRow(icon: Lucide?, label: String, amount: Money, reference: Money, r
                 if (icon != null) EntityIcon(icon)
                 Text(label, color = p.txt, fontSize = t.type.body, fontWeight = FontWeight.Bold)
             }
-            if (onQuickAdd != null) RoundIconButton(Lucide.PLUS, "Spent on $label", onClick = onQuickAdd)
+            if (onQuickAdd != null) RoundIconButton(Lucide.PLUS, trf("Spent on {0}", label), onClick = onQuickAdd)
         }
         ProgressBar(amount, reference)
         Caption(progressCaption(amount, reference, refWord, currency), Modifier.padding(top = t.spacing.u * 0.875f))
@@ -120,7 +127,7 @@ fun EntityIcon(icon: Lucide, size: Dp = LocalTokens.current.icons.md) {
 @Composable
 fun LearnLink(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val t = LocalTokens.current
-    Text("$label\u00A0→", color = t.palette.acc, fontSize = t.type.caption, fontWeight = FontWeight.Bold, textDecoration = LEARN_LINK_DECORATION, modifier = modifier.heightIn(min = t.spacing.u * 3).clickable(onClick = onClick).padding(top = t.spacing.u * 0.875f))
+    Text(label + "\u00A0→", color = t.palette.acc, fontSize = t.type.caption, fontWeight = FontWeight.Bold, textDecoration = LEARN_LINK_DECORATION, modifier = modifier.heightIn(min = t.spacing.u * 3).clickable(onClick = onClick).padding(top = t.spacing.u * 0.875f))
 }
 
 /** §2.5: a link needs a cue that is not colour, since an accent can sit one step from `txt2`. */

@@ -17,6 +17,7 @@ import androidx.work.*
 import app.scifin.engine.Reminders
 import app.scifin.shared.R
 import java.util.concurrent.TimeUnit
+import app.scifin.i18n.tr
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlinx.datetime.*
@@ -176,18 +177,18 @@ class AndroidNotificationScheduler(
         // due in three days" is exactly that.
         mgr.createNotificationChannel(
             NotificationChannel(
-                CHANNEL_REMINDERS, "Due-date reminders", NotificationManager.IMPORTANCE_DEFAULT
-            ).apply { description = "A quiet note before a recurring expense is due." }
+                CHANNEL_REMINDERS, tr("Due-date reminders"), NotificationManager.IMPORTANCE_DEFAULT
+            ).apply { description = tr("A quiet note before a recurring expense is due.") }
         )
         mgr.createNotificationChannel(
             NotificationChannel(
-                CHANNEL_NEW_MONTH, "New month", NotificationManager.IMPORTANCE_DEFAULT
-            ).apply { description = "One gentle ping on the 1st of each month." }
+                CHANNEL_NEW_MONTH, tr("New month"), NotificationManager.IMPORTANCE_DEFAULT
+            ).apply { description = tr("One gentle ping on the 1st of each month.") }
         )
         mgr.createNotificationChannel(
             NotificationChannel(
-                CHANNEL_COPIES, "Automatic copies", NotificationManager.IMPORTANCE_DEFAULT
-            ).apply { description = "Said once when an automatic copy could not be written." }
+                CHANNEL_COPIES, tr("Automatic copies"), NotificationManager.IMPORTANCE_DEFAULT
+            ).apply { description = tr("Said once when an automatic copy could not be written.") }
         )
     }
 }
