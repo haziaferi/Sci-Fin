@@ -72,7 +72,11 @@ enum class SettingsPage(val title: String) {
 sealed interface Sheet {
     /** §3.6's entry on a target key (`savings`, `goal:<id>`, `cat:<id>`, `acct:<id>`); null is the floating + and
      *  Ctrl+N, which open the last area and target used. */
-    data class Entry(val target: String? = null) : Sheet
+    data class Entry(val target: String? = null, val income: Boolean = false) : Sheet
+    /** §3.10: one logged shift, edited or removed before the payday that would pay it. */
+    data class EditShift(val id: String) : Sheet
+    /** §3.10: leaving hourly (to salaried, or Income off) with shifts still logged -- confirm what arrived, or discard. */
+    data class SettleShifts(val next: app.scifin.model.IncomeType?) : Sheet
     /** §3.6's Savings full editor: the typed-UPDATE direct edit. */
     data object SavingsEditor : Sheet
     /** §4.4: the accounts note, opened from its one line on Activity. */

@@ -26,6 +26,7 @@ import app.scifin.app.UiState
 import app.scifin.engine.Accounts
 import app.scifin.engine.LoanDraft
 import app.scifin.engine.TimeWorth
+import app.scifin.engine.Hourly
 import app.scifin.engine.monthsLabel
 import app.scifin.engine.plusMonthsClamped
 import app.scifin.model.AccountType
@@ -236,7 +237,11 @@ fun TimeWorthCalcScreen(state: UiState, store: AppStore) {
         FieldGroup {
             FieldLabel("What an hour of your time is worth")
             TextField(rateText, { rateText = it }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = "What an hour of your time is worth", placeholder = prefill?.let { moneyText(it) } ?: "e.g. 22.00")
-            Caption(if (prefill != null) "Worked out from your income and the hours above — a starting point, fully editable." else "Your figure, entered directly. The app doesn’t need Income switched on for this.", Modifier.padding(top = t.spacing.u * 0.75f))
+            Caption(when {
+                prefill != null && Hourly.isHourly(d.settings) -> "Your hourly rate from Settings — a starting point, fully editable."
+                prefill != null -> "Worked out from your income and the hours above — a starting point, fully editable."
+                else -> "Your figure, entered directly. The app doesn’t need Income switched on for this."
+            }, Modifier.padding(top = t.spacing.u * 0.75f))
         }
         SectionLabel("What those hours come to")
         CardBox {

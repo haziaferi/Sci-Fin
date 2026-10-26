@@ -10,6 +10,7 @@ import app.scifin.model.ProfileData
 import app.scifin.model.RecurringExpense
 import app.scifin.model.Savings
 import app.scifin.model.Settings
+import app.scifin.model.Shift
 import app.scifin.model.Transaction
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
@@ -52,11 +53,12 @@ data class TrashedProfile(
     val profile: Profile, val savings: Savings, val settings: Settings, val importState: ImportState,
     val goals: List<Goal>, val categories: List<Category>, val expenses: List<RecurringExpense>,
     val accounts: List<Account>, val transactions: List<Transaction>,
+    val shifts: List<Shift> = emptyList(),
 ) {
-    fun data() = ProfileData(profile, savings, settings, importState, goals, categories, expenses, accounts, transactions)
+    fun data() = ProfileData(profile, savings, settings, importState, goals, categories, expenses, accounts, transactions, shifts)
 
     companion object {
-        fun of(d: ProfileData) = TrashedProfile(d.profile, d.savings, d.settings, d.importState, d.goals, d.categories, d.recurringExpenses, d.accounts, d.transactions)
+        fun of(d: ProfileData) = TrashedProfile(d.profile, d.savings, d.settings, d.importState, d.goals, d.categories, d.recurringExpenses, d.accounts, d.transactions, d.shifts)
     }
 }
 

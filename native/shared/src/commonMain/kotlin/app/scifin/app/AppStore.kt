@@ -20,6 +20,7 @@ import app.scifin.engine.Clock
 import app.scifin.engine.GoalDraft
 import app.scifin.engine.GoalEditing
 import app.scifin.engine.Income
+import app.scifin.engine.Hourly
 import app.scifin.engine.ValidatedBackup
 import app.scifin.model.AppState
 import app.scifin.model.ImportState
@@ -221,6 +222,14 @@ class AppStore(
             )
         }
         if (resume == 3) startTutorial(fromOnboarding = true)
+        // §3.10: salaried without auto-deposit -- opening the app after a payday with nothing logged brings up the
+        // Income entry, pre-filled, once per payday (owner, 2026-10-26)
+        data?.takeIf { resume == null }?.let { d ->
+            Hourly.salariedPaydayToLog(d, clock.today())?.let { day ->
+                dispatch { it.copy(settings = it.settings.copy(lastPaydayHandled = day)) }
+                openSheet(Sheet.Entry("savings", income = true))
+            }
+        }
         // the Trash's 30 days are kept on opening as well as by the daily task
         runCatching { session.tidyTrash() }
         refreshTrash()
@@ -582,7 +591,47 @@ class AppStore(
     fun updateSettings(change: (Settings) -> Settings): Job = dispatch { it.copy(settings = change(it.settings)) }
 
     /** §3.3: the toggle carries its clearing set and its anchor marker; the engine owns both. */
-    fun setIncomeEnabled(enabled: Boolean): Job = dispatch { Income.setEnabled(it, enabled, clock.today()) }
+    fun setIncomeEnabled(enabled: Boolean): Job {
+        // §3.10: hours still logged are settled first (owner, 2026-10-26)
+        if (!enabled && _state.value.data?.shifts?.isNotEmpty() == true) { openSheet(Sheet.SettleShifts(null)); return settled() }
+        return dispatch { Income.setEnabled(it, enabled, clock.today()) }
+    }
+
+    // ---- §3.10's hourly income ------------------------------------------------------------
+
+    fun setIncomeType(type: app.scifin.model.IncomeType): Job {
+        val d = _state.value.data ?: return settled()
+        if (d.settings.incomeType == type) return settled()
+        if (d.shifts.isNotEmpty()) { openSheet(Sheet.SettleShifts(type)); return settled() }
+        return dispatch { Hourly.setType(it, type, clock.today()) }
+    }
+
+    /** A write that did not happen because a question was asked first: already complete, so callers may join it. */
+    private fun settled(): Job = Job().also { it.complete() }
+
+    fun setHourlyRate(rate: app.scifin.model.Money): Job = updateSettings { it.copy(hourlyRate = rate) }
+
+    fun logShift(date: kotlinx.datetime.LocalDate, hours: Double, rate: app.scifin.model.Money): Job =
+        dispatch { Hourly.logShift(it, app.scifin.model.Shift(newId(), it.profileId, date, hours, rate)) }
+
+    fun editShift(shift: app.scifin.model.Shift): Job = dispatch { Hourly.editShift(it, shift) }
+    fun removeShift(id: String): Job = dispatch { Hourly.removeShift(it, id) }
+
+    /** The payday prompt's Confirm, re-read against the state it writes so a shift logged meanwhile is counted. */
+    fun confirmPayday(arrived: app.scifin.model.Money): Job = dispatch { d ->
+        Hourly.duePayday(d, clock.today())?.let { Hourly.confirmPayday(d, it, arrived, clock, newId()) } ?: d
+    }
+
+    fun nothingThisTime(): Job = dispatch { d -> Hourly.duePayday(d, clock.today())?.let { Hourly.nothingThisTime(d, it) } ?: d }
+
+    /** [Sheet.SettleShifts]' answer: what arrived for the logged hours (null discards them), then the switch it was asked for. */
+    fun settleShifts(next: app.scifin.model.IncomeType?, arrived: app.scifin.model.Money?): Job {
+        closeSheet()
+        return dispatch { d ->
+            val settled = Hourly.settleOnSwitch(d, arrived, clock, newId())
+            if (next == null) Income.setEnabled(settled, false, clock.today()) else Hourly.setType(settled, next, clock.today())
+        }
+    }
     fun setIncomeCadence(cadence: IncomeCadence): Job = dispatch { Income.setCadence(it, cadence) }
     fun setAutoDeposit(on: Boolean): Job = dispatch { Income.setAutoDeposit(it, on, clock.today()) }
 

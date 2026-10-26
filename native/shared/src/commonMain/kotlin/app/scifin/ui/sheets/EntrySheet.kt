@@ -46,6 +46,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import app.scifin.app.AppStore
 import app.scifin.app.Sheet
 import app.scifin.engine.Entry
+import app.scifin.engine.Hourly
+import app.scifin.ui.screens.hoursShort
+import app.scifin.ui.screens.parseHoursText
 import app.scifin.model.Money
 import app.scifin.model.ProfileData
 import app.scifin.ui.LocalTokens
@@ -76,6 +79,8 @@ fun EntrySheet(sheet: Sheet.Entry, d: ProfileData, store: AppStore) {
     fun dayWord(x: LocalDate) = when (x) { today -> "today"; yesterday -> "yesterday"; else -> null }
     val cur = d.settings.currency
     val start = remember {
+        // §3.10: payday's entry (salaried, manual) and "Log hours" open on Savings' Income
+        if (sheet.income && d.settings.incomeEnabled) return@remember "savings" to "income"
         val last = store.lastEntry?.takeIf { Entry.exists(d, it.first) }
         val target = sheet.target?.takeIf { Entry.exists(d, it) } ?: last?.first ?: Entry.defaultTarget(d)
         val dir = last?.takeIf { it.first == target && Entry.directions(d, target)?.any { o -> o.first == it.second } == true }?.second
@@ -83,17 +88,25 @@ fun EntrySheet(sheet: Sheet.Entry, d: ProfileData, store: AppStore) {
     }
     var target by remember { mutableStateOf(start.first) }
     var direction by remember { mutableStateOf(start.second) }
-    var amountText by remember { mutableStateOf("") }
+    var amountText by remember { mutableStateOf(if (sheet.income && !Hourly.isHourly(d.settings) && d.settings.income > 0) moneyText(d.settings.income) else "") }
+    // §3.10: on hourly income the Income verb logs a shift -- hours at a rate -- and moves nothing until payday
+    var rateText by remember { mutableStateOf(if (d.settings.hourlyRate > 0) moneyText(d.settings.hourlyRate) else "") }
     var note by remember { mutableStateOf("") }
     var date by remember { mutableStateOf(today) }
     var pair by remember { mutableStateOf(Entry.pairDefault(d, start.first)) }
     var open by remember { mutableStateOf<String?>(null) }
     val amountFocus = remember { FocusRequester() }
 
-    val amount: Money? = parseMoney(amountText)
+    val shift = Hourly.isHourly(d.settings) && Entry.areaOf(target) == Entry.Area.SAVINGS && direction == "income"
+    val hours = if (shift) parseHoursText(amountText) else null
+    val rate = if (shift) parseMoney(rateText)?.takeIf { it > 0 } else null
+    val amount: Money? = if (shift) null else parseMoney(amountText)
     val moves = Entry.moves(d, target, direction, amount, pair)
+    val ready = if (shift) hours != null && rate != null else moves != null
     val done = {
-        if (moves != null) {
+        if (shift) {
+            if (hours != null && rate != null) { store.logShift(date, hours, rate); store.lastEntry = target to direction; store.closeSheet() }
+        } else if (moves != null) {
             val a = amount!!; val tg = target; val dir = direction; val n = note; val dt = date; val pr = pair
             store.dispatch { pd -> Entry.write(pd, tg, dir, a, n, dt, pr, store.clock, store.newId) }
             store.lastEntry = tg to dir
@@ -107,7 +120,7 @@ fun EntrySheet(sheet: Sheet.Entry, d: ProfileData, store: AppStore) {
     fun pickDirection(next: String) {
         direction = next; open = null
         // §3.3's manual path: Income starts on the paycheck amount
-        if (next == "income" && amountText.isEmpty() && !d.settings.incomeAutoDeposit && d.settings.income > 0) amountText = moneyText(d.settings.income)
+        if (next == "income" && amountText.isEmpty() && !d.settings.incomeAutoDeposit && !Hourly.isHourly(d.settings) && d.settings.income > 0) amountText = moneyText(d.settings.income)
     }
     // the cursor returns to the amount whenever no options are open
     LaunchedEffect(open) { if (open == null) runCatching { amountFocus.requestFocus() } }
@@ -122,8 +135,8 @@ fun EntrySheet(sheet: Sheet.Entry, d: ProfileData, store: AppStore) {
     }
 
     SheetScaffold(title = "Log", onDismiss = store::closeSheet, action = {
-        Box(Modifier.heightIn(min = t.spacing.target).widthIn(min = t.spacing.target).clickable(enabled = moves != null, role = Role.Button, onClickLabel = "Log it") { done() }.probeAs("entry-done"), contentAlignment = Alignment.CenterEnd) {
-            Text("Done", color = if (moves != null) p.acc else p.txt3, fontSize = t.type.body)
+        Box(Modifier.heightIn(min = t.spacing.target).widthIn(min = t.spacing.target).clickable(enabled = ready, role = Role.Button, onClickLabel = "Log it") { done() }.probeAs("entry-done"), contentAlignment = Alignment.CenterEnd) {
+            Text("Done", color = if (ready) p.acc else p.txt3, fontSize = t.type.body)
         }
     }) {
         // the options of the word that was tapped, above the sentence
@@ -155,7 +168,7 @@ fun EntrySheet(sheet: Sheet.Entry, d: ProfileData, store: AppStore) {
             val dirs = Entry.directions(d, target)
             if (dirs != null) Word(dirs.first { it.first == direction }.second, open == "dir", "dir") { open = if (open == "dir") null else "dir" }
             else Inline(Entry.fixedVerb(target))
-            Inline(currencySymbol(cur))
+            if (!shift) Inline(currencySymbol(cur))
             BasicTextField(
                 amountText, { amountText = it }, singleLine = true, textStyle = field.copy(fontWeight = FontWeight.Bold), cursorBrush = SolidColor(p.acc),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done, autoCorrectEnabled = false), keyboardActions = KeyboardActions(onDone = { done() }),
@@ -166,16 +179,37 @@ fun EntrySheet(sheet: Sheet.Entry, d: ProfileData, store: AppStore) {
                     Box(Modifier.heightIn(min = t.spacing.target).drawBehind {
                         val y = size.height - gap.toPx(); drawLine(p.acc, Offset(0f, y), Offset(size.width, y), line.toPx())
                     }, contentAlignment = Alignment.CenterStart) {
-                        if (amountText.isEmpty()) Text("0.00", color = p.txt3, fontSize = t.type.body, fontWeight = FontWeight.Bold)
+                        if (amountText.isEmpty()) Text(if (shift) "0" else "0.00", color = p.txt3, fontSize = t.type.body, fontWeight = FontWeight.Bold)
                         inner()
                     }
                 },
             )
+            if (shift) {
+                Inline("h at")
+                BasicTextField(
+                    rateText, { rateText = it }, singleLine = true, textStyle = field.copy(fontWeight = FontWeight.Bold), cursorBrush = SolidColor(p.acc),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done, autoCorrectEnabled = false), keyboardActions = KeyboardActions(onDone = { done() }),
+                    modifier = Modifier.width(t.spacing.u * 10).heightIn(min = t.spacing.target).then(enter).probeAs("word-rate"),
+                    decorationBox = { inner ->
+                        // typed like the hours, so underlined like them; the symbol travels with the figure when the line wraps
+                        val line = t.strokes.emph; val gap = t.spacing.u
+                        Row(Modifier.heightIn(min = t.spacing.target).drawBehind {
+                            val y = size.height - gap.toPx(); drawLine(p.acc, Offset(0f, y), Offset(size.width, y), line.toPx())
+                        }, verticalAlignment = Alignment.CenterVertically) {
+                            Text(currencySymbol(cur), color = p.txt2, fontSize = t.type.body)
+                            Box(Modifier.padding(start = t.spacing.u * 0.4f), contentAlignment = Alignment.CenterStart) {
+                                if (rateText.isEmpty()) Text("0.00", color = p.txt3, fontSize = t.type.body, fontWeight = FontWeight.Bold)
+                                inner()
+                            }
+                        }
+                    },
+                )
+            }
             Entry.preposition(target, direction)?.let { prep ->
                 Inline(prep)
                 Word(Entry.nameOf(d, target), open == "target", "target") { open = if (open == "target") null else "target" }
             }
-            val word = Entry.noteWord(target, direction)
+            val word = if (shift) null else Entry.noteWord(target, direction)
             val pays = Entry.areaOf(target) == Entry.Area.ACCOUNT && direction == "payment"
             Word(dayWord(date) ?: formatDate(date), open == "date", "date",
                 trailing = if (word != null || pays) "," else "") { open = if (open == "date") null else "date" }
@@ -197,9 +231,12 @@ fun EntrySheet(sheet: Sheet.Entry, d: ProfileData, store: AppStore) {
             }
         }
         // the readout: what will move, and the captions
-        val readout = moves?.joinToString(" · ") { (n, a) -> "$n ${if (a > 0) "+" else "−"}${formatMoney(if (a < 0) -a else a, cur)}" }
+        val readout = if (shift) (if (hours != null && rate != null) "${hoursShort(hours)} · ${formatMoney(Hourly.gross(listOf(app.scifin.model.Shift("", "", date, hours, rate))), cur)} before deductions" else null)
+            else moves?.joinToString(" · ") { (n, a) -> "$n ${if (a > 0) "+" else "−"}${formatMoney(if (a < 0) -a else a, cur)}" }
         Text(readout ?: "", color = p.txt2, fontSize = t.type.caption, modifier = Modifier.padding(top = t.spacing.u * 0.5f).probeAs("entry-readout"))
-        for (c in Entry.captions(d, target, direction, amount, note, pair) { formatMoney(it, cur) }) Caption(c, Modifier.padding(top = t.spacing.u * 0.5f))
+        val captions = if (shift) listOf("Nothing reaches Savings until payday, when you confirm what arrived.")
+            else Entry.captions(d, target, direction, amount, note, pair) { formatMoney(it, cur) }
+        for (c in captions) Caption(c, Modifier.padding(top = t.spacing.u * 0.5f))
     }
 }
 

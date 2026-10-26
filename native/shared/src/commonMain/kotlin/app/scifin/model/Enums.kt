@@ -25,6 +25,13 @@ enum class IncomeCadence(val token: String) {
     companion object { fun of(token: String) = entries.first { it.token == token } }
 }
 
+/** §3.10 (owner, 2026-10-26): a known paycheck, or pay that exists only once hours are worked. */
+@Serializable
+enum class IncomeType(val token: String) {
+    @SerialName("salaried") SALARIED("salaried"), @SerialName("hourly") HOURLY("hourly");
+    companion object { fun of(token: String) = entries.first { it.token == token } }
+}
+
 @Serializable
 enum class DateMode(val token: String) {
     @SerialName("interval") INTERVAL("interval"), @SerialName("fixedDate") FIXED_DATE("fixedDate");

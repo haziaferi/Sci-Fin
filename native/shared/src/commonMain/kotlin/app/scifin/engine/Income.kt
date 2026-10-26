@@ -77,7 +77,7 @@ object Income {
      */
     fun runCatchUp(d: ProfileData, clock: Clock, ids: () -> String): Pair<ProfileData, CatchUp> {
         val s = d.settings
-        if (!s.incomeEnabled || !s.incomeAutoDeposit || s.income <= 0) return d to CatchUp(0, 0)
+        if (!s.incomeEnabled || !s.incomeAutoDeposit || s.income <= 0 || Hourly.isHourly(s)) return d to CatchUp(0, 0)
         var cur = d
         var count = 0
         var total = 0L
@@ -103,7 +103,8 @@ object Income {
      */
     fun noIncomeLoggedDays(d: ProfileData, today: LocalDate): Int? {
         val s = d.settings
-        if (!s.incomeEnabled || s.incomeAutoDeposit) return null
+        // hourly: the payday prompt does this job (owner, 2026-10-26)
+        if (!s.incomeEnabled || s.incomeAutoDeposit || Hourly.isHourly(s)) return null
         val ref = s.lastIncomeLoggedDate ?: s.incomeEnabledDate ?: return null
         val elapsed = ref.daysTo(today)
         return when (s.incomeCadence) {
@@ -125,10 +126,12 @@ object Income {
     /** §3.3's toggle. Off clears the whole set -- cleared, not remembered; on stamps the date. */
     fun setEnabled(d: ProfileData, enabled: Boolean, today: LocalDate): ProfileData {
         val s = d.settings
-        return d.copy(settings = if (!enabled) s.copy(
+        // hourly's unpaid shifts are settled by the switch prompt first; off clears what is left, like the rest
+        return d.copy(shifts = if (!enabled) emptyList() else d.shifts, settings = if (!enabled) s.copy(
             incomeEnabled = false, income = 0, incomeAutoDeposit = false,
             incomePayDate = null, incomePayDate2 = null, incomeEnabledDate = null,
             lastIncomeLoggedDate = null, lastIncomeDepositDate = null,
+            incomeType = app.scifin.model.IncomeType.SALARIED, hourlyRate = 0, lastPaydayHandled = null,
         ) else s.copy(
             incomeEnabled = true, incomeEnabledDate = today,
             incomePayDate = s.incomePayDate ?: today,

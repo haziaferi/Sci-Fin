@@ -15,7 +15,7 @@ object TimeWorth {
 
     /** One paycheck as a month's worth (§3.3's cadences); null with Income off or no amount, so there is no pre-fill. */
     fun monthlyEquivalent(s: Settings): Money? {
-        if (!s.incomeEnabled || s.income <= 0) return null
+        if (!s.incomeEnabled || s.income <= 0 || Hourly.isHourly(s)) return null
         return when (s.incomeCadence) {
             IncomeCadence.WEEKLY -> (s.income * 52.0 / 12).roundToLong()
             IncomeCadence.BIWEEKLY -> (s.income * 26.0 / 12).roundToLong()
@@ -24,8 +24,9 @@ object TimeWorth {
         }
     }
 
-    /** The Salaried pre-fill: a month's pay over the hours the person expects to work in it. A starting point, never a gate. */
+    /** The pre-fill: hourly income's own rate (§10.2), or a month's pay over the hours the person expects to work in it. A starting point, never a gate. */
     fun prefillRate(s: Settings, expectedHours: Double): Money? {
+        if (Hourly.isHourly(s)) return s.hourlyRate.takeIf { it > 0 }
         val monthly = monthlyEquivalent(s) ?: return null
         if (expectedHours <= 0) return null
         return (monthly / expectedHours).roundToLong()

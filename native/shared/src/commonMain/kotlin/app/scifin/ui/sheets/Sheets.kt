@@ -16,6 +16,8 @@ import app.scifin.ui.screens.ReconcileSheet
 import app.scifin.ui.screens.DeleteGoalSheet
 import app.scifin.ui.screens.DeletePairSheet
 import app.scifin.ui.screens.PayoffCommitSheet
+import app.scifin.ui.screens.EditShiftSheet
+import app.scifin.ui.screens.SettleShiftsSheet
 
 /** The one open form, over whatever screen is showing (§4.8 rule 3 decides its shape). */
 @Composable
@@ -39,6 +41,8 @@ fun Sheets(sheet: Sheet, state: UiState, store: AppStore) {
             is Sheet.Reconcile -> ReconcileSheet(sheet, state, store)
             is Sheet.LoanSave -> LoanSaveSheet(sheet, state, store)
             is Sheet.LoanBorrow -> LoanBorrowSheet(sheet, state, store)
+            is Sheet.EditShift -> EditShiftSheet(sheet, d, store)
+            is Sheet.SettleShifts -> SettleShiftsSheet(sheet, d, store)
         }
     }
 }

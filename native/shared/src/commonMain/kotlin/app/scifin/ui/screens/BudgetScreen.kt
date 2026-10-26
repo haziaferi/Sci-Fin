@@ -23,6 +23,7 @@ import app.scifin.app.Sheet
 import app.scifin.app.Tab
 import app.scifin.app.UiState
 import app.scifin.engine.Income
+import app.scifin.engine.Hourly
 import app.scifin.engine.Recurring
 import app.scifin.engine.Threshold
 import app.scifin.model.ProfileData
@@ -92,6 +93,7 @@ fun BudgetScreen(state: UiState, store: AppStore) {
 private fun EnvelopesView(d: ProfileData, state: UiState, store: AppStore) {
     val t = LocalTokens.current
     val today = store.clock.today()
+    PaydayCard(d, store, today)
     CatchUpCard(state, d, store)
     SavingsRow(d, store)
     GoalsSection(d, store)
@@ -153,6 +155,7 @@ private fun IncomeSection(d: ProfileData, store: AppStore, today: LocalDate) {
             PlaceholderCard("Off by default. Turn it on in Settings to track paychecks and let this section come back.")
             return@Column
         }
+        if (Hourly.isHourly(d.settings)) { HourlyIncomeSection(d, store, today); return@Column }
         LedgerRow(
             onClick = null,
             name = {

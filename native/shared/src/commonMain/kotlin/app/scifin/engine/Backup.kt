@@ -15,6 +15,7 @@ import app.scifin.model.RecurringExpense
 import app.scifin.model.SCHEMA_VERSION
 import app.scifin.model.Savings
 import app.scifin.model.Settings
+import app.scifin.model.Shift
 import app.scifin.model.Theme
 import app.scifin.model.ThemeMode
 import app.scifin.model.Transaction
@@ -55,6 +56,8 @@ data class BackupProfile(
     val recurringExpenses: List<RecurringExpense> = emptyList(),
     val accounts: List<Account> = emptyList(),
     val transactions: List<Transaction> = emptyList(),
+    /** §3.10's unpaid hours; absent from files before format 9, which read as none. */
+    val shifts: List<Shift> = emptyList(),
 )
 
 @Serializable
@@ -81,7 +84,7 @@ object Backup {
 
     fun toProfile(d: ProfileData) = BackupProfile(
         d.profile.id, d.profile.name, d.savings.amount, d.settings, d.importState,
-        d.goals, d.categories, d.recurringExpenses, d.accounts, d.transactions,
+        d.goals, d.categories, d.recurringExpenses, d.accounts, d.transactions, d.shifts,
     )
 
     fun build(profiles: List<ProfileData>, activeProfileId: String, exportedAt: LocalDate): BackupFile =
@@ -112,7 +115,7 @@ object Backup {
             val po = pe as? JsonObject ?: return BackupResult.Refused("That backup is damaged (a profile is missing its id, name or data). Nothing was changed.")
             val id = po["id"].str(); val name = po["name"].str()
             if (id == null || name == null) return BackupResult.Refused("That backup is damaged (a profile is missing its id, name or data). Nothing was changed.")
-            for (list in listOf("transactions", "goals", "categories", "recurringExpenses", "accounts")) {
+            for (list in listOf("transactions", "goals", "categories", "recurringExpenses", "accounts", "shifts")) {
                 val el = po[list]
                 if (el != null && el !is JsonNull && el !is JsonArray) return BackupResult.Refused("That backup is damaged (“$name” has no $list list). Nothing was changed.")
             }
@@ -124,7 +127,7 @@ object Backup {
                     bp.transactions.forEach { TransactionKey.parse(it.key) }      // every Savings figure parses these
                     unique("profile", listOf(id)); unique("goal", bp.goals.map { it.id }); unique("category", bp.categories.map { it.id })
                     unique("recurring expense", bp.recurringExpenses.map { it.id }); unique("account", bp.accounts.map { it.id })
-                    unique("transaction", bp.transactions.map { it.id })
+                    unique("transaction", bp.transactions.map { it.id }); unique("shift", bp.shifts.map { it.id })
                 }
             }.getOrElse {
                 println("Sci-Fin: backup profile “$name” refused: ${it.message}")   // the reason stays in the log, not on screen
@@ -140,6 +143,7 @@ object Backup {
                 recurringExpenses = bp.recurringExpenses.map { it.copy(profileId = id) },
                 accounts = bp.accounts.map { it.copy(profileId = id) },
                 transactions = bp.transactions.map { it.copy(profileId = id) },
+                shifts = bp.shifts.map { it.copy(profileId = id) },
             ))
         }
         val active = root["activeProfileId"].str()?.takeIf { a -> profiles.any { it.profileId == a } } ?: profiles.first().profileId

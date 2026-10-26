@@ -98,4 +98,19 @@ val SCIFIN_MIGRATIONS: Array<Migration> = arrayOf(
             connection.execSQL("CREATE INDEX IF NOT EXISTS `index_trash_profileId` ON `trash` (`profileId`)")
         }
     },
+
+    /**
+     * 8 → 9: §3.10's hourly income (owner, 2026-10-26). Every existing Profile is salaried, with the payday notification
+     * on, as the entity's defaults say; the shifts table starts empty.
+     */
+    object : Migration(8, 9) {
+        override fun migrate(connection: SQLiteConnection) {
+            connection.execSQL("ALTER TABLE settings ADD COLUMN incomeType TEXT NOT NULL DEFAULT 'salaried'")
+            connection.execSQL("ALTER TABLE settings ADD COLUMN hourlyRate INTEGER NOT NULL DEFAULT 0")
+            connection.execSQL("ALTER TABLE settings ADD COLUMN lastPaydayHandled TEXT")
+            connection.execSQL("ALTER TABLE settings ADD COLUMN paydayNotificationEnabled INTEGER NOT NULL DEFAULT 1")
+            connection.execSQL("CREATE TABLE IF NOT EXISTS `shifts` (`id` TEXT NOT NULL, `profileId` TEXT NOT NULL, `date` TEXT NOT NULL, `hours` REAL NOT NULL, `rate` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            connection.execSQL("CREATE INDEX IF NOT EXISTS `index_shifts_profileId` ON `shifts` (`profileId`)")
+        }
+    },
 )
