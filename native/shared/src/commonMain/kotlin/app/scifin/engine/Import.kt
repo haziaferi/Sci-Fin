@@ -1,5 +1,8 @@
 package app.scifin.engine
 
+import app.scifin.i18n.stored
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
 import app.scifin.model.AccountType
 import app.scifin.model.Money
 import app.scifin.model.ProfileData
@@ -95,7 +98,7 @@ object Import {
             if (posted.length != 8) return@mapNotNull null
             val d = runCatching { LocalDate(posted.substring(0, 4).toInt(), posted.substring(4, 6).toInt(), posted.substring(6, 8).toInt()) }.getOrNull() ?: return@mapNotNull null
             val amt = amount(field(b, "TRNAMT"))?.takeIf { it != 0L } ?: return@mapNotNull null   // as CSV: a zero row moves nothing
-            val name = field(b, "NAME").ifEmpty { field(b, "MEMO") }.ifEmpty { "Statement entry" }
+            val name = field(b, "NAME").ifEmpty { field(b, "MEMO") }.ifEmpty { stored("Statement entry") }
             ImportRow(d, amt, name, field(b, "FITID").ifEmpty { null })
         }.toList()
     }
@@ -180,7 +183,7 @@ object Import {
             val a = amt ?: return@mapNotNull null
             if (a == 0L) return@mapNotNull null
             val desc = (if (iDesc >= 0) c.getOrNull(iDesc) else null)?.replace(Regex("\\s*\r?\n\\s*"), " ")
-            ImportRow(d, a, desc?.ifEmpty { null } ?: "Statement entry")
+            ImportRow(d, a, desc?.ifEmpty { null } ?: stored("Statement entry"))
         }
     }
 
@@ -209,13 +212,13 @@ object Import {
             when {
                 ks.any { it in seen } -> {
                     status = ImportStatus.DUPLICATE
-                    note = if (r.fitid != null) "Already imported — matched on the bank’s own transaction id" else "Already imported — matched on date, amount and description"
+                    note = if (r.fitid != null) tr("Already imported — matched on the bank’s own transaction id") else tr("Already imported — matched on date, amount and description")
                 }
-                r.amount > 0 -> { status = ImportStatus.INCOMING; note = "Money in — goes to Savings unless you say otherwise" }
+                r.amount > 0 -> { status = ImportStatus.INCOMING; note = tr("Money in — goes to Savings unless you say otherwise") }
                 // whole words either way round: "Rent" is in "Affitto rent", not in "Parent teacher assoc"
                 pw.isNotEmpty() && recurring.any { nw -> pw.windowed(nw.size).any { it == nw } || nw.windowed(pw.size).any { it == pw } } -> {
                     status = ImportStatus.RECURRING
-                    note = "Looks like a recurring expense the app already sweeps — skipped so it isn’t counted twice"
+                    note = tr("Looks like a recurring expense the app already sweeps — skipped so it isn’t counted twice")
                 }
             }
             val rule = d.importState.payeeRules[payee]?.takeIf { id -> d.categories.any { it.id == id } }
@@ -227,14 +230,14 @@ object Import {
 
     /** Where money in can go (§4.3): Savings, or on through Savings into a Goal. Savings is the null target. */
     fun inflowTargets(d: ProfileData): List<Pair<String, String>> =
-        listOf("" to "Savings") + d.goals.map { "goal:${it.id}" to "Add to ${it.name}" }
+        listOf("" to tr("Savings")) + d.goals.map { "goal:${it.id}" to trf("Add to {0}", it.name) }
 
     /** Where an outflow of [amount] can go: every Category, the Goals that hold enough, the cards to charge, every Account to pay off. */
     fun outflowTargets(d: ProfileData, amount: Money): List<Pair<String, String>> =
         d.categories.map { "cat:${it.id}" to it.name } +
-            d.goals.filter { it.saved >= amount }.map { "spend:${it.id}" to "Spent from ${it.name}" } +
-            d.accounts.filter { it.type == AccountType.CREDIT }.map { "charge:${it.id}" to "Charged to ${it.name}" } +
-            d.accounts.map { "payoff:${it.id}" to "Paid off ${it.name}" }
+            d.goals.filter { it.saved >= amount }.map { "spend:${it.id}" to trf("Spent from {0}", it.name) } +
+            d.accounts.filter { it.type == AccountType.CREDIT }.map { "charge:${it.id}" to trf("Charged to {0}", it.name) } +
+            d.accounts.map { "payoff:${it.id}" to trf("Paid off {0}", it.name) }
 
     fun targetExists(d: ProfileData, target: String, amount: Money): Boolean = outflowTargets(d, amount).any { it.first == target }
 

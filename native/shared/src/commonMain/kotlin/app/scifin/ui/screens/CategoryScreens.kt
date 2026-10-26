@@ -1,5 +1,7 @@
 package app.scifin.ui.screens
 
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
 import app.scifin.ui.components.FigureLabel
 import app.scifin.ui.components.EditorDeleteButton
 import androidx.compose.foundation.layout.Arrangement
@@ -53,7 +55,7 @@ fun CategoriesView(d: ProfileData, store: AppStore) {
     val cur = d.settings.currency
     Surface(Modifier.padding(bottom = t.spacing.gap * 1.3f)) {
         Column {
-            FigureLabel("Spent this month")
+            FigureLabel(tr("Spent this month"))
             AmountText(formatMoney(d.categories.sumOf { it.spent }, cur), color = p.acc, fontSize = t.type.figure, fontWeight = FontWeight.Bold)
         }
     }
@@ -61,11 +63,11 @@ fun CategoriesView(d: ProfileData, store: AppStore) {
     for (c in d.categories) ProgressRow(
         entityIcon(c.icon, Lucide.TAG), c.name, c.spent, c.planned, "plan", cur,
         onQuickAdd = { store.openSheet(Sheet.Entry("cat:${c.id}")) }, onClick = { store.push(Route.CategoryEditor(c.id)) },
-        learnLink = if (c.spent > c.planned) "Why nothing here turns red" to { store.push(Route.LearnTopic("why-no-red")) } else null,
+        learnLink = if (c.spent > c.planned) tr("Why nothing here turns red") to { store.push(Route.LearnTopic("why-no-red")) } else null,
     )
-    AddRow("New category") { store.push(Route.CategoryEditor(null)) }
+    AddRow(tr("New category")) { store.push(Route.CategoryEditor(null)) }
     }
-    InfoNote("“Spent” is directly editable and goes up with each purchase you log.", Modifier.padding(top = t.spacing.gap * 1.3f))
+    InfoNote(tr("“Spent” is directly editable and goes up with each purchase you log."), Modifier.padding(top = t.spacing.gap * 1.3f))
 }
 
 /** §3.6 / §4.3's editor: `spent` is a plain, directly-editable number; changing it moves the difference to or from Savings. */
@@ -82,18 +84,18 @@ fun CategoryEditorScreen(route: Route.CategoryEditor, state: UiState, store: App
     // a typed figure that does not read as one holds Save rather than saving 0 (§3.6: Spent moves Savings)
     val unreadable = listOf(plannedText, spentText).any { it.isNotBlank() && parseMoney(it) == null }
     Page(null) {
-        TopRow(if (isNew) "New category" else draft.name.ifBlank { "Category" }, onBack = { store.back() })
-        FieldGroup { FieldLabel("Name"); TextField(draft.name, { draft = draft.copy(name = it) }, placeholder = "Groceries, hobby supplies…", label = "Name") }
+        TopRow(if (isNew) tr("New category") else draft.name.ifBlank { tr("Category") }, onBack = { store.back() })
+        FieldGroup { FieldLabel(tr("Name")); TextField(draft.name, { draft = draft.copy(name = it) }, placeholder = tr("Groceries, hobby supplies…"), label = tr("Name")) }
         IconPicker(draft.icon) { draft = draft.copy(icon = it) }
-        FieldGroup { FieldLabel("Planned this month"); TextField(plannedText, { v -> plannedText = v; draft = draft.copy(planned = parseMoney(v) ?: 0) }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = "Planned this month") }
+        FieldGroup { FieldLabel(tr("Planned this month")); TextField(plannedText, { v -> plannedText = v; draft = draft.copy(planned = parseMoney(v) ?: 0) }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = tr("Planned this month")) }
         FieldGroup {
-            FieldLabel("Spent so far this month"); TextField(spentText, { v -> spentText = v; draft = draft.copy(spent = parseMoney(v) ?: 0) }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = "Spent so far this month")
-            Caption("Changing this moves the difference to or from Savings — same mechanism as logging a purchase, just from this screen instead.", Modifier.padding(top = t.spacing.u * 0.75f))
+            FieldLabel(tr("Spent so far this month")); TextField(spentText, { v -> spentText = v; draft = draft.copy(spent = parseMoney(v) ?: 0) }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = tr("Spent so far this month"))
+            Caption(tr("Changing this moves the difference to or from Savings — same mechanism as logging a purchase, just from this screen instead."), Modifier.padding(top = t.spacing.u * 0.75f))
         }
-        if (!isNew) Button("Log a purchase", ButtonKind.SECONDARY, modifier = Modifier.fillMaxWidth().padding(bottom = t.spacing.u * 1.25f)) { store.openSheet(Sheet.Entry("cat:${original.id}")) }
+        if (!isNew) Button(tr("Log a purchase"), ButtonKind.SECONDARY, modifier = Modifier.fillMaxWidth().padding(bottom = t.spacing.u * 1.25f)) { store.openSheet(Sheet.Entry("cat:${original.id}")) }
         Row(Modifier.fillMaxWidth().padding(top = t.spacing.pad), horizontalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
             if (!isNew) EditorDeleteButton(original.name) { store.openSheet(Sheet.DeleteCategory(original.id)) }
-            Button(if (isNew) "Add category" else "Save", enabled = draft.name.isNotBlank() && !unreadable, modifier = Modifier.weight(1f)) { store.saveCategory(draft); store.back() }
+            Button(if (isNew) tr("Add category") else tr("Save"), enabled = draft.name.isNotBlank() && !unreadable, modifier = Modifier.weight(1f)) { store.saveCategory(draft); store.back() }
         }
     }
 }
@@ -104,12 +106,12 @@ fun DeleteCategorySheet(sheet: Sheet.DeleteCategory, state: UiState, store: AppS
     val t = LocalTokens.current; val p = t.palette
     val d = state.data ?: return
     val c = d.categories.firstOrNull { it.id == sheet.id } ?: return
-    SheetScaffold(title = "Delete category", onDismiss = store::closeSheet) {
-        Text("Delete ${c.name}? This month’s spend is not un-spent — only the category itself goes away.", color = p.txt, fontSize = t.type.body, lineHeight = t.type.body * 1.5, modifier = Modifier.padding(bottom = t.spacing.gap))
+    SheetScaffold(title = tr("Delete category"), onDismiss = store::closeSheet) {
+        Text(trf("Delete {0}? This month’s spend is not un-spent — only the category itself goes away.", c.name), color = p.txt, fontSize = t.type.body, lineHeight = t.type.body * 1.5, modifier = Modifier.padding(bottom = t.spacing.gap))
         Caption(TRASH_LINE, Modifier.padding(bottom = t.spacing.pad))
         ButtonRow {
-            Button("Cancel", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.closeSheet() }
-            Button("Delete", ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { store.deleteCategory(c.id) }
+            Button(tr("Cancel"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.closeSheet() }
+            Button(tr("Delete"), ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { store.deleteCategory(c.id) }
         }
     }
 }

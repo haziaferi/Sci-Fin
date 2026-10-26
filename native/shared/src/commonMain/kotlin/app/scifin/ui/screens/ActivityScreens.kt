@@ -1,5 +1,8 @@
 package app.scifin.ui.screens
 
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
+import app.scifin.i18n.trp
 import app.scifin.ui.components.FigureLabel
 import app.scifin.ui.components.EditorDeleteButton
 import androidx.compose.foundation.background
@@ -115,7 +118,7 @@ fun ActivityScreen(state: UiState, store: AppStore) {
         SavingsRow(d, store)
         // §4.4: Accounts, then the log, then the note, each row in the shared figure column
         Column(Modifier.tutAnchor("accounts-section"), verticalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
-            SectionLabel("Accounts")
+            SectionLabel(tr("Accounts"))
             if (d.accounts.isNotEmpty()) LedgerGroup {
                 for (a in d.accounts) {
                     val finished = Accounts.finished(d, a)
@@ -129,25 +132,25 @@ fun ActivityScreen(state: UiState, store: AppStore) {
                                         EntityIcon(entityIcon(a.icon, if (a.type == AccountType.LOAN) Lucide.LANDMARK else Lucide.CREDIT_CARD))
                                         Text(a.name, color = if (finished) p.txt2 else p.txt, fontSize = t.type.body, fontWeight = FontWeight.Bold)
                                     }
-                                    Caption((if (a.type == AccountType.LOAN) "Loan" else "Credit") + (if (a.type == AccountType.LOAN && a.autoUpdateFromPayments) " · auto-updates" else ""))
+                                    Caption(if (a.type == AccountType.LOAN && a.autoUpdateFromPayments) tr("Loan · auto-updates") else if (a.type == AccountType.LOAN) tr("Loan") else tr("Credit"))
                                 }
                             },
                             figure = formatMoney(a.balance, cur), probeName = "account",
                             // §3.6: on a desktop every row carries its own +; a phone has the floating +
                             slot = if (LocalWidthClass.current != WidthClass.COMPACT)
-                                ({ RowAdd("Log on ${a.name}") { store.openSheet(Sheet.Entry("acct:${a.id}")) } })
+                                ({ RowAdd(trf("Log on {0}", a.name)) { store.openSheet(Sheet.Entry("acct:${a.id}")) } })
                             else ({ LucideIcon(Lucide.CHEVRON_RIGHT, tint = p.txt2, size = t.icons.sm) }),
                         )
                     }
                 }
             }
-            AddRow("New account") { store.push(Route.AccountEditor(null)) }
+            AddRow(tr("New account")) { store.push(Route.AccountEditor(null)) }
         }
         Column(verticalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
-            SectionLabel("Log")
+            SectionLabel(tr("Log"))
             LedgerGroup {
-                NavRow(Lucide.ROTATE_CCW, "Activity log", "${d.transactions.size} ${if (d.transactions.size == 1) "entry" else "entries"}", decorative = true, selected = shown == Route.Ledger) { open(Route.Ledger) }
-                NavRow(Lucide.DATABASE, "Import a statement", d.importState.lastImportDate?.let { "Last ${formatDate(it)}" } ?: "CSV or OFX", decorative = true, selected = shown == Route.Import) { open(Route.Import) }
+                NavRow(Lucide.ROTATE_CCW, tr("Activity log"), trp("{0} entry", "{0} entries", d.transactions.size), decorative = true, selected = shown == Route.Ledger) { open(Route.Ledger) }
+                NavRow(Lucide.DATABASE, tr("Import a statement"), d.importState.lastImportDate?.let { trf("Last {0}", formatDate(it)) } ?: tr("CSV or OFX"), decorative = true, selected = shown == Route.Import) { open(Route.Import) }
             }
         }
         AccountsNote(store)
@@ -155,18 +158,18 @@ fun ActivityScreen(state: UiState, store: AppStore) {
     }
 }
 
-private const val ACCOUNTS_NOTE = "Accounts are informational — they never feed Savings, Goal or Category math directly (a Loan’s auto-update only keeps its own tracked balance honest). Choose one for its detail and, on a card, its payoff outlook."
+private val ACCOUNTS_NOTE: String get() = tr("Accounts are informational — they never feed Savings, Goal or Category math directly (a Loan’s auto-update only keeps its own tracked balance honest). Choose one for its detail and, on a card, its payoff outlook.")
 
 /** §4.4: the note's first clause on screen, the rest in a sheet. */
 @Composable
 private fun AccountsNote(store: AppStore) {
-    NoteLine("Accounts are informational.", Modifier.padding(top = LocalTokens.current.spacing.gap).probeAs("note")) { store.openSheet(Sheet.AccountsNote) }
+    NoteLine(tr("Accounts are informational."), Modifier.padding(top = LocalTokens.current.spacing.gap).probeAs("note")) { store.openSheet(Sheet.AccountsNote) }
 }
 
 @Composable
 fun AccountsNoteSheet(store: AppStore) {
     val t = LocalTokens.current
-    SheetScaffold(title = "Accounts", onDismiss = store::closeSheet) {
+    SheetScaffold(title = tr("Accounts"), onDismiss = store::closeSheet) {
         Text(ACCOUNTS_NOTE, color = t.palette.txt, fontSize = t.type.body, lineHeight = t.type.body * 1.5)
     }
 }
@@ -180,38 +183,38 @@ fun AccountDetailScreen(route: Route.AccountDetail, state: UiState, store: AppSt
     val cur = d.settings.currency
     val a = d.accounts.firstOrNull { it.id == route.id }
     Page(null) {
-        TopRow(a?.name ?: "Account", onBack = { store.back() })
-        if (a == null) { InfoNote("That account is gone."); return@Page }
+        TopRow(a?.name ?: tr("Account"), onBack = { store.back() })
+        if (a == null) { InfoNote(tr("That account is gone.")); return@Page }
         val linked = a.linkedRecurringExpenseId?.let { id -> d.recurringExpenses.firstOrNull { it.id == id } }
         val finished = Accounts.finished(d, a)
         Surface {
             Column(verticalArrangement = Arrangement.spacedBy(t.spacing.u / 2)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.u / 2)) {
                     LucideIcon(entityIcon(a.icon, if (a.type == AccountType.LOAN) Lucide.LANDMARK else Lucide.CREDIT_CARD), tint = p.txt2, size = t.icons.sm)
-                    FigureLabel((if (a.type == AccountType.LOAN) "Loan" else "Credit") + " balance")
+                    FigureLabel(if (a.type == AccountType.LOAN) tr("Loan balance") else tr("Credit balance"))
                 }
                 AmountText(formatMoney(a.balance, cur), color = p.acc, fontSize = t.type.figure, fontWeight = FontWeight.Bold)
-                if (finished) Caption("This loan’s payment schedule has ended. The account stays until you remove it.")
+                if (finished) Caption(tr("This loan’s payment schedule has ended. The account stays until you remove it."))
             }
         }
         Row(Modifier.fillMaxWidth().padding(top = t.spacing.gap), horizontalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
-            Button("Log", ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { store.openSheet(Sheet.Entry("acct:${a.id}")) }
-            Button("Edit", ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { store.push(Route.AccountEditor(a.id)) }
+            Button(tr("Log"), ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { store.openSheet(Sheet.Entry("acct:${a.id}")) }
+            Button(tr("Edit"), ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { store.push(Route.AccountEditor(a.id)) }
         }
         if (a.type == AccountType.CREDIT) PayoffPanel(a, cur, store) else {
-            SectionLabel("Loan")
+            SectionLabel(tr("Loan"))
             Surface {
                 Column(verticalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
-                    a.interestRate?.let { DetailRow("Rate", "${rateText(it, 2)}%", a.rateType?.let { r -> rateTypeLabel(r) }) }
-                    a.principal?.let { DetailRow("Original principal", formatMoney(it, cur), null) }
-                    a.termMonths?.let { DetailRow("Term", "$it month${if (it == 1) "" else "s"}", null) }
-                    if (linked != null) DetailRow("Payment", formatMoney(linked.amount, cur), cadenceLabel(linked.cadence))
-                    if (a.autoUpdateFromPayments) Caption("Auto-updates as its linked expense sweeps — interest and principal are split from the live balance each cycle, so it survives extra payments and corrections.")
+                    a.interestRate?.let { DetailRow(tr("Rate"), trf("{0}%", rateText(it, 2)), a.rateType?.let { r -> rateTypeLabel(r) }) }
+                    a.principal?.let { DetailRow(tr("Original principal"), formatMoney(it, cur), null) }
+                    a.termMonths?.let { DetailRow(tr("Term"), trp("{0} month", "{0} months", it), null) }
+                    if (linked != null) DetailRow(tr("Payment"), formatMoney(linked.amount, cur), cadenceLabel(linked.cadence))
+                    if (a.autoUpdateFromPayments) Caption(tr("Auto-updates as its linked expense sweeps — interest and principal are split from the live balance each cycle, so it survives extra payments and corrections."))
                 }
             }
             LearnLink(BORROWING_LINK, { store.push(Route.LearnTopic("borrowing")) })
         }
-        InfoNote("Accounts are informational — they never feed Savings, Goal or Category math directly.", Modifier.padding(top = t.spacing.gap))
+        InfoNote(tr("Accounts are informational — they never feed Savings, Goal or Category math directly."), Modifier.padding(top = t.spacing.gap))
     }
 }
 
@@ -228,9 +231,9 @@ private fun DetailRow(label: String, value: String, caption: String?) {
 }
 
 /** The borrowing topic's link, on a loan's and a card's own screen (§4.5, topic 7). */
-private const val BORROWING_LINK = "What borrowing really costs"
+private val BORROWING_LINK: String get() = tr("What borrowing really costs")
 
-fun rateTypeLabel(r: RateType) = when (r) { RateType.FIXED -> "Fixed"; RateType.VARIABLE -> "Variable"; RateType.INTEREST_ONLY -> "Interest-only" }
+fun rateTypeLabel(r: RateType) = when (r) { RateType.FIXED -> tr("Fixed"); RateType.VARIABLE -> tr("Variable"); RateType.INTEREST_ONLY -> tr("Interest-only") }
 
 /** §9.2 surface 1: three ways of paying a card off and what each actually costs; the fixed payment can become a linked Recurring Expense. */
 @Composable
@@ -239,44 +242,44 @@ private fun PayoffPanel(a: Account, cur: String, store: AppStore) {
     // committed on every valid change and NOT keyed on a.apr: re-keying resets the field mid-typing
     var aprText by rememberSaveable(a.id) { mutableStateOf(rateText(a.apr, 1)) }
     var fixedText by rememberSaveable(a.id) { mutableStateOf("") }
-    SectionLabel("Payoff outlook")
+    SectionLabel(tr("Payoff outlook"))
     Surface {
         Column {
             FieldGroup {
-                FieldLabel("Interest rate (APR)")
-                TextField(aprText, { v -> aprText = v; val r = parseRate(v); if (r != null || v.isBlank()) store.setAccountApr(a.id, r) }, prefix = "%", placeholder = "e.g. 21.9", keyboard = KeyboardType.Decimal, label = "Interest rate (APR)")
-                Caption("Kept on this account, so the outlook is here next time rather than blank.", Modifier.padding(top = t.spacing.u * 0.75f))
+                FieldLabel(tr("Interest rate (APR)"))
+                TextField(aprText, { v -> aprText = v; val r = parseRate(v); if (r != null || v.isBlank()) store.setAccountApr(a.id, r) }, prefix = "%", placeholder = tr("e.g. 21.9"), keyboard = KeyboardType.Decimal, label = tr("Interest rate (APR)"))
+                Caption(tr("Kept on this account, so the outlook is here next time rather than blank."), Modifier.padding(top = t.spacing.u * 0.75f))
             }
             val apr = a.apr
             if (apr == null || a.balance <= 0) {
-                Caption(if (a.balance <= 0) "Nothing outstanding on this card right now, so there is no payoff to project." else "Add the card’s rate and this will show what each way of paying it off actually costs.")
+                Caption(if (a.balance <= 0) tr("Nothing outstanding on this card right now, so there is no payoff to project.") else tr("Add the card’s rate and this will show what each way of paying it off actually costs."))
             } else {
                 val i = apr / 12
                 // §9.2: no amount typed, no projection; a typed amount is floored to the 100-minor-unit minimum
                 val fixedAmt = parseMoney(fixedText)?.takeIf { it > 0 }?.let { maxOf(100L, it) }
                 val min = Accounts.payoffAtMinimum(a.balance, i)
-                Outcome("Paid in full this cycle", "the whole balance, once", 0, 0, cur, primary = true)
+                Outcome(tr("Paid in full this cycle"), tr("the whole balance, once"), 0, 0, cur, primary = true)
                 FieldGroup {
-                    Box(Modifier.padding(top = t.spacing.gap)) { FieldLabel("A fixed payment each month") }
-                    TextField(fixedText, { fixedText = it }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = "A fixed payment each month")
+                    Box(Modifier.padding(top = t.spacing.gap)) { FieldLabel(tr("A fixed payment each month")) }
+                    TextField(fixedText, { fixedText = it }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = tr("A fixed payment each month"))
                 }
                 if (fixedAmt != null) {
                     val fixed = Accounts.payoffAtFixedPayment(a.balance, i, fixedAmt)
-                    Outcome("${formatMoney(fixedAmt, cur)} every month", "a payment you choose and keep", fixed.months, fixed.interest, cur, primary = false)
+                    Outcome(trf("{0} every month", formatMoney(fixedAmt, cur)), tr("a payment you choose and keep"), fixed.months, fixed.interest, cur, primary = false)
                     if (fixed.months != null) {
-                        Button("Commit to ${formatMoney(fixedAmt, cur)} a month", modifier = Modifier.fillMaxWidth().padding(top = t.spacing.u * 0.75f)) { store.openSheet(Sheet.PayoffCommit(a.id, fixedAmt)) }
-                        Caption("Creates a recurring expense for the payment, linked to this account.", Modifier.padding(top = t.spacing.u * 0.75f))
+                        Button(trf("Commit to {0} a month", formatMoney(fixedAmt, cur)), modifier = Modifier.fillMaxWidth().padding(top = t.spacing.u * 0.75f)) { store.openSheet(Sheet.PayoffCommit(a.id, fixedAmt)) }
+                        Caption(tr("Creates a recurring expense for the payment, linked to this account."), Modifier.padding(top = t.spacing.u * 0.75f))
                     }
                 }
-                Outcome("Minimum only", "about ${formatMoney(min.first, cur)} to start, falling as the balance does", min.months, min.interest, cur, primary = false)
-                Caption("Minimum modelled as ${(Accounts.MIN_PAYMENT_PCT * 100).toInt()}% of the balance or ${formatMoney(Accounts.MIN_PAYMENT_FLOOR, cur)}, whichever is larger — an assumption, not your card’s actual terms. It can’t become a recurring expense, because it isn’t a fixed amount.")
+                Outcome(tr("Minimum only"), trf("about {0} to start, falling as the balance does", formatMoney(min.first, cur)), min.months, min.interest, cur, primary = false)
+                Caption(trf("Minimum modelled as {0}% of the balance or {1}, whichever is larger — an assumption, not your card’s actual terms. It can’t become a recurring expense, because it isn’t a fixed amount.", (Accounts.MIN_PAYMENT_PCT * 100).toInt(), formatMoney(Accounts.MIN_PAYMENT_FLOOR, cur)))
             }
         }
     }
     // under the outlook it explains, above the credit note and its topic (§4.5's order, owner 2026-10-23)
     LearnLink(BORROWING_LINK, { store.push(Route.LearnTopic("borrowing")) })
-    InfoNote("In places that score credit, paying this off in full each cycle also reports payment history — not something this app is telling you to do, just part of the picture.", Modifier.padding(top = t.spacing.gap))
-    LearnLink("How credit scoring works, and who it leaves out", { store.push(Route.LearnTopic("credit-score")) })
+    InfoNote(tr("In places that score credit, paying this off in full each cycle also reports payment history — not something this app is telling you to do, just part of the picture."), Modifier.padding(top = t.spacing.gap))
+    LearnLink(tr("How credit scoring works, and who it leaves out"), { store.push(Route.LearnTopic("credit-score")) })
 }
 
 @Composable
@@ -289,7 +292,7 @@ private fun Outcome(title: String, sub: String, months: Int?, interest: Money?, 
     ) {
         Text(title, color = p.txt, fontSize = t.type.body, fontWeight = FontWeight.Bold)
         Text(monthsLabel(months), color = p.txt, fontSize = t.type.title, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = t.spacing.u / 2))
-        Caption((if (interest == null) "The balance never falls at that payment." else "${formatMoney(interest, cur)} of interest") + " — $sub", Modifier.padding(top = t.spacing.u * 0.875f))
+        Caption(if (interest == null) trf("The balance never falls at that payment. — {0}", sub) else trf("{0} of interest — {1}", formatMoney(interest, cur), sub), Modifier.padding(top = t.spacing.u * 0.875f))
     }
 }
 
@@ -301,14 +304,14 @@ fun PayoffCommitSheet(sheet: Sheet.PayoffCommit, state: UiState, store: AppStore
     val a = d.accounts.firstOrNull { it.id == sheet.accountId } ?: return
     val cur = d.settings.currency
     val today = store.clock.today()
-    var name by rememberSaveable(sheet) { mutableStateOf("${a.name} payment") }
-    SheetScaffold(title = "Commit to ${formatMoney(sheet.amount, cur)} a month", onDismiss = store::closeSheet) {
-        FieldGroup { FieldLabel("Name this recurring expense"); TextField(name, { name = it }, label = "Name this recurring expense") }
-        FeasibilityNote("Monthly, on the ${ordinal(today.day)}, linked to ${a.name}. The first payment is ${formatDate(today.plusMonthsClamped(1))} — a month from today, not today — so nothing leaves Savings until then.")
-        Caption("No end date: a card’s payoff moves with every new purchase. Edit or delete it any time.", Modifier.padding(top = t.spacing.gap, bottom = t.spacing.u * 1.25f))
+    var name by rememberSaveable(sheet) { mutableStateOf(trf("{0} payment", a.name)) }
+    SheetScaffold(title = trf("Commit to {0} a month", formatMoney(sheet.amount, cur)), onDismiss = store::closeSheet) {
+        FieldGroup { FieldLabel(tr("Name this recurring expense")); TextField(name, { name = it }, label = tr("Name this recurring expense")) }
+        FeasibilityNote(trf("Monthly, on the {0}, linked to {1}. The first payment is {2} — a month from today, not today — so nothing leaves Savings until then.", ordinal(today.day), a.name, formatDate(today.plusMonthsClamped(1))))
+        Caption(tr("No end date: a card’s payoff moves with every new purchase. Edit or delete it any time."), Modifier.padding(top = t.spacing.gap, bottom = t.spacing.u * 1.25f))
         ButtonRow {
-            Button("Cancel", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.closeSheet() }
-            Button("Create it", modifier = Modifier.weight(1f)) { store.commitPayoff(a.id, sheet.amount, name); store.closeSheet() }
+            Button(tr("Cancel"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.closeSheet() }
+            Button(tr("Create it"), modifier = Modifier.weight(1f)) { store.commitPayoff(a.id, sheet.amount, name); store.closeSheet() }
         }
     }
 }
@@ -330,37 +333,37 @@ fun AccountEditorScreen(route: Route.AccountEditor, state: UiState, store: AppSt
     var principalText by rememberSaveable(route) { mutableStateOf(draft.principal?.let { moneyText(it) } ?: "") }
     var termText by rememberSaveable(route) { mutableStateOf(draft.termMonths?.toString() ?: "") }
     Page(null) {
-        TopRow(if (isNew) "New account" else draft.name.ifBlank { "Account" }, onBack = { store.back() })
-        FieldGroup { FieldLabel("Name"); TextField(draft.name, { draft = draft.copy(name = it) }, placeholder = "Credit card, car loan…", label = "Name") }
-        FieldGroup { FieldLabel("Type"); Segmented(listOf("credit" to "Credit", "loan" to "Loan"), draft.type.token, { v -> draft = Accounts.retype(draft, AccountType.of(v)); loanRateText = ""; aprText = ""; principalText = ""; termText = "" }) }
+        TopRow(if (isNew) tr("New account") else draft.name.ifBlank { tr("Account") }, onBack = { store.back() })
+        FieldGroup { FieldLabel(tr("Name")); TextField(draft.name, { draft = draft.copy(name = it) }, placeholder = tr("Credit card, car loan…"), label = tr("Name")) }
+        FieldGroup { FieldLabel(tr("Type")); Segmented(listOf("credit" to tr("Credit"), "loan" to tr("Loan")), draft.type.token, { v -> draft = Accounts.retype(draft, AccountType.of(v)); loanRateText = ""; aprText = ""; principalText = ""; termText = "" }) }
         FieldGroup {
-            FieldLabel("Balance owed"); TextField(balanceText, { v -> balanceText = v; draft = draft.copy(balance = parseMoney(v) ?: 0) }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = "Balance owed")
-            Caption("Directly editable at any time — logging a payment stays available as a lower-friction nudge too.", Modifier.padding(top = t.spacing.u * 0.75f))
+            FieldLabel(tr("Balance owed")); TextField(balanceText, { v -> balanceText = v; draft = draft.copy(balance = parseMoney(v) ?: 0) }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = tr("Balance owed"))
+            Caption(tr("Directly editable at any time — logging a payment stays available as a lower-friction nudge too."), Modifier.padding(top = t.spacing.u * 0.75f))
         }
         if (draft.type == AccountType.LOAN) {
-            SectionLabel("Loan terms")
+            SectionLabel(tr("Loan terms"))
             FieldGroup {
-                FieldLabel("Interest rate"); TextField(loanRateText, { v -> loanRateText = v; draft = draft.copy(interestRate = parseRate(v)) }, prefix = "%", placeholder = "e.g. 5.90", keyboard = KeyboardType.Decimal, label = "Interest rate")
-                Caption("Auto-update needs this: each cycle it splits interest from principal off the live balance.", Modifier.padding(top = t.spacing.u * 0.75f))
+                FieldLabel(tr("Interest rate")); TextField(loanRateText, { v -> loanRateText = v; draft = draft.copy(interestRate = parseRate(v)) }, prefix = "%", placeholder = tr("e.g. 5.90"), keyboard = KeyboardType.Decimal, label = tr("Interest rate"))
+                Caption(tr("Auto-update needs this: each cycle it splits interest from principal off the live balance."), Modifier.padding(top = t.spacing.u * 0.75f))
             }
-            FieldGroup { FieldLabel("Original principal"); TextField(principalText, { v -> principalText = v; draft = draft.copy(principal = parseMoney(v)) }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = "Original principal") }
-            FieldGroup { FieldLabel("Term (months)"); TextField(termText, { v -> termText = v; draft = draft.copy(termMonths = v.trim().toIntOrNull()?.takeIf { it >= 1 }) }, prefix = "#", keyboard = KeyboardType.Number, label = "Term (months)") }
-            FieldGroup { FieldLabel("Rate type"); ChipRow(RateType.entries.map { it.token to rateTypeLabel(it) }, draft.rateType?.token ?: "") { v -> draft = draft.copy(rateType = RateType.of(v)) } }
+            FieldGroup { FieldLabel(tr("Original principal")); TextField(principalText, { v -> principalText = v; draft = draft.copy(principal = parseMoney(v)) }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = tr("Original principal")) }
+            FieldGroup { FieldLabel(tr("Term (months)")); TextField(termText, { v -> termText = v; draft = draft.copy(termMonths = v.trim().toIntOrNull()?.takeIf { it >= 1 }) }, prefix = "#", keyboard = KeyboardType.Number, label = tr("Term (months)")) }
+            FieldGroup { FieldLabel(tr("Rate type")); ChipRow(RateType.entries.map { it.token to rateTypeLabel(it) }, draft.rateType?.token ?: "") { v -> draft = draft.copy(rateType = RateType.of(v)) } }
             // §7.2: a Loan with no rate has nothing for the decrement to compute from -- the toggle is absent, not greyed
-            if (Accounts.loanInputsComplete(draft)) SettingRow(Lucide.REPEAT, "Auto-update from payments", "Decrements as its linked expense sweeps") {
+            if (Accounts.loanInputsComplete(draft)) SettingRow(Lucide.REPEAT, tr("Auto-update from payments"), tr("Decrements as its linked expense sweeps")) {
                 Switch(draft.autoUpdateFromPayments) { draft = draft.copy(autoUpdateFromPayments = !draft.autoUpdateFromPayments) }
             }
             if (Accounts.loanInputsComplete(draft) && draft.autoUpdateFromPayments) {
                 val eligible = d.recurringExpenses.filter { it.linkedAccountId == null || it.linkedAccountId == draft.id }
-                FieldGroup { FieldLabel("Linked recurring expense"); ChipRow(eligible.map { it.id to it.name }, draft.linkedRecurringExpenseId ?: "") { v -> draft = draft.copy(linkedRecurringExpenseId = v) } }
+                FieldGroup { FieldLabel(tr("Linked recurring expense")); ChipRow(eligible.map { it.id to it.name }, draft.linkedRecurringExpenseId ?: "") { v -> draft = draft.copy(linkedRecurringExpenseId = v) } }
             }
         } else FieldGroup {
-            FieldLabel("Interest rate (APR)"); TextField(aprText, { v -> aprText = v; draft = draft.copy(apr = parseRate(v)) }, prefix = "%", placeholder = "e.g. 21.9", keyboard = KeyboardType.Decimal, label = "Interest rate (APR)")
-            Caption("Feeds the payoff outlook on this card’s detail screen.", Modifier.padding(top = t.spacing.u * 0.75f))
+            FieldLabel(tr("Interest rate (APR)")); TextField(aprText, { v -> aprText = v; draft = draft.copy(apr = parseRate(v)) }, prefix = "%", placeholder = tr("e.g. 21.9"), keyboard = KeyboardType.Decimal, label = tr("Interest rate (APR)"))
+            Caption(tr("Feeds the payoff outlook on this card’s detail screen."), Modifier.padding(top = t.spacing.u * 0.75f))
         }
         Row(Modifier.fillMaxWidth().padding(top = t.spacing.pad), horizontalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
             if (!isNew) EditorDeleteButton(original.name) { store.openSheet(Sheet.DeleteAccount(original.id)) }
-            Button(if (isNew) "Add account" else "Save", enabled = draft.name.isNotBlank(), modifier = Modifier.weight(1f)) {
+            Button(if (isNew) tr("Add account") else tr("Save"), enabled = draft.name.isNotBlank(), modifier = Modifier.weight(1f)) {
                 // §7.2: a Loan leaving for Credit with a payment linked asks first; the sheet saves
                 if (Accounts.retypeNeedsCascade(d, draft)) store.openSheet(Sheet.RetypeCascade(draft)) else { store.saveAccount(draft); store.back() }
             }
@@ -380,13 +383,13 @@ fun DeleteAccountSheet(sheet: Sheet.DeleteAccount, state: UiState, store: AppSto
     val linked = a.linkedRecurringExpenseId?.let { id -> d.recurringExpenses.firstOrNull { it.id == id } }
     val back = linked?.let { Recurring.reversalAmount(d, it, store.clock.today()) } ?: 0L
     val amount = formatMoney(back, cur)
-    val pair = if (linked != null) "${a.name} and “${linked.name}”" else a.name
+    val pair = if (linked != null) trf("{0} and “{1}”", a.name, linked.name) else a.name
     DeleteWithReturnSheet(
-        title = "Delete account",
-        question = "Delete ${a.name}?" + when {
-            linked == null -> " This is informational-only, so nothing else in the app is affected."
-            back > 0 -> " This also removes the ${formatMoney(linked.amount, cur)}/month payment “${linked.name}” — they were created as a pair and they go as one. Add $amount back to Savings? That’s what’s actually been swept for the current period."
-            else -> " This also removes the ${formatMoney(linked.amount, cur)}/month payment “${linked.name}” — they were created as a pair and they go as one."
+        title = tr("Delete account"),
+        question = when {
+            linked == null -> trf("Delete {0}? This is informational-only, so nothing else in the app is affected.", a.name)
+            back > 0 -> trf("Delete {0}? This also removes the {1}/month payment “{2}” — they were created as a pair and they go as one.", a.name, formatMoney(linked.amount, cur), linked.name) + " " + trf("Add {0} back to Savings? That’s what’s actually been swept for the current period.", amount)
+            else -> trf("Delete {0}? This also removes the {1}/month payment “{2}” — they were created as a pair and they go as one.", a.name, formatMoney(linked.amount, cur), linked.name)
         },
         hasReturn = back > 0,
         confirmAddBack = deleteAddBackCopy(amount, pair),
@@ -406,12 +409,12 @@ fun RetypeCascadeSheet(sheet: Sheet.RetypeCascade, state: UiState, store: AppSto
     val back = Recurring.reversalAmount(d, linked, store.clock.today())
     val amount = formatMoney(back, cur)
     DeleteWithReturnSheet(
-        title = "Change to a credit account",
-        question = "Change ${sheet.draft.name} to Credit? This also removes the ${formatMoney(linked.amount, cur)}/month payment “${linked.name}” — a credit account can’t keep a loan’s tracked figure honest." +
-            (if (back > 0) " Add $amount back to Savings? That’s what’s actually been swept for the current period." else ""),
+        title = tr("Change to a credit account"),
+        question = trf("Change {0} to Credit? This also removes the {1}/month payment “{2}” — a credit account can’t keep a loan’s tracked figure honest.", sheet.draft.name, formatMoney(linked.amount, cur), linked.name) +
+            (if (back > 0) " " + trf("Add {0} back to Savings? That’s what’s actually been swept for the current period.", amount) else ""),
         hasReturn = back > 0,
-        confirmAddBack = deleteAddBackCopy(amount, "“${linked.name}”", trash = false),
-        confirmDeleteOnly = deleteOnlyCopy("“${linked.name}”", trash = false),
+        confirmAddBack = deleteAddBackCopy(amount, trf("“{0}”", linked.name), trash = false),
+        confirmDeleteOnly = deleteOnlyCopy(trf("“{0}”", linked.name), trash = false),
         onDismiss = store::closeSheet,
         onDelete = { returnMoney -> store.retypeAccountToCredit(sheet.draft, reverse = returnMoney) },
         trash = false,

@@ -22,6 +22,8 @@ import app.scifin.app.AppStore
 import app.scifin.app.Sheet
 import app.scifin.engine.Hourly
 import app.scifin.engine.Income
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
 import app.scifin.model.IncomeType
 import app.scifin.model.ProfileData
 import app.scifin.model.Shift
@@ -55,7 +57,7 @@ import kotlinx.datetime.LocalDate
  */
 
 /** "14.5 h", "6 h": a whole number of hours drops its decimals. */
-fun hoursShort(h: Double): String = (if (h % 1.0 == 0.0) h.toLong().toString() else h.toString()) + " h"
+fun hoursShort(h: Double): String = trf("{0} h", if (h % 1.0 == 0.0) h.toLong().toString() else h.toString())
 
 /** Hours typed with a comma or a point; zero, negative or unreadable is no figure. */
 fun parseHoursText(v: String): Double? = v.trim().replace(',', '.').toDoubleOrNull()?.takeIf { it > 0 }
@@ -63,7 +65,7 @@ fun parseHoursText(v: String): Double? = v.trim().replace(',', '.').toDoubleOrNu
 private fun hoursText(h: Double): String = if (h % 1.0 == 0.0) h.toLong().toString() else h.toString()
 
 /** What the estimate is, in words the person can check against the payslip. */
-private fun estimateWord(beforeDeductions: Boolean) = if (beforeDeductions) "before deductions" else "from your recent paydays"
+private fun estimateWord(beforeDeductions: Boolean) = if (beforeDeductions) tr("before deductions") else tr("from your recent paydays")
 
 /** Budget's Income section while Income is hourly: the rate, what has arrived this month, and the shifts not yet paid. */
 @Composable
@@ -76,30 +78,34 @@ fun HourlyIncomeSection(d: ProfileData, store: AppStore, today: LocalDate) {
         name = {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.u / 2)) {
                 LucideIcon(Lucide.BANKNOTE, tint = p.txt2, size = t.icons.sm)
-                LedgerLabel("Per hour (paid ${cadenceLabel(s.incomeCadence).lowercase()})")
+                LedgerLabel(trf("Per hour (paid {0})", cadenceLabel(s.incomeCadence).lowercase()))
             }
         },
         figure = formatMoney(s.hourlyRate, cur), probeName = "income",
-        under = { Caption("${formatMoney(Income.receivedThisMonth(d, today), cur)} received so far this month", Modifier.padding(top = t.spacing.u * 0.5f)) },
+        under = { Caption(trf("{0} received so far this month", formatMoney(Income.receivedThisMonth(d, today), cur)), Modifier.padding(top = t.spacing.u * 0.5f)) },
     )
     val shifts = Hourly.pending(d)
     val next = Hourly.nextPayday(s, today)
     if (shifts.isEmpty()) {
-        Caption("No hours logged since the last payday." + (next?.let { " Next payday: ${formatDate(it)}." } ?: ""))
+        Caption(tr("No hours logged since the last payday.") + (next?.let { " " + trf("Next payday: {0}.", formatDate(it)) } ?: ""))
     } else {
         val (est, before) = Hourly.estimate(d, shifts)
-        Caption("${hoursShort(shifts.sumOf { it.hours })} logged" + (next?.let { " for the payday on ${formatDate(it)}" } ?: "") + " · about ${formatMoney(est, cur)} ${estimateWord(before)}", Modifier.probeAs("shift-summary"))
+        Caption(
+            next?.let { day -> trf("{0} logged for the payday on {1} · about {2} {3}", hoursShort(shifts.sumOf { it.hours }), formatDate(day), formatMoney(est, cur), estimateWord(before)) }
+                ?: trf("{0} logged · about {1} {2}", hoursShort(shifts.sumOf { it.hours }), formatMoney(est, cur), estimateWord(before)),
+            Modifier.probeAs("shift-summary"),
+        )
         LedgerGroup {
             for (sh in shifts) LedgerRow(
                 onClick = { store.openSheet(Sheet.EditShift(sh.id)) },
                 name = { LedgerLabel(formatDate(sh.date)) },
                 figure = hoursShort(sh.hours),
-                under = { Caption("at ${formatMoney(sh.rate, cur)} an hour") },
-                clickLabel = "Edit this shift",
+                under = { Caption(trf("at {0} an hour", formatMoney(sh.rate, cur))) },
+                clickLabel = tr("Edit this shift"),
             )
         }
     }
-    Button("Log hours", ButtonKind.SECONDARY, modifier = Modifier.fillMaxWidth().probeAs("log-hours")) { store.openSheet(Sheet.Entry("savings", income = true)) }
+    Button(tr("Log hours"), ButtonKind.SECONDARY, modifier = Modifier.fillMaxWidth().probeAs("log-hours")) { store.openSheet(Sheet.Entry("savings", income = true)) }
 }
 
 /**
@@ -119,16 +125,17 @@ fun PaydayCard(d: ProfileData, store: AppStore, today: LocalDate) {
         verticalArrangement = Arrangement.spacedBy(t.spacing.u * 0.75f),
     ) {
         Text(
-            "Payday, ${formatDate(payday.date)} — " + if (payday.shifts.isEmpty()) "no hours logged. Did anything arrive?" else "${hoursShort(payday.hours)} logged. What arrived?",
+            if (payday.shifts.isEmpty()) trf("Payday, {0} — no hours logged. Did anything arrive?", formatDate(payday.date))
+            else trf("Payday, {0} — {1} logged. What arrived?", formatDate(payday.date), hoursShort(payday.hours)),
             color = p.txt, fontSize = t.type.body, fontWeight = FontWeight.Bold,
         )
-        TextField(arrivedText, { arrivedText = it }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = "What arrived")
-        if (payday.shifts.isNotEmpty()) Caption("Estimated at ${formatMoney(est, cur)}, ${estimateWord(before)}. Change it to what actually arrived.")
+        TextField(arrivedText, { arrivedText = it }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = tr("What arrived"))
+        if (payday.shifts.isNotEmpty()) Caption(trf("Estimated at {0}, {1}. Change it to what actually arrived.", formatMoney(est, cur), estimateWord(before)))
         ButtonRow {
-            Button("Nothing this time", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.nothingThisTime() }
-            Button("Confirm", enabled = arrived != null, modifier = Modifier.weight(1f)) { arrived?.let { store.confirmPayday(it) } }
+            Button(tr("Nothing this time"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.nothingThisTime() }
+            Button(tr("Confirm"), enabled = arrived != null, modifier = Modifier.weight(1f)) { arrived?.let { store.confirmPayday(it) } }
         }
-        if (payday.shifts.isNotEmpty()) Caption("“Nothing this time” keeps the hours logged for the next payday.")
+        if (payday.shifts.isNotEmpty()) Caption(tr("“Nothing this time” keeps the hours logged for the next payday."))
     }
 }
 
@@ -142,13 +149,13 @@ fun EditShiftSheet(sheet: Sheet.EditShift, d: ProfileData, store: AppStore) {
     var date by remember { mutableStateOf(shift.date) }
     val hours = parseHoursText(hoursText)
     val rate = parseMoney(rateText)?.takeIf { it > 0 }
-    SheetScaffold(title = "Shift", onDismiss = store::closeSheet) {
-        FieldGroup { FieldLabel("Hours"); TextField(hoursText, { hoursText = it }, prefix = "#", keyboard = KeyboardType.Decimal, label = "Hours") }
-        FieldGroup { FieldLabel("Per hour"); TextField(rateText, { rateText = it }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = "Per hour") }
-        FieldGroup { FieldLabel("Worked on"); DateField(date) { date = it } }
+    SheetScaffold(title = tr("Shift"), onDismiss = store::closeSheet) {
+        FieldGroup { FieldLabel(tr("Hours")); TextField(hoursText, { hoursText = it }, prefix = "#", keyboard = KeyboardType.Decimal, label = tr("Hours")) }
+        FieldGroup { FieldLabel(tr("Per hour")); TextField(rateText, { rateText = it }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = tr("Per hour")) }
+        FieldGroup { FieldLabel(tr("Worked on")); DateField(date) { date = it } }
         ButtonRow {
-            Button("Remove", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.removeShift(shift.id); store.closeSheet() }
-            Button("Save", enabled = hours != null && rate != null, modifier = Modifier.weight(1f)) {
+            Button(tr("Remove"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.removeShift(shift.id); store.closeSheet() }
+            Button(tr("Save"), enabled = hours != null && rate != null, modifier = Modifier.weight(1f)) {
                 store.editShift(Shift(shift.id, shift.profileId, date, hours!!, rate!!)); store.closeSheet()
             }
         }
@@ -166,17 +173,20 @@ fun SettleShiftsSheet(sheet: Sheet.SettleShifts, d: ProfileData, store: AppStore
     val (est, before) = Hourly.estimate(d, shifts)
     var arrivedText by rememberSaveable { mutableStateOf(moneyText(est)) }
     val arrived = parseMoney(arrivedText)?.takeIf { it > 0 }
-    val leaving = if (sheet.next == IncomeType.SALARIED) "Switching to salaried" else "Turning Income off"
-    SheetScaffold(title = "Hours still logged", onDismiss = store::closeSheet) {
-        Caption("$leaving leaves ${hoursShort(shifts.sumOf { it.hours })} with no payday to count them. Confirm what arrived for them now, dated today, or discard them.")
+    val logged = hoursShort(shifts.sumOf { it.hours })
+    SheetScaffold(title = tr("Hours still logged"), onDismiss = store::closeSheet) {
+        Caption(
+            if (sheet.next == IncomeType.SALARIED) trf("Switching to salaried leaves {0} with no payday to count them. Confirm what arrived for them now, dated today, or discard them.", logged)
+            else trf("Turning Income off leaves {0} with no payday to count them. Confirm what arrived for them now, dated today, or discard them.", logged),
+        )
         FieldGroup {
-            FieldLabel("What arrived")
-            TextField(arrivedText, { arrivedText = it }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = "What arrived")
-            Caption("Estimated at ${formatMoney(est, cur)}, ${estimateWord(before)}.", Modifier.padding(top = LocalTokens.current.spacing.u * 0.75f))
+            FieldLabel(tr("What arrived"))
+            TextField(arrivedText, { arrivedText = it }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = tr("What arrived"))
+            Caption(trf("Estimated at {0}, {1}.", formatMoney(est, cur), estimateWord(before)), Modifier.padding(top = LocalTokens.current.spacing.u * 0.75f))
         }
         ButtonRow {
-            Button("Discard the hours", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.settleShifts(sheet.next, null) }
-            Button("Confirm", enabled = arrived != null, modifier = Modifier.weight(1f)) { store.settleShifts(sheet.next, arrived) }
+            Button(tr("Discard the hours"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.settleShifts(sheet.next, null) }
+            Button(tr("Confirm"), enabled = arrived != null, modifier = Modifier.weight(1f)) { store.settleShifts(sheet.next, arrived) }
         }
     }
 }

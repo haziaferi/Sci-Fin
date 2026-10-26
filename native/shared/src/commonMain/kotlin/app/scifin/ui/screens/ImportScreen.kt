@@ -1,5 +1,8 @@
 package app.scifin.ui.screens
 
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
+import app.scifin.i18n.trp
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -51,20 +54,20 @@ fun ImportScreen(state: UiState, store: AppStore) {
     val cur = d.settings.currency
     val review = state.importReview
     Page(null) {
-        TopRow(if (review == null) "Import a statement" else "Review import", onBack = { if (review != null) store.cancelImport() else store.back() })
+        TopRow(if (review == null) tr("Import a statement") else tr("Review import"), onBack = { if (review != null) store.cancelImport() else store.back() })
         if (review == null) {
-            InfoNote("Export a statement from your bank as CSV or OFX and open it here. It is read on this device and nothing is sent anywhere.")
+            InfoNote(tr("Export a statement from your bank as CSV or OFX and open it here. It is read on this device and nothing is sent anywhere."))
             Column(Modifier.padding(top = t.spacing.gap)) {
-                FieldLabel("Statement file")
-                Button("Choose a statement file", ButtonKind.SECONDARY, modifier = Modifier.fillMaxWidth()) { store.pickStatement() }
+                FieldLabel(tr("Statement file"))
+                Button(tr("Choose a statement file"), ButtonKind.SECONDARY, modifier = Modifier.fillMaxWidth()) { store.pickStatement() }
             }
             state.importError?.let { FeasibilityNote(it, Modifier.padding(top = t.spacing.gap)) }
-            Caption("OFX is worth preferring where your bank offers it: it carries the bank’s own transaction id, so re-importing an overlapping period can identify duplicates exactly rather than by resemblance.", Modifier.padding(top = t.spacing.gap))
+            Caption(tr("OFX is worth preferring where your bank offers it: it carries the bank’s own transaction id, so re-importing an overlapping period can identify duplicates exactly rather than by resemblance."), Modifier.padding(top = t.spacing.gap))
             state.importDone?.let { done ->
                 InfoNote(importSummary(done.count, done.out, done.inn, cur), Modifier.padding(top = t.spacing.gap))
-                LearnLink("See them in the Activity log", { store.push(Route.Ledger) })
+                LearnLink(tr("See them in the Activity log"), { store.push(Route.Ledger) })
             }
-            d.importState.lastImportDate?.let { Caption("Last import: ${formatDateFull(it)}.", Modifier.padding(top = t.spacing.gap)) }
+            d.importState.lastImportDate?.let { Caption(trf("Last import: {0}.", formatDateFull(it)), Modifier.padding(top = t.spacing.gap)) }
             return@Page
         }
         val included = review.rows.filter { it.include }
@@ -75,10 +78,10 @@ fun ImportScreen(state: UiState, store: AppStore) {
             Column(verticalArrangement = Arrangement.spacedBy(t.spacing.u / 2)) {
                 FigureLabel("${review.fileName} · ${review.format}")
                 AmountText(formatMoney(outTotal, cur), color = p.acc, fontSize = t.type.figure, fontWeight = FontWeight.Bold)
-                Caption("${included.size} of ${review.rows.size} entries selected" + (if (inTotal > 0) ", plus ${formatMoney(inTotal, cur)} in" else "") + (if (skipped > 0) " · $skipped skipped" else ""))
+                Caption(trf("{0} of {1} entries selected", included.size, review.rows.size) + (if (inTotal > 0) ", " + trf("plus {0} in", formatMoney(inTotal, cur)) else "") + (if (skipped > 0) " · " + trf("{0} skipped", skipped) else ""))
             }
         }
-        InfoNote("Nothing is recorded until you confirm. Anything already imported, or already swept as a recurring expense, is unticked — tick it if you disagree.", Modifier.padding(bottom = t.spacing.gap))
+        InfoNote(tr("Nothing is recorded until you confirm. Anything already imported, or already swept as a recurring expense, is unticked — tick it if you disagree."), Modifier.padding(bottom = t.spacing.gap))
         Column(Modifier.padding(bottom = t.spacing.gap), verticalArrangement = Arrangement.spacedBy(t.spacing.gap)) { review.rows.forEachIndexed { i, r ->
             Column(
                 Modifier.fillMaxWidth().background(p.surf2, RoundedCornerShape(t.radii.lg)).padding(horizontal = t.spacing.u * 1.5f, vertical = t.spacing.u * 1.25f),
@@ -90,27 +93,27 @@ fun ImportScreen(state: UiState, store: AppStore) {
                         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.u * 0.75f),
                     ) {
                         CheckboxMark(r.include)
-                        Text(r.row.description, color = if (r.include) p.txt else p.txt2, fontSize = t.type.body, fontWeight = FontWeight.Bold)
+                        Text(tr(r.row.description), color = if (r.include) p.txt else p.txt2, fontSize = t.type.body, fontWeight = FontWeight.Bold)
                     }
                     Text(formatMoney(if (r.row.amount < 0) -r.row.amount else r.row.amount, cur), color = if (r.include) p.txt else p.txt2, fontSize = t.type.body, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = t.spacing.gap))
                 }
-                Text("${formatDateFull(r.row.date)} · ${if (r.row.amount < 0) "out" else "in"}", color = p.txt2, fontSize = t.type.caption)
+                Text(formatDateFull(r.row.date) + " · " + (if (r.row.amount < 0) tr("out") else tr("in")), color = p.txt2, fontSize = t.type.caption)
                 if (r.note.isNotEmpty()) Text(r.note, color = p.txt2, fontSize = t.type.caption)
                 if (r.include && r.row.amount > 0) Box(Modifier.padding(top = t.spacing.u / 2)) {
                     Dropdown(Import.inflowTargets(d), r.target ?: "", { v -> store.setImportTarget(i, v.ifEmpty { null }) })
                 }
                 // §4.3: every outflow needs a target; nothing leaves Savings untracked
                 if (r.include && r.row.amount < 0) Box(Modifier.padding(top = t.spacing.u / 2)) {
-                    Dropdown(listOf("" to "Choose where it went") + Import.outflowTargets(d, -r.row.amount), r.target ?: "", { v -> store.setImportTarget(i, v.ifEmpty { null }) })
+                    Dropdown(listOf("" to tr("Choose where it went")) + Import.outflowTargets(d, -r.row.amount), r.target ?: "", { v -> store.setImportTarget(i, v.ifEmpty { null }) })
                 }
             }
         } }
         val open = Import.unassigned(d, review.rows).size
-        if (open > 0) Caption("$open ${if (open == 1) "expense still needs" else "expenses still need"} a Category, Goal or Account.", Modifier.padding(top = t.spacing.gap))
+        if (open > 0) Caption(trp("{0} expense still needs a Category, Goal or Account.", "{0} expenses still need a Category, Goal or Account.", open), Modifier.padding(top = t.spacing.gap))
         Box(Modifier.padding(top = t.spacing.pad)) {
             ButtonRow {
-                Button("Cancel", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.cancelImport() }
-                Button("Add ${included.size} ${if (included.size == 1) "entry" else "entries"}", enabled = included.isNotEmpty() && open == 0, modifier = Modifier.weight(1f)) { store.confirmImport() }
+                Button(tr("Cancel"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.cancelImport() }
+                Button(trp("Add {0} entry", "Add {0} entries", included.size), enabled = included.isNotEmpty() && open == 0, modifier = Modifier.weight(1f)) { store.confirmImport() }
             }
         }
     }
@@ -118,6 +121,6 @@ fun ImportScreen(state: UiState, store: AppStore) {
 
 /** §4.3: the line that confirms an import -- count, money out, money in. */
 fun importSummary(count: Int, out: Money, inn: Money, currency: String): String {
-    val head = "$count ${if (count == 1) "entry" else "entries"} added — ${formatMoney(out, currency)} out"
-    return if (inn > 0) "$head, ${formatMoney(inn, currency)} in." else "$head."
+    return if (inn > 0) trp("{0} entry added — {1} out, {2} in.", "{0} entries added — {1} out, {2} in.", count, formatMoney(out, currency), formatMoney(inn, currency))
+    else trp("{0} entry added — {1} out.", "{0} entries added — {1} out.", count, formatMoney(out, currency))
 }

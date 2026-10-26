@@ -17,13 +17,14 @@ import app.scifin.notify.NotificationPermission
 import app.scifin.ui.LocalTokens
 import app.scifin.ui.components.Button
 import app.scifin.ui.components.Page
+import app.scifin.i18n.tr
 
 /* §11.1's steps 2 and 4; step 3 is the tutorial (TutorialOverlay.kt). */
 
-private const val PERMISSION_TITLE = "One more thing before the tour"
-private const val PERMISSION_BODY = "Sci-Fin can send a single, quiet notification on the 1st of each month — nothing else, ever, unless you choose to turn more on later."
-private const val CURRENCY_LEAD = "What currency should amounts show in? Change this — or anything else — anytime in Settings."
-private const val CONTINUE_TO_APP = "Continue to Sci-Fin"
+private val PERMISSION_TITLE: String get() = tr("One more thing before the tour")
+private val PERMISSION_BODY: String get() = tr("Sci-Fin can send a single, quiet notification on the 1st of each month — nothing else, ever, unless you choose to turn more on later.")
+private val CURRENCY_LEAD: String get() = tr("What currency should amounts show in? Change this — or anything else — anytime in Settings.")
+private val CONTINUE_TO_APP: String get() = tr("Continue to Sci-Fin")
 
 /**
  * §11.1 step 2: explain, then ask. Continue requests the permission where the OS has a prompt
@@ -40,7 +41,7 @@ fun PermissionStepScreen(state: UiState, store: AppStore) {
                 Text(PERMISSION_BODY, color = p.txt2, fontSize = t.type.body, lineHeight = t.type.body * 1.6f)
             }
         }
-        Button("Continue", modifier = Modifier.fillMaxWidth()) { if (canPrompt) store.requestNotificationPermissionAndContinue() else store.advanceOnboarding() }
+        Button(tr("Continue"), modifier = Modifier.fillMaxWidth()) { if (canPrompt) store.requestNotificationPermissionAndContinue() else store.advanceOnboarding() }
     }
 }
 

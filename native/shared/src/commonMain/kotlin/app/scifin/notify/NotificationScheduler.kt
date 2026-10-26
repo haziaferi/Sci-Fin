@@ -1,5 +1,6 @@
 package app.scifin.notify
 
+import app.scifin.i18n.tr
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 
@@ -118,6 +119,6 @@ interface NotificationScheduler {
 
 /** Fixed by §3.9. Held here so neither platform can drift from the other's wording. */
 object NewMonthCopy {
-    const val TITLE = "New Month"
-    const val BODY = "Fresh start — ready when you are."
+    val TITLE: String get() = tr("New Month")
+    val BODY: String get() = tr("Fresh start — ready when you are.")
 }

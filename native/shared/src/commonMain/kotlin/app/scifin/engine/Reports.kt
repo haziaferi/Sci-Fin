@@ -1,5 +1,6 @@
 package app.scifin.engine
 
+import app.scifin.i18n.tr
 import app.scifin.model.Money
 import app.scifin.model.ProfileData
 import kotlinx.datetime.LocalDate
@@ -118,10 +119,10 @@ object Reports {
             if (eff == 0L) continue
             val out = -eff
             when (val k = TransactionKey.parse(t.key)) {
-                is TransactionKey.RecurringKey -> d.recurringExpenses.firstOrNull { it.id == k.id }.let { bump(t.key, it?.name ?: t.targetLabel, it?.icon, out) }
-                is TransactionKey.CategoryKey -> d.categories.firstOrNull { it.id == k.id }.let { bump(t.key, it?.name ?: t.targetLabel, it?.icon, out) }
-                is TransactionKey.GoalKey -> bump("goals", "Goals", "piggy-bank", out)
-                TransactionKey.SavingsKey -> if (out > 0) bump("uncat", "Uncategorised", "banknote", out)
+                is TransactionKey.RecurringKey -> d.recurringExpenses.firstOrNull { it.id == k.id }.let { bump(t.key, it?.name ?: tr(t.targetLabel), it?.icon, out) }
+                is TransactionKey.CategoryKey -> d.categories.firstOrNull { it.id == k.id }.let { bump(t.key, it?.name ?: tr(t.targetLabel), it?.icon, out) }
+                is TransactionKey.GoalKey -> bump("goals", tr("Goals"), "piggy-bank", out)
+                TransactionKey.SavingsKey -> if (out > 0) bump("uncat", tr("Uncategorised"), "banknote", out)
                 is TransactionKey.AccountKey, is TransactionKey.GoalSpendKey -> Unit
             }
         }

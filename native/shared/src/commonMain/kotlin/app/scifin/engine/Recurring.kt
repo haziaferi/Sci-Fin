@@ -1,5 +1,6 @@
 package app.scifin.engine
 
+import app.scifin.i18n.stored
 import app.scifin.model.AccountType
 import app.scifin.model.Cadence
 import app.scifin.model.DateMode
@@ -355,7 +356,7 @@ object Recurring {
         return next to total
     }
 
-    const val SWEEP_PAYEE = "Recurring sweep"
-    const val REVERSAL_PAYEE = "Deletion reversal"
-    const val RECONCILE_PAYEE = "Edit reconciliation"
+    val SWEEP_PAYEE = stored("Recurring sweep")
+    val REVERSAL_PAYEE = stored("Deletion reversal")
+    val RECONCILE_PAYEE = stored("Edit reconciliation")
 }

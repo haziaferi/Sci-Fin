@@ -1,5 +1,8 @@
 package app.scifin.ui.screens
 
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
+import app.scifin.i18n.trp
 import app.scifin.ui.components.EditorDeleteButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -82,12 +85,12 @@ fun IconPicker(current: String?, onPick: (String?) -> Unit) {
     FieldGroup {
         Row(Modifier.padding(bottom = t.spacing.u * 0.75f)) {
             Text(buildAnnotatedString {
-                withStyle(SpanStyle(color = p.txt2, fontWeight = FontWeight.Bold)) { append("Icon ") }
-                withStyle(SpanStyle(color = p.txt2)) { append("— optional") }
+                withStyle(SpanStyle(color = p.txt2, fontWeight = FontWeight.Bold)) { append(tr("Icon")); append(" ") }
+                withStyle(SpanStyle(color = p.txt2)) { append(tr("— optional")) }
             }, fontSize = t.type.body)
         }
         FlowRow(horizontalArrangement = Arrangement.spacedBy(t.spacing.u * 0.75f), verticalArrangement = Arrangement.spacedBy(t.spacing.u * 0.75f)) {
-            Chip(on = current == null, onClick = { onPick(null) }) { Text("Default", color = if (current == null) p.acc else p.txt2, fontSize = t.type.body, fontWeight = FontWeight.Bold) }
+            Chip(on = current == null, onClick = { onPick(null) }) { Text(tr("Default"), color = if (current == null) p.acc else p.txt2, fontSize = t.type.body, fontWeight = FontWeight.Bold) }
             for (name in ICON_CHOICES) {
                 val icon = Lucide.byKey(name) ?: continue
                 val on = current == name
@@ -165,61 +168,61 @@ fun GoalEditorScreen(route: Route.GoalEditor, state: UiState, store: AppStore) {
     val isNew = original == null
 
     Page(null) {
-        TopRow(if (isNew) "New goal" else draft.name.ifBlank { "Goal" }, onBack = { store.back() })
-        FieldGroup { FieldLabel("Name"); TextField(draft.name, { f = f.copy(draft = draft.copy(name = it)) }, placeholder = "Emergency fund, a trip, new laptop…", label = "Name") }
+        TopRow(if (isNew) tr("New goal") else draft.name.ifBlank { tr("Goal") }, onBack = { store.back() })
+        FieldGroup { FieldLabel(tr("Name")); TextField(draft.name, { f = f.copy(draft = draft.copy(name = it)) }, placeholder = tr("Emergency fund, a trip, new laptop…"), label = tr("Name")) }
         IconPicker(draft.icon) { f = f.copy(draft = draft.copy(icon = it)) }
-        CheckboxRow("Track without a target amount or date", draft.noTarget) { f = f.withNoTarget(!draft.noTarget) }
+        CheckboxRow(tr("Track without a target amount or date"), draft.noTarget) { f = f.withNoTarget(!draft.noTarget) }
         Box(Modifier.padding(top = t.spacing.u * 1.5f)) {
-            FieldGroup { FieldLabel("Already saved"); TextField(f.saved, { f = f.withSaved(it) }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = "Already saved") }
+            FieldGroup { FieldLabel(tr("Already saved")); TextField(f.saved, { f = f.withSaved(it) }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = tr("Already saved")) }
         }
         if (!draft.noTarget) {
-            FieldGroup { FieldLabel("Target amount"); TextField(f.target, { f = f.withTarget(it) }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = "Target amount") }
-            Segmented(listOf("date" to "By date", "amount" to "By amount"), draft.mode.token, { v -> f = f.withMode(GoalMode.of(v)) }, Modifier.padding(bottom = t.spacing.gap))
+            FieldGroup { FieldLabel(tr("Target amount")); TextField(f.target, { f = f.withTarget(it) }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = tr("Target amount")) }
+            Segmented(listOf("date" to tr("By date"), "amount" to tr("By amount")), draft.mode.token, { v -> f = f.withMode(GoalMode.of(v)) }, Modifier.padding(bottom = t.spacing.gap))
             if (draft.mode == GoalMode.DATE) {
-                FieldGroup { FieldLabel("Months from now"); TextField(f.months, { f = f.withMonths(it) }, keyboard = KeyboardType.Number, label = "Months from now") }
-                draft.monthly?.takeIf { it > 0 }?.let { Caption("Suggested: ${formatMoney(it, cur)}/month", Modifier.padding(start = t.spacing.u * 0.25f, bottom = t.spacing.u * 1.25f)) }
+                FieldGroup { FieldLabel(tr("Months from now")); TextField(f.months, { f = f.withMonths(it) }, keyboard = KeyboardType.Number, label = tr("Months from now")) }
+                draft.monthly?.takeIf { it > 0 }?.let { Caption(trf("Suggested: {0}/month", formatMoney(it, cur)), Modifier.padding(start = t.spacing.u * 0.25f, bottom = t.spacing.u * 1.25f)) }
             } else {
-                FieldGroup { FieldLabel("Monthly contribution"); TextField(f.monthly, { f = f.withMonthly(it) }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = "Monthly contribution") }
-                draft.months?.takeIf { it > 0 }?.let { Caption("Suggested timeline: $it month${if (it == 1) "" else "s"}", Modifier.padding(start = t.spacing.u * 0.25f, bottom = t.spacing.u * 1.25f)) }
+                FieldGroup { FieldLabel(tr("Monthly contribution")); TextField(f.monthly, { f = f.withMonthly(it) }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = tr("Monthly contribution")) }
+                draft.months?.takeIf { it > 0 }?.let { Caption(trp("Suggested timeline: {0} month", "Suggested timeline: {0} months", it), Modifier.padding(start = t.spacing.u * 0.25f, bottom = t.spacing.u * 1.25f)) }
             }
             val monthly = draft.monthly ?: 0
             val target = draft.target ?: 0
             if (target > 0 && monthly > 0) {
                 // §6.4's frame view: where this fits, as a plain comparison, never a block
-                LearnLink(if (frameOpen) "Hide where this fits in your current frame" else "Show where this fits in your current frame", { frameOpen = !frameOpen })
+                LearnLink(if (frameOpen) tr("Hide where this fits in your current frame") else tr("Show where this fits in your current frame"), { frameOpen = !frameOpen })
                 if (frameOpen) {
                     val frame = Goals.frame(d, monthly, draft.id, Recurring.scheduledTotal(d, today), today)
                     val line = when (frame) {
-                        is GoalFrame.IncomeOn -> "With ${formatMoney(Income.receivedThisMonth(d, today), cur)} received so far this month, minus recurring expenses and other goals’ commitments, you have roughly ${formatMoney(frame.available, cur)} available. This goal asks for ${formatMoney(monthly, cur)}/mo."
-                        is GoalFrame.IncomeOff -> "Recurring expenses plus other goals’ commitments plus this one come to ${formatMoney(frame.committed, cur)}/mo, weighed against your Savings of ${formatMoney(frame.savings, cur)}. Income is off, so this is a plain comparison, not a division."
+                        is GoalFrame.IncomeOn -> trf("With {0} received so far this month, minus recurring expenses and other goals’ commitments, you have roughly {1} available. This goal asks for {2}/mo.", formatMoney(Income.receivedThisMonth(d, today), cur), formatMoney(frame.available, cur), formatMoney(monthly, cur))
+                        is GoalFrame.IncomeOff -> trf("Recurring expenses plus other goals’ commitments plus this one come to {0}/mo, weighed against your Savings of {1}. Income is off, so this is a plain comparison, not a division.", formatMoney(frame.committed, cur), formatMoney(frame.savings, cur))
                     }
-                    InlineLearn(listOf(line, "You can still save it as-is — the app doesn’t block this either way."), null)
+                    InlineLearn(listOf(line, tr("You can still save it as-is — the app doesn’t block this either way.")), null)
                 }
                 Goals.sustainability(d, monthly, today)?.let { s ->
                     Column(Modifier.fillMaxWidth().padding(top = t.spacing.gap)) {
                         FeasibilityNote(buildString {
-                            append("If you’d like to make this more sustainable, here are a few options:")
-                            if (s.suggestions == null) append("\n\n").append(if (s.incomeOn) "No income has landed yet this month to suggest alternative amounts from." else "There’s no Savings cushion right now to suggest alternative amounts from.")
+                            append(tr("If you’d like to make this more sustainable, here are a few options:"))
+                            if (s.suggestions == null) append("\n\n").append(if (s.incomeOn) tr("No income has landed yet this month to suggest alternative amounts from.") else tr("There’s no Savings cushion right now to suggest alternative amounts from."))
                         })
                         s.suggestions?.let { list ->
                             FlowRow(Modifier.padding(top = t.spacing.gap), horizontalArrangement = Arrangement.spacedBy(t.spacing.gap), verticalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
                                 for (amt in list) {
                                     val months = if (amt > 0) draft.remaining.ceilDiv(amt) else 0
                                     Chip(on = true, onClick = { f = f.withSuggestion(amt) }, padding = t.spacing.u * 1.375f, choice = false) {
-                                        Text("${formatMoney(amt, cur)}/mo · ${months}mo", color = p.acc, fontSize = t.type.caption, fontWeight = FontWeight.Bold)
+                                        Text(trf("{0}/mo · {1}mo", formatMoney(amt, cur), months), color = p.acc, fontSize = t.type.caption, fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
                         }
-                        Caption("You can still save ${formatMoney(monthly, cur)}/mo as-is.", Modifier.padding(top = t.spacing.u * 0.75f))
+                        Caption(trf("You can still save {0}/mo as-is.", formatMoney(monthly, cur)), Modifier.padding(top = t.spacing.u * 0.75f))
                     }
                 }
             }
         }
-        LearnLink(if (isNew) "Why naming it matters" else "Why naming this helps", { store.push(Route.LearnTopic("name-your-goal")) })
+        LearnLink(if (isNew) tr("Why naming it matters") else tr("Why naming this helps"), { store.push(Route.LearnTopic("name-your-goal")) })
         Row(Modifier.fillMaxWidth().padding(top = t.spacing.pad), horizontalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
             if (!isNew) EditorDeleteButton(original.name) { store.openSheet(Sheet.DeleteGoal(original.id)) }
-            Button(if (isNew) "Add goal" else "Save", enabled = draft.name.isNotBlank() && !f.unreadable, modifier = Modifier.weight(1f)) {
+            Button(if (isNew) tr("Add goal") else tr("Save"), enabled = draft.name.isNotBlank() && !f.unreadable, modifier = Modifier.weight(1f)) {
                 store.saveGoal(draft); store.back()
             }
         }
@@ -234,8 +237,9 @@ fun DeleteGoalSheet(sheet: Sheet.DeleteGoal, state: UiState, store: AppStore) {
     val cur = d.settings.currency
     val saved = formatMoney(g.saved, cur)
     DeleteWithReturnSheet(
-        title = "Delete goal",
-        question = "Delete ${g.name}?" + (if (g.saved > 0) " Add $saved back to Savings? That money was never spent, only labeled." else " The goal itself is removed.") + " Its past history stays in the log either way.",
+        title = tr("Delete goal"),
+        question = if (g.saved > 0) trf("Delete {0}? Add {1} back to Savings? That money was never spent, only labeled. Its past history stays in the log either way.", g.name, saved)
+            else trf("Delete {0}? The goal itself is removed. Its past history stays in the log either way.", g.name),
         hasReturn = g.saved > 0,
         confirmAddBack = deleteAddBackCopy(saved, g.name),
         confirmDeleteOnly = deleteOnlyCopy(g.name),

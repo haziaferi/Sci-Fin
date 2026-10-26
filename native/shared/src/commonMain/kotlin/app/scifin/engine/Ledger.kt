@@ -2,6 +2,7 @@
 
 package app.scifin.engine
 
+import app.scifin.i18n.stored
 import app.scifin.model.Money
 import app.scifin.model.ProfileData
 import app.scifin.model.Transaction
@@ -167,7 +168,7 @@ object Ledger {
     }
 
     /** §3.3's auto-deposit rows are recognised by this payee, in the ledger and in §7.3. */
-    const val AUTO_DEPOSIT_PAYEE = "Auto-deposit"
+    val AUTO_DEPOSIT_PAYEE = stored("Auto-deposit")
 }
 
 /** §3.6: the arithmetic reading of Savings -- null (§3.1's third state) reads as 0 here only. */

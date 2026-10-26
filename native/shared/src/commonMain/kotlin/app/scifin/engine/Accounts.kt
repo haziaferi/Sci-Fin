@@ -1,5 +1,8 @@
 package app.scifin.engine
 
+import app.scifin.i18n.stored
+import app.scifin.i18n.tr
+import app.scifin.i18n.trp
 import app.scifin.model.Account
 import app.scifin.model.AccountType
 import app.scifin.model.Cadence
@@ -59,7 +62,7 @@ object Accounts {
 
     /** "Save for it": a by-date Goal for the principal over the term, nothing else created. */
     fun saveForItGoal(principal: Money, math: LoanMath, name: String, today: LocalDate, id: String, profileId: String): Goal =
-        Goals.rederive(Goal(id, profileId, name.trim().ifEmpty { "Savings goal" }, "piggy-bank", saved = 0, target = principal,
+        Goals.rederive(Goal(id, profileId, name.trim().ifEmpty { stored("Savings goal") }, "piggy-bank", saved = 0, target = principal,
             targetDate = today.plusMonthsClamped(math.months), mode = GoalMode.DATE), today)
 
     /**
@@ -82,7 +85,7 @@ object Accounts {
             interestRate = annualRate, termMonths = m.months, rateType = rateType, originationDate = today,
         )
         val exp = RecurringExpense(
-            expId, d.profileId, expenseName.trim().ifEmpty { "Loan payment" }, "landmark", m.monthly, Cadence.MONTHLY,
+            expId, d.profileId, expenseName.trim().ifEmpty { stored("Loan payment") }, "landmark", m.monthly, Cadence.MONTHLY,
             firstDueDate = firstDue, dueDate = firstDue, dueDateAnchorDay = anchorDay, dateMode = DateMode.FIXED_DATE,
             lastSweptMonth = today.ymKey(), endDate = today.plusMonthsClamped(m.months, anchorDay), linkedAccountId = acctId,
         )
@@ -234,17 +237,17 @@ object Accounts {
             before.linkedRecurringExpenseId?.let { eid -> d.recurringExpenses.any { it.id == eid } } == true
     }
 
-    const val OPENING_BALANCE = "Opening balance"
-    const val ACCOUNT_CLOSED = "Account closed"
+    val OPENING_BALANCE = stored("Opening balance")
+    val ACCOUNT_CLOSED = stored("Account closed")
 }
 
 /** §9.2's copy for a months figure: "never at this rate", "cleared at once", "2 years 3 months". */
 fun monthsLabel(m: Int?): String = when {
-    m == null -> "never at this rate"
-    m == 0 -> "cleared at once"
-    m < 12 -> "$m month" + (if (m == 1) "" else "s")
+    m == null -> tr("never at this rate")
+    m == 0 -> tr("cleared at once")
+    m < 12 -> trp("{0} month", "{0} months", m)
     else -> {
         val y = m / 12; val r = m % 12
-        "$y year" + (if (y == 1) "" else "s") + (if (r > 0) " $r month" + (if (r == 1) "" else "s") else "")
+        trp("{0} year", "{0} years", y) + (if (r > 0) " " + trp("{0} month", "{0} months", r) else "")
     }
 }

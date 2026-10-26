@@ -19,6 +19,8 @@ import app.scifin.engine.Trash
 import app.scifin.model.TrashItem
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
 
 /** What one run of §4.7's automatic copy did. */
 sealed class CopyOutcome {
@@ -151,20 +153,20 @@ class AppSession(
 
         suspend fun fail(reason: String): CopyOutcome {
             val now = dao.copySchedule() ?: c
-            if (!now.failureNotified) scheduler.notifyNow(COPY_NOTICE, "Automatic copy not written", reason)
+            if (!now.failureNotified) scheduler.notifyNow(COPY_NOTICE, tr("Automatic copy not written"), reason)
             dao.upsertCopySchedule(now.copy(lastError = reason, failureNotified = true))
             return CopyOutcome.Failed(reason)
         }
 
         val plain = Backup.encode(Backup.build(dao.profiles().mapNotNull { dao.load(it.id) }, app.activeProfileId, today))
         val text = c.sealedPassword?.let { sealed ->
-            val password = place.unseal(sealed) ?: return fail("The copies’ password can’t be read on this device any more. Set it again in Data & backup.")
+            val password = place.unseal(sealed) ?: return fail(tr("The copies’ password can’t be read on this device any more. Set it again in Data & backup."))
             BackupCrypto.encrypt(plain, password, c.hint.orEmpty(), today.toString())
         } ?: plain
         val name = "$COPY_PREFIX$today.json"
-        val existing = place.list(folder) ?: return fail("The copies’ folder can’t be reached. It may have been moved or removed, or Sci-Fin’s access to it withdrawn.")
+        val existing = place.list(folder) ?: return fail(tr("The copies’ folder can’t be reached. It may have been moved or removed, or Sci-Fin’s access to it withdrawn."))
         if (name in existing) place.delete(folder, name)          // Copy now twice in a day: the later one stands
-        if (!place.write(folder, name, text)) return fail("The copy could not be written to its folder. The folder may be full or read-only.")
+        if (!place.write(folder, name, text)) return fail(tr("The copy could not be written to its folder. The folder may be full or read-only."))
         // the oldest beyond the fourteen kept go (owner, 2026-10-20); only this app's own copies are ever touched
         val ours = (place.list(folder) ?: existing + name).filter { it.startsWith(COPY_PREFIX) && it.endsWith(".json") }.sorted()
         ours.dropLast(COPIES_KEPT).forEach { place.delete(folder, it) }
@@ -216,10 +218,10 @@ class AppSession(
             }
         }
         if (toWarn.isNotEmpty()) {
-            val names = toWarn.joinToString(", ") { "“${it.name}”" }
-            val body = if (toWarn.size == 1) "$names leaves the Trash for good in 10 days. Restore it from Settings › Trash if you still want it."
-                else "${toWarn.size} items leave the Trash for good in 10 days: $names. Restore any you still want from Settings › Trash."
-            scheduler.notifyNow(TRASH_NOTICE, "Leaving the Trash soon", body)
+            val names = toWarn.joinToString(", ") { "“${tr(it.name)}”" }
+            val body = if (toWarn.size == 1) trf("{0} leaves the Trash for good in 10 days. Restore it from Settings › Trash if you still want it.", names)
+                else trf("{0} items leave the Trash for good in 10 days: {1}. Restore any you still want from Settings › Trash.", toWarn.size, names)
+            scheduler.notifyNow(TRASH_NOTICE, tr("Leaving the Trash soon"), body)
             toWarn.forEach { dao.upsertTrash(it.copy(warned = true)) }
         }
         return gone

@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import app.scifin.app.AppStore
 import app.scifin.app.Sheet
+import app.scifin.i18n.tr
 import app.scifin.model.ProfileData
 import app.scifin.ui.LocalTokens
 import app.scifin.ui.LocalWidthClass
@@ -32,12 +33,12 @@ fun SavingsRow(d: ProfileData, store: AppStore) {
     Column(Modifier.tutAnchor("savings-row"), verticalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
         SavingsLedgerRow(
             if (unset) "—" else formatMoney(d.savings.amount, d.settings.currency),
-            onClick = { store.openSheet(Sheet.SavingsEditor) }, clickLabel = "Edit Savings directly",
+            onClick = { store.openSheet(Sheet.SavingsEditor) }, clickLabel = tr("Edit Savings directly"),
             // §3.6: a desktop's Savings row has its own + (Add / Income); a phone has the floating +
             slot = if (LocalWidthClass.current != WidthClass.COMPACT)
-                ({ RowAdd("Add to Savings") { store.openSheet(Sheet.Entry("savings")) } }) else null,
+                ({ RowAdd(tr("Add to Savings")) { store.openSheet(Sheet.Entry("savings")) } }) else null,
         )
-        if (unset) PlainNote("The app’s core functions depend on this figure being real. Log money in whenever you’re ready — no rush.")
+        if (unset) PlainNote(tr("The app’s core functions depend on this figure being real. Log money in whenever you’re ready — no rush."))
     }
 }
 

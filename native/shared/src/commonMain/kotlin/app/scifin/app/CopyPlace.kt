@@ -1,5 +1,7 @@
 package app.scifin.app
 
+import app.scifin.i18n.tr
+
 /** A folder chosen for §4.7's automatic copies: the platform's handle on it and the name to show. */
 data class CopyFolder(val id: String, val label: String)
 
@@ -34,8 +36,10 @@ interface CopyPlace {
 }
 
 /** How often the automatic copy runs. Weekly is what turning it on chooses (owner, 2026-10-19). */
-enum class CopyEvery(val token: String, val label: String, val days: Int) {
-    OFF("off", "Off", 0), DAILY("daily", "Daily", 1), WEEKLY("weekly", "Weekly", 7);
+enum class CopyEvery(val token: String, val days: Int) {
+    OFF("off", 0), DAILY("daily", 1), WEEKLY("weekly", 7);
+
+    val label: String get() = when (this) { OFF -> tr("Off"); DAILY -> tr("Daily"); WEEKLY -> tr("Weekly") }
 
     companion object {
         fun of(token: String): CopyEvery = entries.firstOrNull { it.token == token } ?: OFF

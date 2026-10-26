@@ -1,5 +1,6 @@
 package app.scifin.engine
 
+import app.scifin.i18n.stored
 import app.scifin.model.Money
 import app.scifin.model.ProfileData
 import kotlinx.datetime.LocalDate
@@ -67,6 +68,6 @@ object Writes {
         return Ledger.logAndMove(next, Movement(delta, TransactionKey.CategoryKey(categoryId), c.name, payee ?: CORRECTION), clock, txId).first
     }
 
-    const val CORRECTION = "Correction"
-    const val STARTING_BALANCE = "Starting balance"
+    val CORRECTION = stored("Correction")
+    val STARTING_BALANCE = stored("Starting balance")
 }

@@ -2,6 +2,8 @@
 
 package app.scifin.engine
 
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
 import app.scifin.model.Money
 import app.scifin.model.ProfileData
 import app.scifin.model.RecurringExpense
@@ -70,7 +72,7 @@ object Reminders {
             out.add(ReminderRegistration(
                 expenseId = r.expenseId,
                 title = r.name,
-                body = "${moneyText(r.amount, d.settings.currency)} · due ${monthDay(r.dueDate)}",
+                body = trf("{0} · due {1}", moneyText(r.amount, d.settings.currency), monthDay(r.dueDate)),
                 dueDate = r.dueDate,
                 fireAt = fireAt,
             ))
@@ -97,7 +99,7 @@ object Reminders {
     fun localNow(clock: Clock): LocalDateTime =
         clock.today().atTime(clock.now().toLocalDateTime(TimeZone.currentSystemDefault()).time)
 
-    const val IMPORT_REMINDER_BODY = "Ready to import last month’s statement?"
+    val IMPORT_REMINDER_BODY: String get() = tr("Ready to import last month’s statement?")
 
-    fun paydayBody(s: app.scifin.model.Settings): String = if (Hourly.isHourly(s)) "Payday — confirm what arrived" else "Payday — log what arrived"
+    fun paydayBody(s: app.scifin.model.Settings): String = if (Hourly.isHourly(s)) tr("Payday — confirm what arrived") else tr("Payday — log what arrived")
 }

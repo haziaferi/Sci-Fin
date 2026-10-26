@@ -30,6 +30,7 @@ import android.content.Intent
 import android.provider.DocumentsContract
 import app.scifin.app.CopyFolder
 import app.scifin.data.sciFinDamageNotice
+import app.scifin.i18n.tr
 import app.scifin.data.sciFinLocalCopies
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -129,7 +130,7 @@ class MainActivity : ComponentActivity() {
                 val doc = DocumentsContract.buildDocumentUriUsingTree(uri, DocumentsContract.getTreeDocumentId(uri))
                 val name = runCatching {
                     resolver.query(doc, arrayOf(DocumentsContract.Document.COLUMN_DISPLAY_NAME), null, null, null)?.use { c -> if (c.moveToFirst()) c.getString(0) else null }
-                }.getOrNull() ?: uri.lastPathSegment.orEmpty().substringAfterLast(':').ifEmpty { "Chosen folder" }
+                }.getOrNull() ?: uri.lastPathSegment.orEmpty().substringAfterLast(':').ifEmpty { tr("Chosen folder") }
                 CopyFolder(uri.toString(), name)
             }
         }

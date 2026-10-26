@@ -1,5 +1,8 @@
 package app.scifin.ui.screens
 
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
+import app.scifin.i18n.trp
 import app.scifin.ui.components.EditorDeleteButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -60,7 +63,7 @@ import app.scifin.ui.components.deleteOnlyCopy
 fun freshExpense(id: String, profileId: String, today: LocalDate) =
     RecurringExpense(id, profileId, "", null, 0, Cadence.MONTHLY, firstDueDate = today, dueDate = today, dateMode = DateMode.FIXED_DATE)
 
-private val CADENCES = Cadence.entries.map { it.token to cadenceLabel(it) }
+private val CADENCES get() = Cadence.entries.map { it.token to cadenceLabel(it) }
 
 /**
  * §3.11's editor: automatic sweep configuration, not a manual log. `dateMode` is offered for
@@ -87,12 +90,12 @@ fun RecurringEditorScreen(route: Route.RecurringEditor, state: UiState, store: A
     val showDateMode = draft.cadence.monthAnchored
 
     Page(null) {
-        TopRow(if (isNew) "New recurring expense" else draft.name.ifBlank { "Recurring expense" }, onBack = { store.back() })
-        FieldGroup { FieldLabel("Name"); TextField(draft.name, { draft = draft.copy(name = it) }, placeholder = "Rent, phone bill…", label = "Name") }
-        FieldGroup { FieldLabel("Amount"); TextField(amountText, { v -> amountText = v; draft = draft.copy(amount = parseMoney(v) ?: 0) }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = "Amount") }
+        TopRow(if (isNew) tr("New recurring expense") else draft.name.ifBlank { tr("Recurring expense") }, onBack = { store.back() })
+        FieldGroup { FieldLabel(tr("Name")); TextField(draft.name, { draft = draft.copy(name = it) }, placeholder = tr("Rent, phone bill…"), label = tr("Name")) }
+        FieldGroup { FieldLabel(tr("Amount")); TextField(amountText, { v -> amountText = v; draft = draft.copy(amount = parseMoney(v) ?: 0) }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = tr("Amount")) }
         IconPicker(draft.icon) { draft = draft.copy(icon = it) }
         FieldGroup {
-            FieldLabel("Cadence")
+            FieldLabel(tr("Cadence"))
             ChipRow(CADENCES, draft.cadence.token) { v ->
                 val c = Cadence.of(v)
                 // §3.11: dateMode applies to monthly/bimonthly/yearly only; clearing it keeps the illegal combination out of the draft
@@ -100,33 +103,33 @@ fun RecurringEditorScreen(route: Route.RecurringEditor, state: UiState, store: A
             }
         }
         if (semi) {
-            FieldGroup { FieldLabel("First due date"); DateField(semiA) { semiA = it } }
-            FieldGroup { FieldLabel("Second due date"); DateField(semiB) { semiB = it } }
-        } else FieldGroup { FieldLabel("Due date"); DateField(draft.dueDate) { draft = draft.copy(dueDate = it) } }
+            FieldGroup { FieldLabel(tr("First due date")); DateField(semiA) { semiA = it } }
+            FieldGroup { FieldLabel(tr("Second due date")); DateField(semiB) { semiB = it } }
+        } else FieldGroup { FieldLabel(tr("Due date")); DateField(draft.dueDate) { draft = draft.copy(dueDate = it) } }
         if (showDateMode) FieldGroup {
-            FieldLabel("Date mode")
-            Segmented(listOf("interval" to "Interval", "fixedDate" to "Fixed date"), draft.dateMode?.token ?: "fixedDate", { v -> draft = draft.copy(dateMode = DateMode.of(v)) })
-            Caption("Interval drifts across months, like most subscriptions. Fixed date never drifts, snapping to month-end where needed.", Modifier.padding(top = t.spacing.u * 0.75f))
+            FieldLabel(tr("Date mode"))
+            Segmented(listOf("interval" to tr("Interval"), "fixedDate" to tr("Fixed date")), draft.dateMode?.token ?: "fixedDate", { v -> draft = draft.copy(dateMode = DateMode.of(v)) })
+            Caption(tr("Interval drifts across months, like most subscriptions. Fixed date never drifts, snapping to month-end where needed."), Modifier.padding(top = t.spacing.u * 0.75f))
         }
         apportionedCaption(draft, original, today, cur)?.let { InfoNote(it, Modifier.padding(bottom = t.spacing.u * 1.25f)) }
         val nextDue = Recurring.normalisedNextDue(if (semi) Recurring.withSemimonthlyFields(draft, semiA, semiB) else draft, today)
-        SettingRow(Lucide.BELL, "Reminder", if (!draft.reminderEnabled) "Off by default" else "Next on ${formatDate(nextDue.minusDays(draft.reminderLeadDays))}, ${draft.reminderLeadDays} day${if (draft.reminderLeadDays > 1) "s" else ""} before ${formatDate(nextDue)}") {
+        SettingRow(Lucide.BELL, tr("Reminder"), if (!draft.reminderEnabled) tr("Off by default") else trp("Next on {1}, {0} day before {2}", "Next on {1}, {0} days before {2}", draft.reminderLeadDays, formatDate(nextDue.minusDays(draft.reminderLeadDays)), formatDate(nextDue))) {
             Switch(draft.reminderEnabled) { draft = draft.copy(reminderEnabled = !draft.reminderEnabled) }
         }
         if (draft.reminderEnabled) Box(Modifier.padding(bottom = t.spacing.u * 1.25f)) {
-            ChipRow(REMINDER_LEAD_DAYS.map { it.toString() to "$it day${if (it > 1) "s" else ""} before" }, draft.reminderLeadDays.toString()) { v -> draft = draft.copy(reminderLeadDays = v.toInt()) }
+            ChipRow(REMINDER_LEAD_DAYS.map { it.toString() to trp("{0} day before", "{0} days before", it) }, draft.reminderLeadDays.toString()) { v -> draft = draft.copy(reminderLeadDays = v.toInt()) }
         }
         FieldGroup {
-            FieldLabel("Ends on (optional)")
+            FieldLabel(tr("Ends on (optional)"))
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
-                Box(Modifier.weight(1f)) { DateField(draft.endDate, placeholder = "Ongoing") { draft = draft.copy(endDate = it) } }
-                if (draft.endDate != null) Button("Clear", ButtonKind.GHOST) { draft = draft.copy(endDate = null) }
+                Box(Modifier.weight(1f)) { DateField(draft.endDate, placeholder = tr("Ongoing")) { draft = draft.copy(endDate = it) } }
+                if (draft.endDate != null) Button(tr("Clear"), ButtonKind.GHOST) { draft = draft.copy(endDate = null) }
             }
-            Caption("Leave blank for ongoing expenses like rent or a subscription. Set for a finite one, like a loan payoff date.", Modifier.padding(top = t.spacing.u * 0.75f))
+            Caption(tr("Leave blank for ongoing expenses like rent or a subscription. Set for a finite one, like a loan payoff date."), Modifier.padding(top = t.spacing.u * 0.75f))
         }
         Row(Modifier.fillMaxWidth().padding(top = t.spacing.pad), horizontalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
             if (!isNew) EditorDeleteButton(original.name) { store.openSheet(Sheet.DeleteExpense(original.id)) }
-            Button(if (isNew) "Add expense" else "Save", enabled = draft.name.isNotBlank() && !amountUnreadable, modifier = Modifier.weight(1f)) {
+            Button(if (isNew) tr("Add expense") else tr("Save"), enabled = draft.name.isNotBlank() && !amountUnreadable, modifier = Modifier.weight(1f)) {
                 val touched = isNew || draft.dueDate2 == null || semiA to semiB != semiShown
                 store.saveExpense(if (semi && touched) Recurring.withSemimonthlyFields(draft, semiA, semiB) else draft, isNew); store.back()
             }
@@ -141,8 +144,8 @@ private fun apportionedCaption(d: RecurringExpense, original: RecurringExpense?,
     val held = if (original != null && !Recurring.planChanged(original, d)) original.apportionedShare else null
     val first = held ?: Recurring.apportionedShareFor(d.copy(dueDate = due), today) ?: return null
     val settled = d.amount / Recurring.cycleLength(d.cadence)
-    return if (first == settled) "Sets aside ${formatMoney(settled, cur)} a month, so the full ${formatMoney(d.amount, cur)} is there when it lands."
-    else "Sets aside ${formatMoney(first, cur)} a month until ${formatDate(due)}, then ${formatMoney(settled, cur)} a month — fewer months to spread the first one over, so the full ${formatMoney(d.amount, cur)} is still there when it lands."
+    return if (first == settled) trf("Sets aside {0} a month, so the full {1} is there when it lands.", formatMoney(settled, cur), formatMoney(d.amount, cur))
+    else trf("Sets aside {0} a month until {1}, then {2} a month — fewer months to spread the first one over, so the full {3} is still there when it lands.", formatMoney(first, cur), formatDate(due), formatMoney(settled, cur), formatMoney(d.amount, cur))
 }
 
 /** §3.11's deletion reversal: only what has genuinely been swept for the current period is offered back; a finished entry reverses nothing. */
@@ -156,15 +159,15 @@ fun DeleteExpenseSheet(sheet: Sheet.DeleteExpense, state: UiState, store: AppSto
     val paired = e.linkedAccountId?.let { id -> d.accounts.firstOrNull { it.id == id } }
     val amount = formatMoney(back, cur)
     DeleteWithReturnSheet(
-        title = "Delete recurring expense",
-        question = if (back > 0) "Delete ${e.name}? Add $amount back to Savings? That’s what’s actually been swept for the current period."
-            else "Delete ${e.name}? Its due date has already passed this period, so nothing is reversed.",
+        title = tr("Delete recurring expense"),
+        question = if (back > 0) trf("Delete {0}?", e.name) + " " + trf("Add {0} back to Savings? That’s what’s actually been swept for the current period.", amount)
+            else trf("Delete {0}? Its due date has already passed this period, so nothing is reversed.", e.name),
         hasReturn = back > 0,
         confirmAddBack = deleteAddBackCopy(amount, e.name),
         confirmDeleteOnly = deleteOnlyCopy(e.name),
         onDismiss = store::closeSheet,
         onDelete = { returnMoney -> store.deleteExpense(e.id, reverse = returnMoney) },
-        note = { if (paired != null) FeasibilityNote("This also removes the linked account “${paired.name}” — they were created as a pair and they go as one.", Modifier.padding(bottom = t.spacing.gap)) },
+        note = { if (paired != null) FeasibilityNote(trf("This also removes the linked account “{0}” — they were created as a pair and they go as one.", paired.name), Modifier.padding(bottom = t.spacing.gap)) },
     )
 }
 
@@ -180,19 +183,19 @@ fun ReconcileSheet(sheet: Sheet.Reconcile, state: UiState, store: AppStore) {
     val acct = e.linkedAccountId?.let { id -> d.accounts.firstOrNull { it.id == id } }?.takeIf { it.type == AccountType.LOAN && it.autoUpdateFromPayments }
     var rateText by remember { mutableStateOf("") }
     SheetScaffold(title = e.name, onDismiss = null) {
-        FeasibilityNote("This month was already swept at the old settings. Under the new ones it comes to ${formatMoney(if (up) r.delta else -r.delta, cur)} ${if (up) "more" else "less"}.")
-        Caption("Either way the new settings govern from the next sweep onward.", Modifier.padding(top = t.spacing.gap, bottom = t.spacing.u * 1.25f))
+        FeasibilityNote(if (up) trf("This month was already swept at the old settings. Under the new ones it comes to {0} more.", formatMoney(r.delta, cur)) else trf("This month was already swept at the old settings. Under the new ones it comes to {0} less.", formatMoney(-r.delta, cur)))
+        Caption(tr("Either way the new settings govern from the next sweep onward."), Modifier.padding(top = t.spacing.gap, bottom = t.spacing.u * 1.25f))
         if (acct != null) FieldGroup {
-            FieldLabel("${acct.name}’s interest rate — optional")
-            TextField(rateText, { rateText = it }, prefix = "%", placeholder = acct.interestRate?.let { (round(it * 10000) / 100).toString() } ?: "", keyboard = KeyboardType.Decimal, label = "${acct.name}’s interest rate — optional")
-            Caption("If this change came from a rate reset, update it here — the balance decrements against this figure every cycle. Leave it blank to keep the current rate.", Modifier.padding(top = t.spacing.u * 0.75f))
+            FieldLabel(trf("{0}’s interest rate — optional", acct.name))
+            TextField(rateText, { rateText = it }, prefix = "%", placeholder = acct.interestRate?.let { (round(it * 10000) / 100).toString() } ?: "", keyboard = KeyboardType.Decimal, label = trf("{0}’s interest rate — optional", acct.name))
+            Caption(tr("If this change came from a rate reset, update it here — the balance decrements against this figure every cycle. Leave it blank to keep the current rate."), Modifier.padding(top = t.spacing.u * 0.75f))
         }
         // a percentage from 0 to 100; anything else holds both answers rather than being dropped as "keep the rate"
         val rate = parseRate(rateText)?.takeIf { it <= 1.0 }
         val rateUnreadable = rateText.isNotBlank() && rate == null
         ButtonRow {
-            Button("Leave it as swept", ButtonKind.GHOST, enabled = !rateUnreadable, modifier = Modifier.weight(1f)) { store.resolveReconcile(null, acct?.id, rate) }
-            Button(if (up) "Take a further ${formatMoney(r.delta, cur)}" else "Return ${formatMoney(-r.delta, cur)}", ButtonKind.SECONDARY, enabled = !rateUnreadable, modifier = Modifier.weight(1f)) { store.resolveReconcile(r, acct?.id, rate) }
+            Button(tr("Leave it as swept"), ButtonKind.GHOST, enabled = !rateUnreadable, modifier = Modifier.weight(1f)) { store.resolveReconcile(null, acct?.id, rate) }
+            Button(if (up) trf("Take a further {0}", formatMoney(r.delta, cur)) else trf("Return {0}", formatMoney(-r.delta, cur)), ButtonKind.SECONDARY, enabled = !rateUnreadable, modifier = Modifier.weight(1f)) { store.resolveReconcile(r, acct?.id, rate) }
         }
     }
 }

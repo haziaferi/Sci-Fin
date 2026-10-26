@@ -1,5 +1,6 @@
 package app.scifin.engine
 
+import app.scifin.i18n.stored
 import app.scifin.model.IncomeType
 import app.scifin.model.Money
 import app.scifin.model.ProfileData
@@ -26,7 +27,7 @@ object Hourly {
     /** Paydays averaged for the learned estimate (owner, 2026-10-26). */
     const val ESTIMATE_PAYDAYS = 3
     /** The payee of a confirmed hourly payday, so the log reads as what it was. */
-    const val PAYDAY_PAYEE = "Payday"
+    val PAYDAY_PAYEE = stored("Payday")
 
     fun isHourly(s: Settings): Boolean = s.incomeEnabled && s.incomeType == IncomeType.HOURLY
 
@@ -121,8 +122,8 @@ object Hourly {
     }
 
     /**
-     * §3.3's type switch. Hourly has no auto-deposit -- what arrives varies -- and starts counting paydays from today,
-     * so none behind it is asked about; back to salaried keeps §3.3's own rules. Shifts must be settled first.
+     * §3.3's type switch. Hourly has no auto-deposit -- what arrives varies -- and starts counting paydays after today,
+     * so none behind it, nor today's, is asked about; back to salaried keeps §3.3's own rules. Shifts must be settled first.
      */
     fun setType(d: ProfileData, type: IncomeType, today: LocalDate): ProfileData {
         val s = d.settings
@@ -132,7 +133,8 @@ object Hourly {
             incomeType = type,
             incomeAutoDeposit = false,
             lastIncomeDepositDate = null,
-            lastPaydayHandled = if (type == IncomeType.HOURLY) today.minusDays(1) else null,
+            // today's payday, if it is one, belongs to the type being left
+            lastPaydayHandled = if (type == IncomeType.HOURLY) today else null,
         ))
     }
 

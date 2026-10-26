@@ -2,6 +2,7 @@ package app.scifin.ui
 
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import app.scifin.i18n.tr
 import app.scifin.ui.screens.LearnTopicScreen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.selection.selectable
@@ -306,7 +307,7 @@ private fun RowScope.DesktopContent(state: UiState, store: AppStore, wc: WidthCl
             // the Page's right edge includes its padding; the button lines up with the content inside it
             val gap = edges.values.maxOrNull()?.let { boxRight - it } ?: 0f
             val end = with(density) { gap.coerceAtLeast(0f).toDp() } + t.spacing.pad
-            Button("Add", ButtonKind.PRIMARY, modifier = Modifier.align(Alignment.TopEnd).padding(top = t.spacing.pad, end = end).onGloballyPositioned { addHeight = it.size.height.toFloat() }.probeAs("add")) { store.openSheet(Sheet.Entry()) }
+            Button(tr("Add"), ButtonKind.PRIMARY, modifier = Modifier.align(Alignment.TopEnd).padding(top = t.spacing.pad, end = end).onGloballyPositioned { addHeight = it.size.height.toFloat() }.probeAs("add")) { store.openSheet(Sheet.Entry()) }
         }
     }
 }
