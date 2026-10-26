@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import app.scifin.i18n.tr
 import app.scifin.ui.LocalTokens
 import app.scifin.ui.Lucide
 import app.scifin.ui.LucideIcon
@@ -43,7 +44,7 @@ fun DateField(value: LocalDate?, placeholder: String = "", onChange: (LocalDate)
     var open by remember { mutableStateOf(false) }
     Row(
         Modifier.fillMaxWidth().heightIn(min = t.spacing.target).background(p.surf, RoundedCornerShape(t.radii.md))
-            .border(t.strokes.ctl, p.bordStrong, RoundedCornerShape(t.radii.md)).clickable(role = Role.Button, onClickLabel = "Select date") { open = true }.padding(horizontal = t.spacing.u * 1.5f),
+            .border(t.strokes.ctl, p.bordStrong, RoundedCornerShape(t.radii.md)).clickable(role = Role.Button, onClickLabel = tr("Select date")) { open = true }.padding(horizontal = t.spacing.u * 1.5f),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(value?.let { formatDateFull(it) } ?: placeholder, color = if (value != null) p.txt else p.txt3, fontSize = t.type.body)
@@ -54,9 +55,9 @@ fun DateField(value: LocalDate?, placeholder: String = "", onChange: (LocalDate)
         val state = remember { DatePickerState(locale = englishCalendarLocale(), initialSelectedDateMillis = value?.let { it.toEpochDays() * DAY_MS }) }
         EnglishLocaleScope { DatePickerDialog(
             onDismissRequest = { open = false },
-            confirmButton = { TextButton(onClick = { state.selectedDateMillis?.let { onChange(LocalDate.fromEpochDays(it / DAY_MS)) }; open = false }) { Text("Done") } },
-            dismissButton = { TextButton(onClick = { open = false }) { Text("Cancel") } },
-        ) { DatePicker(state = state, dateFormatter = remember { englishFormatter() }, title = { Text("Select date", modifier = Modifier.padding(start = t.spacing.u * 3, top = t.spacing.u * 2)) }) } }
+            confirmButton = { TextButton(onClick = { state.selectedDateMillis?.let { onChange(LocalDate.fromEpochDays(it / DAY_MS)) }; open = false }) { Text(tr("Done")) } },
+            dismissButton = { TextButton(onClick = { open = false }) { Text(tr("Cancel")) } },
+        ) { DatePicker(state = state, dateFormatter = remember { englishFormatter() }, title = { Text(tr("Select date"), modifier = Modifier.padding(start = t.spacing.u * 3, top = t.spacing.u * 2)) }) } }
     }
 }
 

@@ -2,7 +2,10 @@ package app.scifin.ui
 
 import app.scifin.engine.currencySymbolOf
 import app.scifin.engine.groupDigits
+import app.scifin.engine.monthDay
 import app.scifin.engine.monthShort
+import app.scifin.i18n.I18n
+import app.scifin.i18n.Language
 import app.scifin.model.Money
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
@@ -23,11 +26,11 @@ fun groupThousands(n: Long): String = groupDigits(n)
 
 fun Month.shortName(): String = monthShort(ordinal + 1)
 
-/** `Sep 14` */
-fun formatDate(d: LocalDate): String = "${d.month.shortName()} ${d.day}"
+/** `Sep 14`; Italian `14 set` */
+fun formatDate(d: LocalDate): String = monthDay(d)
 
-/** `Sep 14, 2026` */
-fun formatDateFull(d: LocalDate): String = "${d.month.shortName()} ${d.day}, ${d.year}"
+/** `Sep 14, 2026`; Italian `14 set 2026` */
+fun formatDateFull(d: LocalDate): String = if (I18n.current == Language.IT) "${d.day} ${d.month.shortName()} ${d.year}" else "${d.month.shortName()} ${d.day}, ${d.year}"
 
 /** A typed amount -- `1234`, `1234.5`, `1.234,56`, `12,50` -- to minor units; null when it is not a number. No sign is accepted (§3.6). */
 fun parseMoney(text: String): Money? {
@@ -53,5 +56,6 @@ fun parseMoney(text: String): Money? {
 fun moneyText(minor: Money): String {
     val neg = minor < 0; val abs = if (neg) -minor else minor
     val cents = abs % 100
-    return (if (neg) "-" else "") + (abs / 100).toString() + (if (cents == 0L) "" else "." + cents.toString().padStart(2, '0'))
+    val mark = if (I18n.current == Language.IT) "," else "."
+    return (if (neg) "-" else "") + (abs / 100).toString() + (if (cents == 0L) "" else mark + cents.toString().padStart(2, '0'))
 }

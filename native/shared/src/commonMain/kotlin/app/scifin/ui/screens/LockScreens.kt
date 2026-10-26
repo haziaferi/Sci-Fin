@@ -50,6 +50,9 @@ import app.scifin.ui.components.TextField
 import app.scifin.ui.formatDateFull
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
+import app.scifin.i18n.typedWordMatches
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
 
 /*
  * §4.7's Security & lock (owner, 2026-10-19): an optional PIN of the app's own, off by default, with an optional
@@ -57,7 +60,7 @@ import kotlin.time.Duration.Companion.seconds
  * is drawn *instead of* the app (Frame.kt), so nothing beneath it can be read or reached by a screen reader.
  */
 
-private const val FORGOTTEN = "A forgotten PIN can’t be recovered. The way back in is to erase everything on this device and start over, then restore your last backup."
+private val FORGOTTEN: String get() = tr("A forgotten PIN can’t be recovered. The way back in is to erase everything on this device and start over, then restore your last backup.")
 
 // ---- the hint, where a PIN or password is chosen and where it is asked for ------------------------------
 
@@ -67,12 +70,13 @@ fun HintField(hint: String, onHint: (String) -> Unit, secret: String, noun: Stri
     if (secret.isEmpty()) return
     Column(modifier) {
         FieldGroup {
-            FieldLabel("Add a hint, optional")
-            TextField(hint, onHint, label = "Hint for the $noun, optional")
+            FieldLabel(tr("Add a hint, optional"))
+            TextField(hint, onHint, label = if (noun == "PIN") tr("Hint for the PIN, optional") else tr("Hint for the password, optional"))
         }
         Caption(
             hintProblem(secret, hint, noun)
-                ?: "Shown only when you ask for it while entering the $noun. Anyone who can see the screen then can read it, so make it something only you would understand.",
+                ?: if (noun == "PIN") tr("Shown only when you ask for it while entering the PIN. Anyone who can see the screen then can read it, so make it something only you would understand.")
+                else tr("Shown only when you ask for it while entering the password. Anyone who can see the screen then can read it, so make it something only you would understand."),
         )
     }
 }
@@ -83,8 +87,8 @@ fun ShowHintLine(hint: String?, modifier: Modifier = Modifier, initiallyShown: B
     if (hint.isNullOrBlank()) return
     var shown by rememberSaveable { mutableStateOf(initiallyShown) }
     Column(modifier) {
-        Button(if (shown) "Hide hint" else "Show hint", ButtonKind.GHOST, modifier = Modifier.fillMaxWidth()) { shown = !shown }
-        if (shown) Caption("Hint: ${hint.trim()}")
+        Button(if (shown) tr("Hide hint") else tr("Show hint"), ButtonKind.GHOST, modifier = Modifier.fillMaxWidth()) { shown = !shown }
+        if (shown) Caption(trf("Hint: {0}", hint.trim()))
     }
 }
 
@@ -102,7 +106,7 @@ fun LockGate(state: UiState, store: AppStore) {
         ) {
             LucideIcon(Lucide.LOCK, tint = p.txt2, size = t.icons.md * 1.5f)
             Text(
-                if (forgot) "Erase and start over" else "Sci-Fin is locked",
+                if (forgot) tr("Erase and start over") else tr("Sci-Fin is locked"),
                 color = p.txt, fontSize = t.type.title, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center,
                 modifier = Modifier.semantics { heading() },
             )
@@ -125,7 +129,7 @@ private fun waitLeft(state: UiState): Long? {
 }
 
 private fun waitText(seconds: Long) =
-    if (seconds < 60) "$seconds seconds" else "${seconds / 60}:${(seconds % 60).toString().padStart(2, '0')}"
+    if (seconds < 60) trf("{0} seconds", seconds) else "${seconds / 60}:${(seconds % 60).toString().padStart(2, '0')}"
 
 /** The PIN field: it tries itself on the last digit, so no second tap is needed; Unlock is there for a slip. */
 @Composable
@@ -146,8 +150,8 @@ private fun PinField(
         }, modifier = Modifier.focusRequester(requester), keyboard = KeyboardType.NumberPassword, label = label, masked = true)
     }
     when {
-        wait != null -> Caption("Too many wrong PINs. Try again in ${waitText(wait)}.")
-        state.pinWrong -> Caption("That isn’t the PIN.")
+        wait != null -> Caption(trf("Too many wrong PINs. Try again in {0}.", waitText(wait)))
+        state.pinWrong -> Caption(tr("That isn’t the PIN."))
     }
     Button(action, enabled = wait == null && Pin.valid(entry), modifier = Modifier.fillMaxWidth()) { onTry(entry) }
 }
@@ -155,9 +159,9 @@ private fun PinField(
 @Composable
 private fun PinEntry(state: UiState, store: AppStore, pinLength: Int, hint: String?, onForgot: () -> Unit) {
     Column(Modifier.fillMaxWidth()) {
-        PinField(state, "PIN", "Unlock", pinLength, focus = true, onTry = store::unlock, clearStore = store::clearPinWrong)
+        PinField(state, tr("PIN"), tr("Unlock"), pinLength, focus = true, onTry = store::unlock, clearStore = store::clearPinWrong)
         ShowHintLine(hint)
-        Button("Forgot PIN?", ButtonKind.GHOST, modifier = Modifier.fillMaxWidth()) { onForgot() }
+        Button(tr("Forgot PIN?"), ButtonKind.GHOST, modifier = Modifier.fillMaxWidth()) { onForgot() }
     }
 }
 
@@ -166,18 +170,19 @@ private fun PinEntry(state: UiState, store: AppStore, pinLength: Int, hint: Stri
 private fun ForgotPin(state: UiState, store: AppStore, onCancel: () -> Unit) {
     val t = LocalTokens.current
     var typed by remember { mutableStateOf("") }
-    val ready = typed.trim().uppercase() == "ERASE"
+    val word = tr("ERASE")
+    val ready = typedWordMatches(typed, "ERASE")
     val exported = state.appState?.lastBackupExportDate
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
         FeasibilityNote(
-            "This deletes every profile, every transaction and every setting on this device, and the app’s own safety copies. It can’t be undone. " +
-                "Sci-Fin then opens as new, where you can restore a backup file.",
+            tr("This deletes every profile, every transaction and every setting on this device, and the app’s own safety copies. It can’t be undone.") + " " +
+                tr("Sci-Fin then opens as new, where you can restore a backup file."),
         )
-        Caption(if (exported != null) "Your last export from this device was on ${formatDateFull(exported)}. Anything logged since then won’t be in it." else "No backup has been exported from this device, so nothing here can be brought back.")
-        FieldGroup { FieldLabel("Type ERASE to confirm"); TextField(typed, { typed = it }, placeholder = "ERASE", label = "Type ERASE to confirm") }
+        Caption(if (exported != null) trf("Your last export from this device was on {0}. Anything logged since then won’t be in it.", formatDateFull(exported)) else tr("No backup has been exported from this device, so nothing here can be brought back."))
+        FieldGroup { FieldLabel(trf("Type {0} to confirm", word)); TextField(typed, { typed = it }, placeholder = word, label = trf("Type {0} to confirm", word)) }
         ButtonRow {
-            Button("Cancel", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { onCancel() }
-            Button("Erase everything", enabled = ready, modifier = Modifier.weight(1f)) { store.eraseEverything() }
+            Button(tr("Cancel"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { onCancel() }
+            Button(tr("Erase everything"), enabled = ready, modifier = Modifier.weight(1f)) { store.eraseEverything() }
         }
     }
 }
@@ -191,7 +196,7 @@ internal fun SecurityPage(state: UiState, store: AppStore) {
     var settingUp by rememberSaveable { mutableStateOf(false) }
     var turningOff by rememberSaveable { mutableStateOf(false) }
     var changing by rememberSaveable { mutableStateOf(false) }
-    SettingRow(Lucide.LOCK, "Lock with a PIN", "Off by default — 4 to 6 digits, asked for each time Sci-Fin opens on this device") {
+    SettingRow(Lucide.LOCK, tr("Lock with a PIN"), tr("Off by default — 4 to 6 digits, asked for each time Sci-Fin opens on this device")) {
         Switch(lock != null || settingUp) {
             when {
                 lock != null -> { turningOff = !turningOff; changing = false; store.clearPinWrong() }
@@ -203,19 +208,19 @@ internal fun SecurityPage(state: UiState, store: AppStore) {
         lock == null && settingUp -> NewPin(state, store) { settingUp = false }
         lock != null && changing -> NewPin(state, store, change = true) { changing = false }
         lock != null && turningOff -> Column(Modifier.padding(top = t.spacing.gap)) {
-            Caption("Enter the PIN to turn the lock off.", Modifier.padding(bottom = t.spacing.gap))
-            PinField(state, "Current PIN", "Turn off", null, focus = true, onTry = { store.turnOffLock(it) }, clearStore = store::clearPinWrong)
-            Button("Keep the lock", ButtonKind.GHOST, modifier = Modifier.fillMaxWidth()) { turningOff = false; store.clearPinWrong() }
+            Caption(tr("Enter the PIN to turn the lock off."), Modifier.padding(bottom = t.spacing.gap))
+            PinField(state, tr("Current PIN"), tr("Turn off"), null, focus = true, onTry = { store.turnOffLock(it) }, clearStore = store::clearPinWrong)
+            Button(tr("Keep the lock"), ButtonKind.GHOST, modifier = Modifier.fillMaxWidth()) { turningOff = false; store.clearPinWrong() }
         }
         lock != null -> Column(Modifier.padding(top = t.spacing.gap)) {
             FieldGroup {
-                FieldLabel("Lock after leaving the app")
+                FieldLabel(tr("Lock after leaving the app"))
                 ChipRow(LockAfter.entries.map { it.token to it.label }, lock.after.token) { store.setLockAfter(LockAfter.of(it)) }
             }
-            Caption("Leaving is switching to another app or minimising Sci-Fin.", Modifier.padding(bottom = t.spacing.gap))
+            Caption(tr("Leaving is switching to another app or minimising Sci-Fin."), Modifier.padding(bottom = t.spacing.gap))
             ButtonRow {
-                Button("Change PIN", ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { changing = true; store.clearPinWrong() }
-                Button("Lock now", ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { store.lockNow() }
+                Button(tr("Change PIN"), ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { changing = true; store.clearPinWrong() }
+                Button(tr("Lock now"), ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { store.lockNow() }
             }
         }
     }
@@ -242,30 +247,30 @@ private fun NewPin(state: UiState, store: AppStore, change: Boolean = false, onD
     Column(Modifier.padding(top = t.spacing.gap)) {
         if (change) {
             FieldGroup {
-                FieldLabel("Current PIN")
-                TextField(current, { current = Pin.clean(it); store.clearPinWrong() }, keyboard = KeyboardType.NumberPassword, label = "Current PIN", masked = true)
+                FieldLabel(tr("Current PIN"))
+                TextField(current, { current = Pin.clean(it); store.clearPinWrong() }, keyboard = KeyboardType.NumberPassword, label = tr("Current PIN"), masked = true)
             }
             when {
-                wait != null -> Caption("Too many wrong PINs. Try again in ${waitText(wait)}.", Modifier.padding(bottom = t.spacing.gap))
-                state.pinWrong -> Caption("That isn’t the PIN.", Modifier.padding(bottom = t.spacing.gap))
+                wait != null -> Caption(trf("Too many wrong PINs. Try again in {0}.", waitText(wait)), Modifier.padding(bottom = t.spacing.gap))
+                state.pinWrong -> Caption(tr("That isn’t the PIN."), Modifier.padding(bottom = t.spacing.gap))
             }
         }
         FieldGroup {
-            FieldLabel("New PIN, 4 to 6 digits")
-            TextField(first, { first = Pin.clean(it) }, keyboard = KeyboardType.NumberPassword, label = "New PIN, 4 to 6 digits", masked = true)
+            FieldLabel(tr("New PIN, 4 to 6 digits"))
+            TextField(first, { first = Pin.clean(it) }, keyboard = KeyboardType.NumberPassword, label = tr("New PIN, 4 to 6 digits"), masked = true)
         }
         FieldGroup {
-            FieldLabel("The same PIN again")
-            TextField(second, { second = Pin.clean(it) }, keyboard = KeyboardType.NumberPassword, label = "The same PIN again", masked = true)
+            FieldLabel(tr("The same PIN again"))
+            TextField(second, { second = Pin.clean(it) }, keyboard = KeyboardType.NumberPassword, label = tr("The same PIN again"), masked = true)
         }
-        if (second.isNotEmpty() && second.length >= first.length && second != first) Caption("The two don’t match yet.")
+        if (second.isNotEmpty() && second.length >= first.length && second != first) Caption(tr("The two don’t match yet."))
         HintField(hint, { hint = it }, first, "PIN", Modifier.padding(top = t.spacing.gap))
         ButtonRow {
-            Button("Cancel", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.clearPinWrong(); onDone() }
-            if (change) Button("Change PIN", enabled = ready, modifier = Modifier.weight(1f)) {
+            Button(tr("Cancel"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.clearPinWrong(); onDone() }
+            if (change) Button(tr("Change PIN"), enabled = ready, modifier = Modifier.weight(1f)) {
                 scope.launch { store.changePin(current, first, hint).join(); if (!store.state.value.pinWrong && store.state.value.pinWaitEnds == null) onDone() }
             }
-            else Button("Set PIN", enabled = ready, modifier = Modifier.weight(1f)) { store.setPin(first, hint); onDone() }
+            else Button(tr("Set PIN"), enabled = ready, modifier = Modifier.weight(1f)) { store.setPin(first, hint); onDone() }
         }
     }
 }

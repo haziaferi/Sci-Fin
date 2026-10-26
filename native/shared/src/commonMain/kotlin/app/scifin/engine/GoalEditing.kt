@@ -1,5 +1,6 @@
 package app.scifin.engine
 
+import app.scifin.i18n.stored
 import app.scifin.model.Goal
 import app.scifin.model.GoalMode
 import app.scifin.model.Money
@@ -91,7 +92,7 @@ object GoalEditing {
     fun delete(d: ProfileData, goalId: String, returnSaved: Boolean, clock: Clock, ids: () -> String): ProfileData {
         val g = d.goals.firstOrNull { it.id == goalId } ?: return d
         var next = d
-        if (returnSaved && g.saved > 0) next = Writes.goalSavedEdit(next, goalId, 0, "Goal deleted — returned to Savings", clock, ids())
+        if (returnSaved && g.saved > 0) next = Writes.goalSavedEdit(next, goalId, 0, stored("Goal deleted — returned to Savings"), clock, ids())
         return next.copy(goals = next.goals.filter { it.id != goalId })
     }
 }

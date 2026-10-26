@@ -1,5 +1,7 @@
 package app.scifin.engine
 
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
 import app.scifin.model.AccountType
 import app.scifin.model.Money
 import app.scifin.model.ProfileData
@@ -23,7 +25,11 @@ import kotlinx.datetime.LocalDate
  * renders it and the tests read it.
  */
 object Entry {
-    enum class Area(val word: String) { SAVINGS("Savings"), GOAL("Goal"), CATEGORY("Category"), ACCOUNT("Account") }
+    enum class Area {
+        SAVINGS, GOAL, CATEGORY, ACCOUNT;
+
+        val word: String get() = when (this) { SAVINGS -> tr("Savings"); GOAL -> tr("Goal"); CATEGORY -> tr("Category"); ACCOUNT -> tr("Account") }
+    }
 
     fun areaOf(target: String): Area = when {
         target.startsWith("goal:") -> Area.GOAL
@@ -34,7 +40,7 @@ object Entry {
 
     /** The targets in an area, in the order the picker lists them. */
     fun targetsIn(d: ProfileData, area: Area): List<Pair<String, String>> = when (area) {
-        Area.SAVINGS -> listOf("savings" to "Savings")
+        Area.SAVINGS -> listOf("savings" to tr("Savings"))
         Area.GOAL -> d.goals.map { "goal:${it.id}" to it.name }
         Area.CATEGORY -> d.categories.map { "cat:${it.id}" to it.name }
         Area.ACCOUNT -> d.accounts.map { "acct:${it.id}" to it.name }
@@ -42,18 +48,18 @@ object Entry {
 
     fun exists(d: ProfileData, target: String): Boolean = targetsIn(d, areaOf(target)).any { it.first == target }
 
-    fun nameOf(d: ProfileData, target: String): String = targetsIn(d, areaOf(target)).firstOrNull { it.first == target }?.second ?: "Savings"
+    fun nameOf(d: ProfileData, target: String): String = targetsIn(d, areaOf(target)).firstOrNull { it.first == target }?.second ?: tr("Savings")
 
     /** Before anything has been logged: the first Category (where most entries go), else Savings. */
     fun defaultTarget(d: ProfileData): String = d.categories.firstOrNull()?.let { "cat:${it.id}" } ?: "savings"
 
     /** The direction words; null where the target has one direction, so there is no control to show. */
     fun directions(d: ProfileData, target: String): List<Pair<String, String>>? = when (areaOf(target)) {
-        Area.SAVINGS -> if (d.settings.incomeEnabled) listOf("in" to "Add", "income" to "Income") else null
-        Area.GOAL -> listOf("in" to "Add", "spend" to "Spent")
+        Area.SAVINGS -> if (d.settings.incomeEnabled) listOf("in" to tr("Add"), "income" to tr("Income")) else null
+        Area.GOAL -> listOf("in" to tr("Add"), "spend" to tr("Spent"))
         Area.CATEGORY -> null
-        Area.ACCOUNT -> if (account(d, target)?.type == AccountType.CREDIT) listOf("charge" to "Charged", "payment" to "Paid off")
-            else listOf("payment" to "Paid off", "increase" to "Increased")
+        Area.ACCOUNT -> if (account(d, target)?.type == AccountType.CREDIT) listOf("charge" to tr("Charged"), "payment" to tr("Paid off"))
+            else listOf("payment" to tr("Paid off"), "increase" to tr("Increased"))
     }
 
     fun firstDirection(d: ProfileData, target: String): String = directions(d, target)?.first()?.first ?: when (areaOf(target)) {
@@ -61,24 +67,25 @@ object Entry {
     }
 
     /** The verb when there is no control: a Category's "Spent", Savings' "Add" while Income is off. */
-    fun fixedVerb(target: String): String = if (areaOf(target) == Area.CATEGORY) "Spent" else "Add"
+    fun fixedVerb(target: String): String = if (areaOf(target) == Area.CATEGORY) tr("Spent") else tr("Add")
 
     /** The word before the target; Savings has none (the area word already names it). */
     fun preposition(target: String, direction: String): String? = when (areaOf(target)) {
         Area.SAVINGS -> null
-        Area.GOAL -> if (direction == "spend") "from" else "to"
-        Area.CATEGORY, Area.ACCOUNT -> "on"
+        Area.GOAL -> if (direction == "spend") tr("from") else tr("to")
+        Area.CATEGORY, Area.ACCOUNT -> tr("on")
     }
 
     /** The note's word, or null where the log already says it ("Payment to <account>"). */
     fun noteWord(target: String, direction: String): String? = when (areaOf(target)) {
-        Area.SAVINGS -> "from"
-        Area.GOAL -> if (direction == "spend") "at" else "for"
-        Area.CATEGORY -> "at"
-        Area.ACCOUNT -> if (direction == "payment") null else "at"
+        Area.SAVINGS -> tr("from")
+        Area.GOAL -> if (direction == "spend") tr("at") else tr("for")
+        Area.CATEGORY -> tr("at")
+        Area.ACCOUNT -> if (direction == "payment") null else tr("at")
     }
 
-    fun noteHint(word: String): String = when (word) { "from" -> "who or where"; "for" -> "what"; else -> "where" }
+    /** [word] is [noteWord]'s, already in the current language. */
+    fun noteHint(word: String): String = when (word) { tr("from") -> tr("who or where"); tr("for") -> tr("what"); else -> tr("where") }
 
     /** §7.2: a payment also leaves Savings by default only when no recurring expense already moves it. */
     fun pairDefault(d: ProfileData, target: String): Boolean = account(d, target)?.let { Accounts.pairedOutflowDefault(it) } ?: false
@@ -88,15 +95,15 @@ object Entry {
         if (amount == null || amount <= 0 || !exists(d, target)) return null
         val name = nameOf(d, target)
         return when (areaOf(target)) {
-            Area.SAVINGS -> listOf("Savings" to amount)
+            Area.SAVINGS -> listOf(tr("Savings") to amount)
             Area.GOAL -> if (direction == "spend") (if (amount > goalHolds(d, target)) null else listOf(name to -amount))
-                else listOf(name to amount, "Savings" to -amount)
-            Area.CATEGORY -> listOf("$name spent" to amount, "Savings" to -amount)
+                else listOf(name to amount, tr("Savings") to -amount)
+            Area.CATEGORY -> listOf(trf("{0} spent", name) to amount, tr("Savings") to -amount)
             Area.ACCOUNT -> {
                 if (directions(d, target)?.none { it.first == direction } != false) return null
                 val a = account(d, target)!!
-                val owed = name + if (a.type == AccountType.CREDIT) " owed" else " balance"
-                if (direction == "payment") listOfNotNull(owed to -amount, if (pair) "Savings" to -amount else null) else listOf(owed to amount)
+                val owed = if (a.type == AccountType.CREDIT) trf("{0} owed", name) else trf("{0} balance", name)
+                if (direction == "payment") listOfNotNull(owed to -amount, if (pair) tr("Savings") to -amount else null) else listOf(owed to amount)
             }
         }
     }
@@ -105,20 +112,20 @@ object Entry {
     fun captions(d: ProfileData, target: String, direction: String, amount: Money?, note: String, pair: Boolean, money: (Money) -> String): List<String> {
         val out = mutableListOf<String>()
         if (areaOf(target) == Area.GOAL && direction == "spend" && amount != null && amount > goalHolds(d, target))
-            out += "${nameOf(d, target)} holds ${money(goalHolds(d, target))}, so this can spend up to that."
-        if (areaOf(target) == Area.SAVINGS && direction == "income") out += "Counts toward this month’s income received."
+            out += trf("{0} holds {1}, so this can spend up to that.", nameOf(d, target), money(goalHolds(d, target)))
+        if (areaOf(target) == Area.SAVINGS && direction == "income") out += tr("Counts toward this month’s income received.")
         val n = note.trim().lowercase()
         val spending = areaOf(target) == Area.CATEGORY || (areaOf(target) == Area.GOAL && direction == "spend")
         if (spending && n.length > 2) d.recurringExpenses.firstOrNull { val name = it.name.lowercase(); n.contains(name) || name.contains(n) }?.let {
-            out += "${it.name} is a recurring expense and is taken on its own date. Log it here only if this is an extra payment."
+            out += trf("{0} is a recurring expense and is taken on its own date. Log it here only if this is an extra payment.", it.name)
         }
         if (areaOf(target) == Area.ACCOUNT && direction == "payment") {
             val linked = account(d, target)?.linkedRecurringExpenseId?.let { id -> d.recurringExpenses.firstOrNull { it.id == id }?.name }
             out += when {
-                linked != null && pair -> "$linked already takes this from Savings on its date, so this would count it twice."
-                linked != null -> "Savings stays: $linked already takes this from Savings on its date."
-                pair -> "Savings goes down by the same amount: nothing else moves it for this account."
-                else -> "Savings stays as it is."
+                linked != null && pair -> trf("{0} already takes this from Savings on its date, so this would count it twice.", linked)
+                linked != null -> trf("Savings stays: {0} already takes this from Savings on its date.", linked)
+                pair -> tr("Savings goes down by the same amount: nothing else moves it for this account.")
+                else -> tr("Savings stays as it is.")
             }
         }
         return out
@@ -138,10 +145,13 @@ object Entry {
                 d, id, amount,
                 when (direction) { "payment" -> Accounts.Direction.PAYMENT; "charge" -> Accounts.Direction.CHARGE; "increase" -> Accounts.Direction.INCREASE; else -> error("unknown account direction: $direction") },
                 payee, direction == "payment" && pair, clock, date,
-                rowLabel = directions(d, target)?.firstOrNull { it.first == direction }?.second, ids = ids,
+                rowLabel = directions(d, target)?.firstOrNull { it.first == direction }?.let { ROW_LABELS[it.first] }, ids = ids,
             )
         }
     }
+
+    /** The row's stored name stays English (the ledger displays it through tr), whatever language the sentence read in. */
+    private val ROW_LABELS = mapOf("charge" to "Charged", "payment" to "Paid off", "increase" to "Increased")
 
     private fun account(d: ProfileData, target: String) = if (areaOf(target) == Area.ACCOUNT) d.accounts.firstOrNull { it.id == target.removePrefix("acct:") } else null
     private fun goalHolds(d: ProfileData, target: String): Money = d.goals.firstOrNull { it.id == target.removePrefix("goal:") }?.saved ?: 0

@@ -26,6 +26,8 @@ import app.scifin.ui.components.Caption
 import app.scifin.ui.components.InfoNote
 import app.scifin.ui.formatDateFull
 import app.scifin.ui.formatMoney
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
 
 /*
  * The Trash (owner, 2026-10-19/20): what was deleted waits here 30 days, inert, then goes for good; a notice comes
@@ -34,16 +36,16 @@ import app.scifin.ui.formatMoney
  */
 
 private fun kindLabel(kind: String) = when (kind) {
-    "goal" -> "Goal"; "category" -> "Category"; "expense" -> "Recurring expense"; "account" -> "Account"
-    "pair" -> "Ledger entries"; "profile" -> "Profile"; else -> "Item"
+    "goal" -> tr("Goal"); "category" -> tr("Category"); "expense" -> tr("Recurring expense"); "account" -> tr("Account")
+    "pair" -> tr("Ledger entries"); "profile" -> tr("Profile"); else -> tr("Item")
 }
 
 @Composable
 internal fun TrashPage(state: UiState, store: AppStore) {
     val t = LocalTokens.current
-    InfoNote("Deleted things wait here for ${Trash.KEPT_DAYS} days, then go for good — a notification says so ten days before. While here they do nothing: a payment doesn’t sweep or remind, and nothing counts towards any figure. Restore puts one back as it was.")
+    InfoNote(trf("Deleted things wait here for {0} days, then go for good — a notification says so ten days before. While here they do nothing: a payment doesn’t sweep or remind, and nothing counts towards any figure. Restore puts one back as it was.", Trash.KEPT_DAYS))
     if (state.trash.isEmpty()) {
-        Caption("Nothing is in the Trash.", Modifier.padding(top = t.spacing.gap))
+        Caption(tr("Nothing is in the Trash."), Modifier.padding(top = t.spacing.gap))
         return
     }
     Column(Modifier.padding(top = t.spacing.gap), verticalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
@@ -57,19 +59,19 @@ private fun TrashRow(e: TrashEntry, state: UiState, store: AppStore) {
     var confirming by rememberSaveable(e.id) { mutableStateOf(false) }
     val cur = state.data?.settings?.currency ?: "USD"
     Column(Modifier.fillMaxWidth().background(p.surf2, RoundedCornerShape(t.radii.lg)).padding(horizontal = t.spacing.u * 1.5f, vertical = t.spacing.u * 1.25f)) {
-        Text(e.name.ifEmpty { kindLabel(e.kind) }, color = p.txt, fontSize = t.type.body, fontWeight = FontWeight.Bold)
-        Caption("${kindLabel(e.kind)} · deleted ${formatDateFull(e.deletedOn)} · goes for good on ${formatDateFull(e.goesOn)}")
-        if (e.money > 0) Caption("Its delete returned ${formatMoney(e.money, cur)} to Savings; restoring takes that back out, logged.")
-        if (e.kind == "profile") Caption("Restoring brings it back as one more profile; it is not opened.")
+        Text(e.name.ifEmpty { kindLabel(e.kind) }.let { tr(it) }, color = p.txt, fontSize = t.type.body, fontWeight = FontWeight.Bold)
+        Caption(trf("{0} · deleted {1} · goes for good on {2}", kindLabel(e.kind), formatDateFull(e.deletedOn), formatDateFull(e.goesOn)))
+        if (e.money > 0) Caption(trf("Its delete returned {0} to Savings; restoring takes that back out, logged.", formatMoney(e.money, cur)))
+        if (e.kind == "profile") Caption(tr("Restoring brings it back as one more profile; it is not opened."))
         if (confirming) {
-            Caption("Delete for good? It can’t be brought back after this.", Modifier.padding(top = t.spacing.u / 2))
+            Caption(tr("Delete for good? It can’t be brought back after this."), Modifier.padding(top = t.spacing.u / 2))
             ButtonRow {
-                Button("Keep it", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { confirming = false }
-                Button("Delete forever", ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { store.deleteForever(e.id) }
+                Button(tr("Keep it"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { confirming = false }
+                Button(tr("Delete forever"), ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { store.deleteForever(e.id) }
             }
         } else ButtonRow {
-            Button("Delete forever", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { confirming = true }
-            Button("Restore", ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { store.restoreFromTrash(e.id) }
+            Button(tr("Delete forever"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { confirming = true }
+            Button(tr("Restore"), ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { store.restoreFromTrash(e.id) }
         }
     }
 }

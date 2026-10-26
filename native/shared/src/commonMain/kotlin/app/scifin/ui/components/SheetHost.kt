@@ -28,6 +28,7 @@ import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import app.scifin.i18n.tr
 import app.scifin.ui.SCRIM
 import app.scifin.ui.LocalTokens
 import app.scifin.ui.LocalWidthClass
@@ -50,7 +51,7 @@ fun SheetScaffold(title: String?, onDismiss: (() -> Unit)?, action: (@Composable
     BoxWithConstraints(
         Modifier.fillMaxSize().background(SCRIM.copy(alpha = 0.42f))
             .pointerInput(dismissable) { if (dismissable) detectTapGestures { dismiss?.invoke() } }
-            .semantics { if (dismissable) { role = Role.Button; onClick(label = "Close") { dismiss?.invoke(); true } } },
+            .semantics { if (dismissable) { role = Role.Button; onClick(label = tr("Close")) { dismiss?.invoke(); true } } },
         contentAlignment = if (wide) Alignment.Center else Alignment.BottomCenter,
     ) {
         val shape = if (wide) RoundedCornerShape(t.radii.xl) else RoundedCornerShape(topStart = t.radii.sheet, topEnd = t.radii.sheet)

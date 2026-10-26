@@ -26,6 +26,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.TextUnit
+import app.scifin.i18n.tr
 import app.scifin.model.Theme
 import app.scifin.ui.LocalProbe
 import app.scifin.ui.LocalTokens
@@ -48,7 +49,7 @@ fun ThemeGrid(selected: Theme, onSelect: (Theme) -> Unit) {
         val cell = (maxWidth - t.spacing.gap) / 2
         val measurer = rememberTextMeasurer()
         val measure: (String, TextUnit) -> Float = { text, sz -> measurer.measure(text, TextStyle(fontSize = sz, fontWeight = FontWeight.Bold)).size.width.toFloat() }
-        val labels = Theme.entries.map { it.label }
+        val labels = Theme.entries.map { tr(it.label) }
         val (roomWith, roomWithout) = with(LocalDensity.current) { (cell - sidePad * 2 - swatch - t.spacing.u).toPx() to (cell - sidePad * 2).toPx() }
         // a 320dp phone at 180-200% text cannot hold the longest name beside the swatch even at the
         // floor size; there the swatch steps aside so the name stays whole and the card stays 48dp
@@ -71,7 +72,7 @@ fun ThemeGrid(selected: Theme, onSelect: (Theme) -> Unit) {
                             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.u),
                         ) {
                             if (showSwatch) Box(Modifier.size(swatch).background(Palettes.of(th, t.dark).acc, CircleShape))
-                            Text(th.label, color = p.txt, fontSize = size, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false,
+                            Text(tr(th.label), color = p.txt, fontSize = size, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false,
                                 modifier = Modifier.probeSize(probe, "theme-name"),
                                 onTextLayout = { r -> probe?.invoke("theme-name-fit", mapOf("overflow" to if (r.hasVisualOverflow) 1f else 0f, "lines" to r.lineCount.toFloat())) })
                         }

@@ -5,6 +5,7 @@ import app.scifin.app.Files
 import javax.swing.JFileChooser
 import javax.swing.UIManager
 import app.scifin.app.PickedFile
+import app.scifin.i18n.tr
 import java.awt.FileDialog
 import java.awt.Frame
 import java.io.File
@@ -15,7 +16,7 @@ import kotlinx.coroutines.withContext
 /** Windows: the system file dialogs (`java.awt.FileDialog`), on the Swing thread. */
 object AwtFiles : Files {
     override suspend fun open(extensions: List<String>): PickedFile? = withContext(Dispatchers.Swing) {
-        val dlg = FileDialog(null as Frame?, if ("json" in extensions) "Restore a backup" else "Import a statement", FileDialog.LOAD)
+        val dlg = FileDialog(null as Frame?, if ("json" in extensions) tr("Restore a backup") else tr("Import a statement"), FileDialog.LOAD)
         // a wildcard name is the hint the Windows dialog honours; setFilenameFilter does nothing there
         dlg.file = extensions.joinToString(";") { "*.$it" }
         dlg.isVisible = true
@@ -26,7 +27,7 @@ object AwtFiles : Files {
     }
 
     override suspend fun save(suggestedName: String, text: String): Boolean = withContext(Dispatchers.Swing) {
-        val dlg = FileDialog(null as Frame?, "Save a backup", FileDialog.SAVE)
+        val dlg = FileDialog(null as Frame?, tr("Save a backup"), FileDialog.SAVE)
         dlg.file = suggestedName
         dlg.isVisible = true
         val dir = dlg.directory ?: return@withContext false
@@ -39,11 +40,11 @@ object AwtFiles : Files {
     override suspend fun pickFolder(): CopyFolder? = withContext(Dispatchers.Swing) {
         runCatching { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()) }
         val chooser = JFileChooser().apply {
-            dialogTitle = "Choose a folder for the automatic copies"
+            dialogTitle = tr("Choose a folder for the automatic copies")
             fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
             isAcceptAllFileFilterUsed = false
         }
-        if (chooser.showDialog(null, "Use this folder") != JFileChooser.APPROVE_OPTION) return@withContext null
+        if (chooser.showDialog(null, tr("Use this folder")) != JFileChooser.APPROVE_OPTION) return@withContext null
         val dir = chooser.selectedFile?.takeIf { it.isDirectory } ?: return@withContext null
         CopyFolder(dir.absolutePath, dir.absolutePath)
     }

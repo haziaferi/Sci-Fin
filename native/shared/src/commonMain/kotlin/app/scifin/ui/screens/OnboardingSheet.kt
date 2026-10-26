@@ -31,23 +31,24 @@ import app.scifin.ui.components.FeasibilityNote
 import app.scifin.ui.components.SheetScaffold
 import app.scifin.ui.components.TextField
 import app.scifin.ui.components.ThemeGrid
+import app.scifin.i18n.tr
 
 /*
  * §11.1 screen 1: a sheet over the app with no dismiss (the screen has no skip); Continue needs
  * a name. The theme cards wrap to two rows rather than shrink below the person's text size.
  */
 
-private const val ONBOARDING_TITLE = "Sci-Fin stands for Scientific-Finance"
-private const val ONBOARDING_DESCRIPTION = "This app is built starting from scientific research regarding how we think about money and focuses on savings."
-private const val ONBOARDING_NAME_LABEL = "Name this profile"
-private const val ONBOARDING_NAME_PLACEHOLDER = "Your name or a label"
-private const val ONBOARDING_THEME_LABEL = "Choose a theme:"
-private const val ONBOARDING_THEME_CAPTION = "You can always change it in Settings."
-private const val ONBOARDING_RESTORE = "Restore from a backup"
-private const val DAMAGED_TITLE = "Sci-Fin can’t read its data"
-private const val DAMAGED_BODY = "The file has been kept as a copy."
-private const val DAMAGED_RESTORE = "Restore a backup"
-private const val DAMAGED_FRESH = "Start fresh"
+private val ONBOARDING_TITLE: String get() = tr("Sci-Fin stands for Scientific-Finance")
+private val ONBOARDING_DESCRIPTION: String get() = tr("This app is built starting from scientific research regarding how we think about money and focuses on savings.")
+private val ONBOARDING_NAME_LABEL: String get() = tr("Name this profile")
+private val ONBOARDING_NAME_PLACEHOLDER: String get() = tr("Your name or a label")
+private val ONBOARDING_THEME_LABEL: String get() = tr("Choose a theme:")
+private val ONBOARDING_THEME_CAPTION: String get() = tr("You can always change it in Settings.")
+private val ONBOARDING_RESTORE: String get() = tr("Restore from a backup")
+private val DAMAGED_TITLE: String get() = tr("Sci-Fin can’t read its data")
+private val DAMAGED_BODY: String get() = tr("The file has been kept as a copy.")
+private val DAMAGED_RESTORE: String get() = tr("Restore a backup")
+private val DAMAGED_FRESH: String get() = tr("Start fresh")
 
 @Composable
 fun OnboardingSheet(route: Route.Onboarding, state: UiState, store: AppStore) {
@@ -60,7 +61,7 @@ fun OnboardingSheet(route: Route.Onboarding, state: UiState, store: AppStore) {
     // and the same Confirm/Cancel pair the Settings route shows, so nothing is decided twice.
     // A file with a password asks for it first (§4.7), in the same sheet.
     if (state.pendingBackup != null || state.lockedBackup != null) {
-        SheetScaffold(title = "Restore backup", onDismiss = null) { BackupOpen(state, store) }
+        SheetScaffold(title = tr("Restore backup"), onDismiss = null) { BackupOpen(state, store) }
         return
     }
 
@@ -101,7 +102,7 @@ fun OnboardingSheet(route: Route.Onboarding, state: UiState, store: AppStore) {
                 )
                 ThemeGrid(selected = theme) { theme = it; store.previewTheme(it) }
             }
-            Button("Continue", enabled = ready, modifier = Modifier.fillMaxWidth()) { store.createProfile(name, theme, route.forNewProfile) }
+            Button(tr("Continue"), enabled = ready, modifier = Modifier.fillMaxWidth()) { store.createProfile(name, theme, route.forNewProfile) }
             // §11.1: restore is offered here, not when adding a second Profile, where it would replace the pool in use
             if (!route.forNewProfile) {
                 Text(

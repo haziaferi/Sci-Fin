@@ -305,6 +305,18 @@ Every major structural decision below traces to a specific research finding in `
 - **CFPB Financial Well\-Being framework** — well\-being is a felt sense of security and freedom of choice, not adherence to a plan (audit §3.7) — the direct basis for the Buffer/Age\-of\-Money report being the app's default view (§5.1) rather than a spending breakdown.
 - **ADHD/autism\-specific findings** — automation and externalized reminders are the highest\-leverage intervention for ADHD; predictability and low\-distraction modes matter most for autism (audit §4.1–§4.2) — informs quick\-add's role (§3.6) and the low\-distraction setting (§2.5).
 
+### 2\.7 Languages (Decided with the owner 2026\-10\-26; being built in three steps)
+
+**English and Italian first**, the system built so that a further language is a catalogue, not code.
+
+- **Which language:** the device's, with English as the fallback for any language not shipped, **overridable per Profile in Appearance** — a Profile carries its language as it carries its theme (§8.4). Before a Profile exists (§11.1's first screen) and on the PIN gate (§4.7), the device's language is used.
+- **Italian is written in the informal *tu*** — the usual register for personal\-finance apps and the closest to the English tone (§2.4).
+- **Dates and amounts take the language's own style:** English `Nov 13` and `€1,450.50`; Italian `13 nov` and `1.450,50 €`. The currency setting still chooses the symbol.
+- **Text the app itself writes into the data** — ledger labels such as *Payday*, *Auto\-deposit*, *Restored from the Trash* — is stored in English and **shown in the active language**, so switching language changes old rows too; what the person typed stays as typed.
+- **Every translation is reviewed by the owner before it ships**, the Learn topics as their own batch: a translation can overstate a finding the English was careful to narrow (§4.5).
+- **Mechanism:** the English text is the key. Every string the person reads passes through `tr`, `trf` (numbered placeholders, which a translation may reorder) or `trp` (one and other forms) in `i18n/I18n.kt`; each other language is a catalogue of English → its text. `LocalisationTest` reads every key from the source, fails the build if a shipped catalogue lacks one or if screen text reaches a component without `tr`, and pins both languages' formats.
+- **Delivered in three PRs:** (1) every string routed through `tr` and the formats made language\-aware, with no visible change in English; (2) the Italian interface and the Appearance row, for review; (3) the Italian Learn topics, for review.
+
 ## 3\. The Financial Model
 
 The section most load\-bearing for everything else — a reframe arrived at over the course of this design conversation, correcting an earlier draft plan that would have contradicted §2 directly.
@@ -1435,7 +1447,7 @@ Not open questions — scheduled later phases, with their design settled to the 
 - ~~**`AppStore.kt:79`'s `twoPane` is dead code.**~~ **Done 2026\-09\-25: deleted, with `Frame.kt`'s unused `TabScreen`.** §4.8's rule 2 was withdrawn on 2026\-09\-24 and `Frame.kt`'s branch removed with it; the property now has exactly one reference in the tree, its own declaration.
 - **The scale and dark pass.** ~~**95** (counted 2026\-09\-24)~~ ~~**62**~~ ~~**58**~~ ~~**44**~~ ~~**43**~~ **16 `N.dp` literals remain under `shared/src/commonMain/kotlin/app/scifin/ui/`** (in 5 files since the visual follow-up, 6 since the cleanup pass of 2026\-10\-10, 10 since the entry and placement mocks were removed on 2026\-10\-09, 11 before that and 13 before 2026\-10\-07; recounted by `tools/speccheck.py` on every run since 2026\-09\-25, after the icon sizes moved onto §2.5's tokens, and 58 since the three chart heights became shapes on 2026\-09\-26, and 44 since the two theme pickers became one token\-sized grid on 2026\-10\-07), against §2.5's rule that measurements scale with the screen; ~~three of them are item 1 of §13.1 above~~. ~~The pass also owes the **System** default for the text\-size setting.~~ ~~**It owes instead the setting's removal, decided 2026\-09\-23 (§2.5): `Settings.scale`, the text\-scale enum and the Appearance row (corrected 2026\-09\-25).**~~ **The setting's removal is built (2026\-09\-25, schema 5):** the field, the enum and the Appearance row are gone, and the three texts that named it were reworded with the owner.
 - ~~**Whether Windows' text size reaches the desktop app** (§4.1, found 2026\-09\-26).~~ **It does not (checked 2026\-09\-26 in Compose Desktop 1.12's source); the host now reads `TextScaleFactor` itself (§2.5, built the same day).** The rail's landscape overflow at 150% was fixed the same day too (§4.1).
-- **Full localisation.** Every string is English in source.
+- **Full localisation.** ~~Every string is English in source.~~ **Decided 2026\-10\-26 (§2.7), English and Italian first; being built in three PRs.**
 
 ### 13\.4 Decision trail
 

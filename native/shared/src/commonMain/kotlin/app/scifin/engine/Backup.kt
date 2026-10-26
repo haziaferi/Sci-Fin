@@ -32,6 +32,8 @@ import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.longOrNull
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
 
 /*
  * §4.7 -- Data & backup. One JSON file, every Profile, replace-not-merge. `schemaVersion`
@@ -95,31 +97,31 @@ object Backup {
     /** Parses and validates whole; nothing is imported on any refusal. */
     fun validate(text: String): BackupResult {
         val root: JsonObject = runCatching { json.parseToJsonElement(text).jsonObject }.getOrNull()
-            ?: return BackupResult.Refused("That file could not be read as a backup. Nothing was changed.")
-        root["app"].str()?.let { if (it != "sci-fin") return BackupResult.Refused("That file is not a Sci-Fin backup.") }
+            ?: return BackupResult.Refused(tr("That file could not be read as a backup. Nothing was changed."))
+        root["app"].str()?.let { if (it != "sci-fin") return BackupResult.Refused(tr("That file is not a Sci-Fin backup.")) }
         val vEl = root["schemaVersion"]
         val v = when {
             vEl == null || vEl is JsonNull -> 1
-            else -> (vEl as? JsonPrimitive)?.intOrNull ?: return BackupResult.Refused("That file is not a Sci-Fin backup.")
+            else -> (vEl as? JsonPrimitive)?.intOrNull ?: return BackupResult.Refused(tr("That file is not a Sci-Fin backup."))
         }
-        if (v < 1) return BackupResult.Refused("That file is not a Sci-Fin backup.")
-        if (v > SCHEMA_VERSION) return BackupResult.Refused("That backup was made by a newer version of the app (format $v; this app reads up to $SCHEMA_VERSION). Nothing was changed.")
+        if (v < 1) return BackupResult.Refused(tr("That file is not a Sci-Fin backup."))
+        if (v > SCHEMA_VERSION) return BackupResult.Refused(trf("That backup was made by a newer version of the app (format {0}; this app reads up to {1}). Nothing was changed.", v, SCHEMA_VERSION))
         val profilesEl = root["profiles"]
-        if (profilesEl == null || profilesEl !is JsonArray || profilesEl.isEmpty()) return BackupResult.Refused("That backup contains no profiles. Nothing was changed.")
+        if (profilesEl == null || profilesEl !is JsonArray || profilesEl.isEmpty()) return BackupResult.Refused(tr("That backup contains no profiles. Nothing was changed."))
 
         val profiles = ArrayList<ProfileData>()
         // per table, across every Profile: Room's primary keys are global, so a repeat would overwrite
         val seen = HashMap<String, MutableSet<String>>()
         fun unique(table: String, ids: List<String>) = ids.forEach { require(seen.getOrPut(table) { HashSet() }.add(it)) { "$table id $it is used twice" } }
         for (pe in profilesEl.jsonArray) {
-            val po = pe as? JsonObject ?: return BackupResult.Refused("That backup is damaged (a profile is missing its id, name or data). Nothing was changed.")
+            val po = pe as? JsonObject ?: return BackupResult.Refused(tr("That backup is damaged (a profile is missing its id, name or data). Nothing was changed."))
             val id = po["id"].str(); val name = po["name"].str()
-            if (id == null || name == null) return BackupResult.Refused("That backup is damaged (a profile is missing its id, name or data). Nothing was changed.")
+            if (id == null || name == null) return BackupResult.Refused(tr("That backup is damaged (a profile is missing its id, name or data). Nothing was changed."))
             for (list in listOf("transactions", "goals", "categories", "recurringExpenses", "accounts", "shifts")) {
                 val el = po[list]
-                if (el != null && el !is JsonNull && el !is JsonArray) return BackupResult.Refused("That backup is damaged (“$name” has no $list list). Nothing was changed.")
+                if (el != null && el !is JsonNull && el !is JsonArray) return BackupResult.Refused(trf("That backup is damaged (“{0}” has no {1} list). Nothing was changed.", name, list))
             }
-            po["savings"]?.let { if (it !is JsonNull && (it as? JsonPrimitive)?.longOrNull == null) return BackupResult.Refused("That backup is damaged (“$name” has an unreadable Savings figure). Nothing was changed.") }
+            po["savings"]?.let { if (it !is JsonNull && (it as? JsonPrimitive)?.longOrNull == null) return BackupResult.Refused(trf("That backup is damaged (“{0}” has an unreadable Savings figure). Nothing was changed.", name)) }
             // Repairs, not rejections: an unknown theme, mode or density is a cosmetic.
             val repaired = repairSettings(po)
             val bp = runCatching {
@@ -131,10 +133,10 @@ object Backup {
                 }
             }.getOrElse {
                 println("Sci-Fin: backup profile “$name” refused: ${it.message}")   // the reason stays in the log, not on screen
-                return BackupResult.Refused("That backup is damaged (“$name” could not be read). Nothing was changed.")
+                return BackupResult.Refused(trf("That backup is damaged (“{0}” could not be read). Nothing was changed.", name))
             }
             profiles.add(ProfileData(
-                profile = Profile(id, name.trim().ifEmpty { "Profile" }),
+                profile = Profile(id, name.trim().ifEmpty { tr("Profile") }),
                 savings = Savings(id, bp.savings),
                 settings = bp.settings.copy(profileId = id),
                 importState = bp.importState.copy(profileId = id),

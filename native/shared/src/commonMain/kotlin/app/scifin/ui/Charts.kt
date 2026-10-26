@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
+import app.scifin.i18n.tr
 
 /*
  * §5's charts, drawn on Canvas: no chart library is in the offline cache, and the prototype's
@@ -81,7 +82,7 @@ fun TwoBarColumns(months: List<Triple<String, Long, Long>>) {
         }
     }
     Row(Modifier.padding(top = t.spacing.u * 1.25f, start = t.spacing.u * 0.25f), horizontalArrangement = Arrangement.spacedBy(t.spacing.u * 2)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.u * 0.75f)) { Box(Modifier.size(t.spacing.u * 1.25f).background(p.acc, RoundedCornerShape(t.radii.micro))); Text("Income", color = p.txt, fontSize = t.type.body) }
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.u * 0.75f)) { Box(Modifier.size(t.spacing.u * 1.25f).background(p.acc.copy(alpha = 0.4f), RoundedCornerShape(t.radii.micro))); Text("Expenses", color = p.txt, fontSize = t.type.body) }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.u * 0.75f)) { Box(Modifier.size(t.spacing.u * 1.25f).background(p.acc, RoundedCornerShape(t.radii.micro))); Text(tr("Income"), color = p.txt, fontSize = t.type.body) }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.u * 0.75f)) { Box(Modifier.size(t.spacing.u * 1.25f).background(p.acc.copy(alpha = 0.4f), RoundedCornerShape(t.radii.micro))); Text(tr("Expenses"), color = p.txt, fontSize = t.type.body) }
     }
 }

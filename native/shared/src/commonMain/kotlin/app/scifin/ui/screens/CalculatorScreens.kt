@@ -1,5 +1,8 @@
 package app.scifin.ui.screens
 
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
+import app.scifin.i18n.trp
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -94,33 +97,33 @@ fun LoanCalcScreen(state: UiState, store: AppStore) {
     val m = Accounts.loanMath(draft.principal, draft.rate, draft.termMonths, draft.rateType)
     val saved = m.monthly * m.months
     Page(null) {
-        TopRow("Loan", onBack = { store.back() })
-        FieldGroup { FieldLabel("Amount borrowed"); TextField(principalText, { v -> principalText = v; parseMoney(v)?.let { draft = draft.copy(principal = it) } }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = "Amount borrowed") }
-        FieldGroup { FieldLabel("Interest rate"); TextField(loanRateText, { v -> loanRateText = v; parseRate(v)?.let { draft = draft.copy(rate = it) } }, prefix = "%", keyboard = KeyboardType.Decimal, label = "Interest rate") }
-        FieldGroup { FieldLabel("Term (months)"); TextField(termText, { v -> termText = v; v.trim().toIntOrNull()?.takeIf { it >= 1 }?.let { draft = draft.copy(termMonths = it) } }, prefix = "#", keyboard = KeyboardType.Number, label = "Term (months)") }
-        FieldGroup { FieldLabel("Rate type"); ChipRow(RateType.entries.map { it.token to rateTypeLabel(it) }, draft.rateType.token) { v -> draft = draft.copy(rateType = RateType.of(v)) } }
+        TopRow(tr("Loan"), onBack = { store.back() })
+        FieldGroup { FieldLabel(tr("Amount borrowed")); TextField(principalText, { v -> principalText = v; parseMoney(v)?.let { draft = draft.copy(principal = it) } }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = tr("Amount borrowed")) }
+        FieldGroup { FieldLabel(tr("Interest rate")); TextField(loanRateText, { v -> loanRateText = v; parseRate(v)?.let { draft = draft.copy(rate = it) } }, prefix = "%", keyboard = KeyboardType.Decimal, label = tr("Interest rate")) }
+        FieldGroup { FieldLabel(tr("Term (months)")); TextField(termText, { v -> termText = v; v.trim().toIntOrNull()?.takeIf { it >= 1 }?.let { draft = draft.copy(termMonths = it) } }, prefix = "#", keyboard = KeyboardType.Number, label = tr("Term (months)")) }
+        FieldGroup { FieldLabel(tr("Rate type")); ChipRow(RateType.entries.map { it.token to rateTypeLabel(it) }, draft.rateType.token) { v -> draft = draft.copy(rateType = RateType.of(v)) } }
         when (draft.rateType) {
-            RateType.VARIABLE -> FeasibilityNote("The app can’t know future rate resets, so the payment it carries is the one as of today. Update the recurring expense when a reset happens — it will settle the difference for you.")
-            RateType.INTEREST_ONLY -> FeasibilityNote("Interest-only: the payment covers interest and nothing else, so the whole principal is still owed at the end of the period.")
+            RateType.VARIABLE -> FeasibilityNote(tr("The app can’t know future rate resets, so the payment it carries is the one as of today. Update the recurring expense when a reset happens — it will settle the difference for you."))
+            RateType.INTEREST_ONLY -> FeasibilityNote(tr("Interest-only: the payment covers interest and nothing else, so the whole principal is still owed at the end of the period."))
             RateType.FIXED -> Unit
         }
-        SectionLabel("If you finance it")
+        SectionLabel(tr("If you finance it"))
         CardBox {
-            Figure("Every month", formatMoney(m.monthly, cur), "for ${m.months} month${if (m.months == 1) "" else "s"}")
-            Figure("Interest paid", formatMoney(m.totalInterest, cur), "on top of what you borrowed")
-            Figure("Total repaid", formatMoney(m.totalRepaid, cur), if (m.principalRemaining > 0) "plus ${formatMoney(m.principalRemaining, cur)} of principal still owed at the end" else "over the whole term")
+            Figure(tr("Every month"), formatMoney(m.monthly, cur), trp("for {0} month", "for {0} months", m.months))
+            Figure(tr("Interest paid"), formatMoney(m.totalInterest, cur), tr("on top of what you borrowed"))
+            Figure(tr("Total repaid"), formatMoney(m.totalRepaid, cur), if (m.principalRemaining > 0) trf("plus {0} of principal still owed at the end", formatMoney(m.principalRemaining, cur)) else tr("over the whole term"))
         }
-        SectionLabel("If you save the same amount instead")
+        SectionLabel(tr("If you save the same amount instead"))
         CardBox {
-            Figure("Put aside each month", formatMoney(m.monthly, cur), "for the same ${m.months} month${if (m.months == 1) "" else "s"}")
-            Figure("You would have", formatMoney(saved, cur), "no interest assumed — this app doesn’t model a return on Savings")
+            Figure(tr("Put aside each month"), formatMoney(m.monthly, cur), trp("for the same {0} month", "for the same {0} months", m.months))
+            Figure(tr("You would have"), formatMoney(saved, cur), tr("no interest assumed — this app doesn’t model a return on Savings"))
         }
-        Button("Save for it", modifier = Modifier.fillMaxWidth().padding(top = t.spacing.gap)) { store.openSheet(Sheet.LoanSave(draft)) }
+        Button(tr("Save for it"), modifier = Modifier.fillMaxWidth().padding(top = t.spacing.gap)) { store.openSheet(Sheet.LoanSave(draft)) }
         Row(Modifier.fillMaxWidth().padding(top = t.spacing.u * 0.75f), horizontalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
-            Button("Get loan", ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { store.openSheet(Sheet.LoanBorrow(draft)) }
-            Button("Reset", ButtonKind.GHOST) { draft = LoanDraft(); principalText = moneyText(draft.principal); loanRateText = rateText(draft.rate, 1); termText = draft.termMonths.toString() }
+            Button(tr("Get loan"), ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { store.openSheet(Sheet.LoanBorrow(draft)) }
+            Button(tr("Reset"), ButtonKind.GHOST) { draft = LoanDraft(); principalText = moneyText(draft.principal); loanRateText = rateText(draft.rate, 1); termText = draft.termMonths.toString() }
         }
-        InfoNote("Exploring costs nothing and creates nothing. “Get loan” creates a real loan account and its payment together, in one step; “Save for it” creates a goal. Either way you confirm first.", Modifier.padding(top = t.spacing.gap))
+        InfoNote(tr("Exploring costs nothing and creates nothing. “Get loan” creates a real loan account and its payment together, in one step; “Save for it” creates a goal. Either way you confirm first."), Modifier.padding(top = t.spacing.gap))
     }
 }
 
@@ -130,13 +133,13 @@ fun LoanSaveSheet(sheet: Sheet.LoanSave, state: UiState, store: AppStore) {
     val d = state.data ?: return
     val cur = d.settings.currency
     val m = Accounts.loanMath(sheet.draft.principal, sheet.draft.rate, sheet.draft.termMonths, sheet.draft.rateType)
-    var name by rememberSaveable(sheet) { mutableStateOf("Savings goal") }
-    SheetScaffold(title = "Save for it instead", onDismiss = store::closeSheet) {
-        FieldGroup { FieldLabel("Name this goal"); TextField(name, { name = it }, label = "Name this goal") }
-        FeasibilityNote("${formatMoney(m.monthly, cur)} a month toward ${formatMoney(sheet.draft.principal, cur)}, over ${m.months} month${if (m.months == 1) "" else "s"}.", Modifier.padding(bottom = t.spacing.gap))
+    var name by rememberSaveable(sheet) { mutableStateOf(tr("Savings goal")) }
+    SheetScaffold(title = tr("Save for it instead"), onDismiss = store::closeSheet) {
+        FieldGroup { FieldLabel(tr("Name this goal")); TextField(name, { name = it }, label = tr("Name this goal")) }
+        FeasibilityNote(trp("{1} a month toward {2}, over {0} month.", "{1} a month toward {2}, over {0} months.", m.months, formatMoney(m.monthly, cur), formatMoney(sheet.draft.principal, cur)), Modifier.padding(bottom = t.spacing.gap))
         ButtonRow {
-            Button("Cancel", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.closeSheet() }
-            Button("Create the goal", modifier = Modifier.weight(1f)) { store.loanSaveForIt(sheet.draft, name) }
+            Button(tr("Cancel"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.closeSheet() }
+            Button(tr("Create the goal"), modifier = Modifier.weight(1f)) { store.loanSaveForIt(sheet.draft, name) }
         }
     }
 }
@@ -148,18 +151,18 @@ fun LoanBorrowSheet(sheet: Sheet.LoanBorrow, state: UiState, store: AppStore) {
     val cur = d.settings.currency
     val today = store.clock.today()
     val m = Accounts.loanMath(sheet.draft.principal, sheet.draft.rate, sheet.draft.termMonths, sheet.draft.rateType)
-    var acctName by rememberSaveable(sheet) { mutableStateOf("Loan") }
-    var expName by rememberSaveable(sheet) { mutableStateOf("Loan payment") }
+    var acctName by rememberSaveable(sheet) { mutableStateOf(tr("Loan")) }
+    var expName by rememberSaveable(sheet) { mutableStateOf(tr("Loan payment")) }
     var autoUpdate by rememberSaveable(sheet) { mutableStateOf(true) }
     val firstDue = today.plusMonthsClamped(1); val endDue = today.plusMonthsClamped(m.months)
-    SheetScaffold(title = "Get this loan", onDismiss = store::closeSheet) {
-        FieldGroup { FieldLabel("Name the account"); TextField(acctName, { acctName = it }, label = "Name the account") }
-        FieldGroup { FieldLabel("Name the payment"); TextField(expName, { expName = it }, label = "Name the payment") }
-        SettingRow(Lucide.REPEAT, "Auto-update the balance", "Splits interest from principal each cycle") { Switch(autoUpdate) { autoUpdate = !autoUpdate } }
-        FeasibilityNote("Creates both together: a ${formatMoney(sheet.draft.principal, cur)} loan account and a ${formatMoney(m.monthly, cur)} monthly payment. Real loans pay in arrears, so the first payment is ${formatDate(firstDue)} — a month from today — and the last is ${formatDateFull(endDue)}. Nothing leaves Savings now.", Modifier.padding(vertical = t.spacing.gap))
+    SheetScaffold(title = tr("Get this loan"), onDismiss = store::closeSheet) {
+        FieldGroup { FieldLabel(tr("Name the account")); TextField(acctName, { acctName = it }, label = tr("Name the account")) }
+        FieldGroup { FieldLabel(tr("Name the payment")); TextField(expName, { expName = it }, label = tr("Name the payment")) }
+        SettingRow(Lucide.REPEAT, tr("Auto-update the balance"), tr("Splits interest from principal each cycle")) { Switch(autoUpdate) { autoUpdate = !autoUpdate } }
+        FeasibilityNote(trf("Creates both together: a {0} loan account and a {1} monthly payment. Real loans pay in arrears, so the first payment is {2} — a month from today — and the last is {3}. Nothing leaves Savings now.", formatMoney(sheet.draft.principal, cur), formatMoney(m.monthly, cur), formatDate(firstDue), formatDateFull(endDue)), Modifier.padding(vertical = t.spacing.gap))
         ButtonRow {
-            Button("Cancel", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.closeSheet() }
-            Button("Create both", modifier = Modifier.weight(1f)) { store.loanGetLoan(sheet.draft, acctName, expName, autoUpdate) }
+            Button(tr("Cancel"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.closeSheet() }
+            Button(tr("Create both"), modifier = Modifier.weight(1f)) { store.loanGetLoan(sheet.draft, acctName, expName, autoUpdate) }
         }
     }
 }
@@ -182,30 +185,30 @@ fun PurchaseCalcScreen(state: UiState, store: AppStore) {
     val res = if (amount > 0 && pay != null) Accounts.payoffAtFixedPayment(amount, i, pay) else null
     val cards = d.accounts.filter { it.type == AccountType.CREDIT }
     Page(null) {
-        TopRow("Putting it on a card", onBack = { store.back() })
-        FieldGroup { FieldLabel("What it costs"); TextField(amountText, { amountText = it }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = "What it costs") }
-        FieldGroup { FieldLabel("Card’s interest rate (APR)"); TextField(aprText, { aprText = it }, prefix = "%", keyboard = KeyboardType.Decimal, label = "Card’s interest rate (APR)") }
-        FieldGroup { FieldLabel("What you’d pay each month"); TextField(monthlyText, { monthlyText = it }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = "What you’d pay each month") }
-        SectionLabel("If you wait and pay cash")
+        TopRow(tr("Putting it on a card"), onBack = { store.back() })
+        FieldGroup { FieldLabel(tr("What it costs")); TextField(amountText, { amountText = it }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = tr("What it costs")) }
+        FieldGroup { FieldLabel(tr("Card’s interest rate (APR)")); TextField(aprText, { aprText = it }, prefix = "%", keyboard = KeyboardType.Decimal, label = tr("Card’s interest rate (APR)")) }
+        FieldGroup { FieldLabel(tr("What you’d pay each month")); TextField(monthlyText, { monthlyText = it }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = tr("What you’d pay each month")) }
+        SectionLabel(tr("If you wait and pay cash"))
         CardBox(accent = true) {
-            Figure("Ready in", monthsToSave?.let { monthsLabel(it) } ?: "—", pay?.let { "putting ${formatMoney(it, cur)} aside each month" })
-            Figure("Interest paid", formatMoney(0, cur), "nothing is financed, so nothing accrues")
+            Figure(tr("Ready in"), monthsToSave?.let { monthsLabel(it) } ?: "—", pay?.let { trf("putting {0} aside each month", formatMoney(it, cur)) })
+            Figure(tr("Interest paid"), formatMoney(0, cur), tr("nothing is financed, so nothing accrues"))
         }
-        SectionLabel("If you put it on the card")
+        SectionLabel(tr("If you put it on the card"))
         CardBox {
-            Figure("Cleared in", res?.let { monthsLabel(it.months) } ?: "—", pay?.let { "paying ${formatMoney(it, cur)} each month" })
-            Figure("Interest paid", res?.interest?.let { formatMoney(it, cur) } ?: "—", when {
+            Figure(tr("Cleared in"), res?.let { monthsLabel(it.months) } ?: "—", pay?.let { trf("paying {0} each month", formatMoney(it, cur)) })
+            Figure(tr("Interest paid"), res?.interest?.let { formatMoney(it, cur) } ?: "—", when {
                 res == null -> null
-                res.months == null -> "At that payment the balance never falls — interest outruns it."
-                else -> "${formatMoney(amount + (res.interest ?: 0), cur)} in total"
+                res.months == null -> tr("At that payment the balance never falls — interest outruns it.")
+                else -> trf("{0} in total", formatMoney(amount + (res.interest ?: 0), cur))
             })
         }
         if (cards.isNotEmpty()) {
-            SectionLabel("Act on it")
+            SectionLabel(tr("Act on it"))
             ChipRow(cards.map { it.id to it.name }, acctId ?: "") { acctId = it }
-            Button("Open this card’s payoff outlook", ButtonKind.SECONDARY, enabled = acctId != null, modifier = Modifier.fillMaxWidth().padding(top = t.spacing.u * 0.75f)) { acctId?.let { store.push(Route.AccountDetail(it)) } }
+            Button(tr("Open this card’s payoff outlook"), ButtonKind.SECONDARY, enabled = acctId != null, modifier = Modifier.fillMaxWidth().padding(top = t.spacing.u * 0.75f)) { acctId?.let { store.push(Route.AccountDetail(it)) } }
         }
-        InfoNote("This screen changes nothing on its own — no balance moves and nothing is created. To commit to a payment, go to the card itself, where the balance and its payoff outlook live.", Modifier.padding(top = t.spacing.gap))
+        InfoNote(tr("This screen changes nothing on its own — no balance moves and nothing is created. To commit to a payment, go to the card itself, where the balance and its payoff outlook live."), Modifier.padding(top = t.spacing.gap))
     }
 }
 
@@ -227,28 +230,28 @@ fun TimeWorthCalcScreen(state: UiState, store: AppStore) {
     val rate = parseMoney(rateText) ?: prefill ?: 0L
     val (month, year) = TimeWorth.worth(rate, hours)
     Page(null) {
-        TopRow("What your time is worth", onBack = { store.back() })
-        FieldGroup { FieldLabel("Extra hours in a typical month"); TextField(hoursText, { hoursText = it }, prefix = "#", keyboard = KeyboardType.Decimal, label = "Extra hours in a typical month") }
+        TopRow(tr("What your time is worth"), onBack = { store.back() })
+        FieldGroup { FieldLabel(tr("Extra hours in a typical month")); TextField(hoursText, { hoursText = it }, prefix = "#", keyboard = KeyboardType.Decimal, label = tr("Extra hours in a typical month")) }
         if (TimeWorth.monthlyEquivalent(d.settings) != null) FieldGroup {
-            FieldLabel("Hours you’d normally expect in a month")
-            TextField(expectedText, { expectedText = it }, prefix = "#", keyboard = KeyboardType.Decimal, label = "Hours you’d normally expect in a month")
-            Caption("Only used to work out a starting rate from what you told the app you earn. Change the rate directly below if you’d rather.", Modifier.padding(top = t.spacing.u * 0.75f))
+            FieldLabel(tr("Hours you’d normally expect in a month"))
+            TextField(expectedText, { expectedText = it }, prefix = "#", keyboard = KeyboardType.Decimal, label = tr("Hours you’d normally expect in a month"))
+            Caption(tr("Only used to work out a starting rate from what you told the app you earn. Change the rate directly below if you’d rather."), Modifier.padding(top = t.spacing.u * 0.75f))
         }
         FieldGroup {
-            FieldLabel("What an hour of your time is worth")
-            TextField(rateText, { rateText = it }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = "What an hour of your time is worth", placeholder = prefill?.let { moneyText(it) } ?: "e.g. 22.00")
+            FieldLabel(tr("What an hour of your time is worth"))
+            TextField(rateText, { rateText = it }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = tr("What an hour of your time is worth"), placeholder = prefill?.let { moneyText(it) } ?: tr("e.g. 22.00"))
             Caption(when {
-                prefill != null && Hourly.isHourly(d.settings) -> "Your hourly rate from Settings — a starting point, fully editable."
-                prefill != null -> "Worked out from your income and the hours above — a starting point, fully editable."
-                else -> "Your figure, entered directly. The app doesn’t need Income switched on for this."
+                prefill != null && Hourly.isHourly(d.settings) -> tr("Your hourly rate from Settings — a starting point, fully editable.")
+                prefill != null -> tr("Worked out from your income and the hours above — a starting point, fully editable.")
+                else -> tr("Your figure, entered directly. The app doesn’t need Income switched on for this.")
             }, Modifier.padding(top = t.spacing.u * 0.75f))
         }
-        SectionLabel("What those hours come to")
+        SectionLabel(tr("What those hours come to"))
         CardBox {
-            Figure("In a month", formatMoney(month, cur), "${hoursLabel(hours)} at ${formatMoney(rate, cur)}")
-            Figure("Over a year", formatMoney(year, cur), "at the same rate and the same hours")
+            Figure(tr("In a month"), formatMoney(month, cur), trf("{0} at {1}", hoursLabel(hours), formatMoney(rate, cur)))
+            Figure(tr("Over a year"), formatMoney(year, cur), tr("at the same rate and the same hours"))
         }
-        InfoNote("This is a reflection, not a claim. It changes nothing in the app, creates nothing, and isn’t a statement about what you’re owed — what asking costs isn’t the same for everyone.", Modifier.padding(top = t.spacing.gap))
+        InfoNote(tr("This is a reflection, not a claim. It changes nothing in the app, creates nothing, and isn’t a statement about what you’re owed — what asking costs isn’t the same for everyone."), Modifier.padding(top = t.spacing.gap))
     }
 }
 
@@ -257,5 +260,5 @@ private fun parseHours(v: String): Double? = v.trim().replace(',', '.').toDouble
 
 private fun hoursLabel(h: Double): String {
     val n = if (h % 1.0 == 0.0) h.toLong().toString() else h.toString()
-    return "$n hour${if (h == 1.0) "" else "s"}"
+    return if (h == 1.0) trf("{0} hour", n) else trf("{0} hours", n)
 }

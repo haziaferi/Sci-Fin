@@ -60,6 +60,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.plus
 import kotlin.coroutines.cancellation.CancellationException
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
 
 /** §4.3: the count and the two totals of a confirmed import. */
 data class ImportDone(val count: Int, val out: Money, val inn: Money)
@@ -149,8 +151,8 @@ private fun CopySchedule.summary(pinOn: Boolean) = CopySummary(
 /** What a call with nothing to do returns, so a caller may still join it. */
 private val DONE: Job = Job().apply { complete() }
 
-private const val READ_FAILED = "Could not read that file. It may have moved, or the app may no longer have access to it."
-private const val NOT_A_STATEMENT = "That file doesn’t look like a bank statement the app can read (CSV or OFX). Nothing was imported."
+private val READ_FAILED: String get() = tr("Could not read that file. It may have moved, or the app may no longer have access to it.")
+private val NOT_A_STATEMENT: String get() = tr("That file doesn’t look like a bank statement the app can read (CSV or OFX). Nothing was imported.")
 
 /** §4.3: a statement parsed and annotated, under review. */
 data class ImportReview(val fileName: String, val format: String, val rows: List<ReviewRow>)
@@ -543,7 +545,7 @@ class AppStore(
 
     fun deletePair(id: String, otherId: String): Job {
         val a = _state.value.data?.transactions?.firstOrNull { it.id == id }
-        val name = a?.let { "${it.targetLabel.ifEmpty { "Savings" }}, two entries that cancel out" } ?: "Two entries that cancel out"
+        val name = a?.let { trf("{0}, two entries that cancel out", tr(it.targetLabel.ifEmpty { "Savings" })) } ?: tr("Two entries that cancel out")
         val job = toTrash("pair", name) { Trash.deletePair(it, id, otherId) }
         closeSheet()
         return job
@@ -559,7 +561,7 @@ class AppStore(
         val isOfx = Regex("<STMTTRN>", RegexOption.IGNORE_CASE).containsMatchIn(picked.text) || Regex("\\.(ofx|qfx)$", RegexOption.IGNORE_CASE).containsMatchIn(picked.name)
         val rows = attempt(::importFailed, NOT_A_STATEMENT) { if (isOfx) Import.parseOFX(picked.text) else Import.parseCSV(picked.text) } ?: return@launch
         if (rows.isEmpty()) {
-            _state.update { it.copy(importReview = null, importError = if (isOfx) "No transactions found in that OFX file." else "That file doesn’t look like a bank statement the app can read: a CSV needs a header row naming at least a date column and an amount (or separate debit and credit columns). Nothing was imported.") }
+            _state.update { it.copy(importReview = null, importError = if (isOfx) tr("No transactions found in that OFX file.") else tr("That file doesn’t look like a bank statement the app can read: a CSV needs a header row naming at least a date column and an amount (or separate debit and credit columns). Nothing was imported.")) }
             return@launch
         }
         val review = Import.annotate(d, rows).sortedByDescending { it.row.date }
@@ -656,7 +658,7 @@ class AppStore(
 
     /** Export with the copies' password and hint (owner, 2026-10-20: offered first, "a different password" possible). */
     fun exportWithCopiesPassword(): Job = scope.launch {
-        val unreadable = "The copies’ password can’t be read on this device any more. Choose a different password for this file."
+        val unreadable = tr("The copies’ password can’t be read on this device any more. Choose a different password for this file.")
         val c = db.dao().copySchedule()
         val password = c?.sealedPassword?.let { session.place.unseal(it) }
         if (c == null || password == null) { _state.update { it.copy(backupError = unreadable) }; return@launch }
@@ -673,7 +675,7 @@ class AppStore(
             val today = clock.today()
             val plain = Backup.encode(Backup.build(all, app.activeProfileId, today))
             val text = if (password == null) plain else withContext(hashing) { BackupCrypto.encrypt(plain, password, hint, today.toString()) }
-            if (attempt(::backupFailed, "Could not save the backup there. Try another place.") { inDialog { files.save("sci-fin-backup-$today.json", text) } } == true) {
+            if (attempt(::backupFailed, tr("Could not save the backup there. Try another place.")) { inDialog { files.save("sci-fin-backup-$today.json", text) } } == true) {
                 dao.upsertAppState(app.copy(lastBackupExportDate = today))
                 _state.update { it.copy(appState = dao.appState(), backupError = null) }
             }
@@ -724,7 +726,7 @@ class AppStore(
             // state and is never re-onboarded.
             val fromOnboarding = (_state.value.route as? Route.Onboarding)?.step == 1
             // one transaction: a failure leaves the device as it was, and says so
-            attempt(::backupFailed, "The restore did not finish, so nothing on this device was changed.") { Backup.apply(db, b, clock.today()) } ?: return@withLock
+            attempt(::backupFailed, tr("The restore did not finish, so nothing on this device was changed.")) { Backup.apply(db, b, clock.today()) } ?: return@withLock
             val routes = if (fromOnboarding) listOf(Route.TabRoute(Tab.BUDGET))
             else listOf(Route.TabRoute(Tab.SETTINGS), Route.Settings(SettingsPage.BACKUP))
             damage.clear()
@@ -837,7 +839,7 @@ class AppStore(
      */
     fun setCopyEvery(every: CopyEvery): Job = scope.launch {
         if (every != CopyEvery.OFF && db.dao().copySchedule()?.folder == null) {
-            val f = attempt(::backupFailed, "That folder can’t be used. Try another.") { inDialog { files.pickFolder() } } ?: return@launch
+            val f = attempt(::backupFailed, tr("That folder can’t be used. Try another.")) { inDialog { files.pickFolder() } } ?: return@launch
             editCopy { it.copy(folder = f.id, folderLabel = f.label, lastError = null, failureNotified = false) }
         }
         editCopy { it.copy(every = every.token) }
@@ -846,7 +848,7 @@ class AppStore(
     }
 
     fun chooseCopyFolder(): Job = scope.launch {
-        val f = attempt(::backupFailed, "That folder can’t be used. Try another.") { inDialog { files.pickFolder() } } ?: return@launch
+        val f = attempt(::backupFailed, tr("That folder can’t be used. Try another.")) { inDialog { files.pickFolder() } } ?: return@launch
         editCopy { it.copy(folder = f.id, folderLabel = f.label, lastError = null, failureNotified = false) }
         refreshCopy()
     }
@@ -858,7 +860,7 @@ class AppStore(
     fun setCopyPassword(password: String, hint: String): Job = scope.launch {
         if (BackupCrypto.passwordProblem(password, password, hint) != null) return@launch
         val sealed = withContext(hashing) { session.place.seal(password) }
-        if (sealed == null) { _state.update { it.copy(backupError = "This device’s key store refused to keep the password, so the copies can’t use one here.") }; return@launch }
+        if (sealed == null) { _state.update { it.copy(backupError = tr("This device’s key store refused to keep the password, so the copies can’t use one here.")) }; return@launch }
         editCopy { it.copy(sealedPassword = sealed, hint = hint.trim()) }
         _state.update { it.copy(copyPasswordAsked = false) }
         refreshCopy()

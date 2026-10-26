@@ -22,6 +22,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import app.scifin.ui.LocalTokens
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
 
 /**
  * §3.6's and §3.11's delete prompt when there is money to add back: the
@@ -57,15 +59,15 @@ fun DeleteWithReturnSheet(
         if (trash && pending == null) Caption(TRASH_LINE, Modifier.padding(bottom = t.spacing.pad))
         if (pending == null) {
             // three actions do not share one row at phone width, so the accepting one takes its own line
-            if (hasReturn) Button("Delete and add back", modifier = Modifier.fillMaxWidth().padding(bottom = t.spacing.gap)) { pending = true }
+            if (hasReturn) Button(tr("Delete and add back"), modifier = Modifier.fillMaxWidth().padding(bottom = t.spacing.gap)) { pending = true }
             ButtonRow {
-                Button("Cancel", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { onDismiss() }
-                if (hasReturn) Button("Delete only", ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { pending = false }
-                else Button("Delete", ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { onDelete(false) }
+                Button(tr("Cancel"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { onDismiss() }
+                if (hasReturn) Button(tr("Delete only"), ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { pending = false }
+                else Button(tr("Delete"), ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { onDelete(false) }
             }
         } else ButtonRow {
-            Button("Go back", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { pending = null }
-            Button("Delete", ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { onDelete(pending == true) }
+            Button(tr("Go back"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { pending = null }
+            Button(tr("Delete"), ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { onDelete(pending == true) }
         }
     }
 }
@@ -80,7 +82,7 @@ fun EditorDeleteButton(name: String, onClick: () -> Unit) {
         Modifier.heightIn(min = t.spacing.target)
             .border(t.strokes.ctl, p.txt2, RoundedCornerShape(t.radii.md))
             .clickable { onClick() }
-            .semantics { contentDescription = "Delete $name"; role = Role.Button }
+            .semantics { contentDescription = trf("Delete {0}", name); role = Role.Button }
             .padding(horizontal = t.spacing.u * 2, vertical = t.spacing.u * 1.5f),
         contentAlignment = Alignment.Center,
     ) { LucideIcon(Lucide.TRASH_2, tint = p.txt2, size = t.icons.md) }
@@ -91,10 +93,10 @@ fun EditorDeleteButton(name: String, onClick: () -> Unit) {
  * these are read. A delete goes to the Trash (owner, 2026-10-19/20); §7.2's retype removes a payment
  * without one, so it passes trash = false.
  */
-const val TRASH_LINE = "It waits in the Trash for 30 days: Settings › Trash puts it back."
+val TRASH_LINE: String get() = tr("It waits in the Trash for 30 days: Settings › Trash puts it back.")
 
 fun deleteOnlyCopy(name: String, trash: Boolean = true): String =
-    if (trash) "$name will go to the Trash for 30 days. Savings stays as it is." else "$name will be deleted. Savings stays as it is."
+    if (trash) trf("{0} will go to the Trash for 30 days. Savings stays as it is.", name) else trf("{0} will be deleted. Savings stays as it is.", name)
 fun deleteAddBackCopy(amount: String, name: String, trash: Boolean = true): String =
-    if (trash) "$amount will go back to Savings and $name will go to the Trash for 30 days. Restoring it takes the $amount back out. Its past history stays in the log."
-    else "$amount will go back to Savings and $name will be deleted. Its past history stays in the log."
+    if (trash) trf("{0} will go back to Savings and {1} will go to the Trash for 30 days. Restoring it takes the {0} back out. Its past history stays in the log.", amount, name)
+    else trf("{0} will go back to Savings and {1} will be deleted. Its past history stays in the log.", amount, name)

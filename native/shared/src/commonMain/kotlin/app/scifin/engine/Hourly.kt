@@ -1,5 +1,6 @@
 package app.scifin.engine
 
+import app.scifin.i18n.stored
 import app.scifin.model.IncomeType
 import app.scifin.model.Money
 import app.scifin.model.ProfileData
@@ -26,7 +27,7 @@ object Hourly {
     /** Paydays averaged for the learned estimate (owner, 2026-10-26). */
     const val ESTIMATE_PAYDAYS = 3
     /** The payee of a confirmed hourly payday, so the log reads as what it was. */
-    const val PAYDAY_PAYEE = "Payday"
+    val PAYDAY_PAYEE = stored("Payday")
 
     fun isHourly(s: Settings): Boolean = s.incomeEnabled && s.incomeType == IncomeType.HOURLY
 

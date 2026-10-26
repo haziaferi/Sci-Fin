@@ -11,6 +11,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import app.scifin.app.AppStore
 import app.scifin.engine.Writes
 import app.scifin.engine.savingsAmount
+import app.scifin.i18n.typedWordMatches
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
 import app.scifin.model.ProfileData
 import app.scifin.ui.LocalTokens
 import app.scifin.ui.components.Button
@@ -40,23 +43,24 @@ fun SavingsEditorSheet(d: ProfileData, store: AppStore) {
     var typed by remember { mutableStateOf("") }
     val parsed = parseMoney(value)
     val delta = parsed?.let { it - d.savingsAmount }
-    val ready = typed.trim().uppercase() == "UPDATE" && parsed != null
+    val word = tr("UPDATE")   // the word to type, in the reader's language; the prompt names the same word
+    val ready = typedWordMatches(typed, "UPDATE") && parsed != null
 
-    SheetScaffold(title = "Savings", onDismiss = store::closeSheet) {
-        InfoNote("This sets the figure directly. Recording something that happened is what the + buttons are for — this is for corrections.", Modifier.padding(bottom = t.spacing.gap * 1.2f))
-        FieldGroup { FieldLabel("Savings amount"); TextField(value, { value = it }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = "Savings amount") }
+    SheetScaffold(title = tr("Savings"), onDismiss = store::closeSheet) {
+        InfoNote(tr("This sets the figure directly. Recording something that happened is what the + buttons are for — this is for corrections."), Modifier.padding(bottom = t.spacing.gap * 1.2f))
+        FieldGroup { FieldLabel(tr("Savings amount")); TextField(value, { value = it }, prefix = currencySymbol(cur), keyboard = KeyboardType.Decimal, label = tr("Savings amount")) }
         Caption(
             when {
-                delta == null -> "Enter the amount."
-                delta == 0L -> "No change yet."
-                else -> "Logs a ${if (delta > 0) "+" else "−"}${formatMoney(if (delta < 0) -delta else delta, cur)} correction — the signed difference, never the new total."
+                delta == null -> tr("Enter the amount.")
+                delta == 0L -> tr("No change yet.")
+                else -> trf("Logs a {0}{1} correction — the signed difference, never the new total.", if (delta > 0) "+" else "−", formatMoney(if (delta < 0) -delta else delta, cur))
             },
             Modifier.padding(start = t.spacing.u * 0.25f, bottom = t.spacing.u * 1.25f),
         )
-        FieldGroup { FieldLabel("Type UPDATE to confirm"); TextField(typed, { typed = it }, placeholder = "UPDATE", label = "Type UPDATE to confirm") }
+        FieldGroup { FieldLabel(trf("Type {0} to confirm", word)); TextField(typed, { typed = it }, placeholder = word, label = trf("Type {0} to confirm", word)) }
         ButtonRow {
-            Button("Cancel", ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.closeSheet() }
-            Button("Save", if (ready) ButtonKind.PRIMARY else ButtonKind.SECONDARY, enabled = ready, modifier = Modifier.weight(1f)) {
+            Button(tr("Cancel"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { store.closeSheet() }
+            Button(tr("Save"), if (ready) ButtonKind.PRIMARY else ButtonKind.SECONDARY, enabled = ready, modifier = Modifier.weight(1f)) {
                 val v = parsed ?: return@Button
                 store.dispatch { p -> Writes.savingsDirectEdit(p, v, null, store.clock, store.newId()) }
                 store.closeSheet()

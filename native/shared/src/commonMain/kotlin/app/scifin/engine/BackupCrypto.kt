@@ -1,5 +1,7 @@
 package app.scifin.engine
 
+import app.scifin.i18n.tr
+import app.scifin.i18n.trf
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -45,9 +47,9 @@ object BackupCrypto {
      * hint -- required for a file (owner, 2026-10-20), and never the password itself ([hintProblem]).
      */
     fun passwordProblem(password: String, again: String, hint: String): String? = when {
-        password.length < MIN_PASSWORD -> "At least $MIN_PASSWORD characters."
-        again != password -> if (again.isEmpty()) "Type the password again." else "The two don’t match yet."
-        hint.isBlank() -> "A hint is needed: it is the one thing that can help you remember this password."
+        password.length < MIN_PASSWORD -> trf("At least {0} characters.", MIN_PASSWORD)
+        again != password -> if (again.isEmpty()) tr("Type the password again.") else tr("The two don’t match yet.")
+        hint.isBlank() -> tr("A hint is needed: it is the one thing that can help you remember this password.")
         else -> hintProblem(password, hint, "password")
     }
 
@@ -80,12 +82,12 @@ object BackupCrypto {
 
     fun decrypt(text: String, password: String): Opened {
         val f = runCatching { json.decodeFromJsonElement(EncryptedBackupFile.serializer(), json.parseToJsonElement(text) as JsonObject) }.getOrNull()
-            ?: return Opened.Refused("That backup is damaged and can’t be opened. Nothing was changed.")
-        if (f.app != "sci-fin") return Opened.Refused("That file is not a Sci-Fin backup.")
-        if (f.encrypted != 1 || f.kdf != "PBKDF2-HMAC-SHA256") return Opened.Refused("That backup was made by a newer version of the app. Nothing was changed.")
-        if (f.iterations !in ACCEPTED_ITERATIONS) return Opened.Refused("That backup is damaged and can’t be opened. Nothing was changed.")
+            ?: return Opened.Refused(tr("That backup is damaged and can’t be opened. Nothing was changed."))
+        if (f.app != "sci-fin") return Opened.Refused(tr("That file is not a Sci-Fin backup."))
+        if (f.encrypted != 1 || f.kdf != "PBKDF2-HMAC-SHA256") return Opened.Refused(tr("That backup was made by a newer version of the app. Nothing was changed."))
+        if (f.iterations !in ACCEPTED_ITERATIONS) return Opened.Refused(tr("That backup is damaged and can’t be opened. Nothing was changed."))
         val parts = runCatching { Triple(Base64.decode(f.salt), Base64.decode(f.iv), Base64.decode(f.data)) }.getOrNull()
-            ?: return Opened.Refused("That backup is damaged and can’t be opened. Nothing was changed.")
+            ?: return Opened.Refused(tr("That backup is damaged and can’t be opened. Nothing was changed."))
         val key = pbkdf2Bytes(password, parts.first, f.iterations)
         // GCM cannot tell a wrong password from an altered file: both fail the tag
         val plain = aesGcmDecrypt(key, parts.second, parts.third, aad(f.exportedAt, f.hint, f.iterations)) ?: return Opened.WrongPassword
