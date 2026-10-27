@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -73,24 +74,29 @@ fun TourSlideshow(slide: Int, state: UiState, store: AppStore) {
     val last = slide == TOUR_SLIDES.lastIndex
     // the ground takes every tap that misses the slide's controls, so nothing beneath is reached
     Box(Modifier.fillMaxSize().background(p.bg).clickable(enabled = false) {}, contentAlignment = Alignment.TopCenter) {
-        Column(Modifier.widthIn(max = t.measure).fillMaxWidth().verticalScroll(rememberScrollState()).padding(t.spacing.pad)) {
-            Text(trf("{0} OF {1}", slide + 1, TOUR_SLIDES.size), color = p.txt2, fontSize = t.type.caption, fontWeight = FontWeight.Bold, letterSpacing = t.type.caption * 0.05, modifier = Modifier.padding(bottom = t.spacing.gap))
-            for ((k, i) in group.withIndex()) key(i) {
-                val stop = TUTORIAL_STOPS[i]
-                Column(if (k > 0) Modifier.padding(top = t.spacing.u * 2.5f) else Modifier) {
-                    Text(stop.place, color = p.acc, fontSize = t.type.caption, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = t.spacing.u * 0.75f))
-                    // one stop gets the slide's whole picture; a pair shares it
-                    Miniature(stop, state, store, maxHeight = if (group.size == 1) t.spacing.u * 41f else t.spacing.u * 21f)
-                    state.data?.let { stop.mock?.invoke(it) }?.let { m ->
-                        Row(Modifier.fillMaxWidth().padding(top = t.spacing.gap).background(p.surf2, RoundedCornerShape(t.radii.sm)).padding(horizontal = t.spacing.u * 1.25f, vertical = t.spacing.gap), horizontalArrangement = Arrangement.spacedBy(t.spacing.u / 2)) {
-                            Text(m, color = p.txt2, fontSize = t.type.caption); Text(tr("(illustrative)"), color = p.txt2.copy(alpha = 0.6f), fontSize = t.type.caption)
+        // the copy scrolls; the foot stays put, so Skip, the dots and Next sit at the same height on every slide
+        Column(Modifier.widthIn(max = t.measure).fillMaxWidth().fillMaxHeight()) {
+            Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(start = t.spacing.pad, end = t.spacing.pad, top = t.spacing.pad)) {
+                Text(trf("{0} OF {1}", slide + 1, TOUR_SLIDES.size), color = p.txt2, fontSize = t.type.caption, fontWeight = FontWeight.Bold, letterSpacing = t.type.caption * 0.05, modifier = Modifier.padding(bottom = t.spacing.gap))
+                for ((k, i) in group.withIndex()) key(i) {
+                    val stop = TUTORIAL_STOPS[i]
+                    Column(if (k > 0) Modifier.padding(top = t.spacing.u * 2.5f) else Modifier) {
+                        Text(stop.place, color = p.acc, fontSize = t.type.caption, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = t.spacing.u * 0.75f))
+                        // one stop gets the slide's whole picture; a pair shares it
+                        Miniature(stop, state, store, maxHeight = if (group.size == 1) t.spacing.u * 41f else t.spacing.u * 21f)
+                        state.data?.let { stop.mock?.invoke(it) }?.let { m ->
+                            Row(Modifier.fillMaxWidth().padding(top = t.spacing.gap).background(p.surf2, RoundedCornerShape(t.radii.sm)).padding(horizontal = t.spacing.u * 1.25f, vertical = t.spacing.gap), horizontalArrangement = Arrangement.spacedBy(t.spacing.u / 2)) {
+                                Text(m, color = p.txt2, fontSize = t.type.caption); Text(tr("(illustrative)"), color = p.txt2.copy(alpha = 0.6f), fontSize = t.type.caption)
+                            }
                         }
+                        for (line in stop.lines) Text(line, color = p.txt, fontSize = t.type.body, lineHeight = t.type.body * 1.5, modifier = Modifier.padding(top = t.spacing.u * 1.25f))
                     }
-                    for (line in stop.lines) Text(line, color = p.txt, fontSize = t.type.body, lineHeight = t.type.body * 1.5, modifier = Modifier.padding(top = t.spacing.u * 1.25f))
                 }
             }
-            Row(Modifier.fillMaxWidth().padding(top = t.spacing.u * 2.5f), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(tr("Skip"), color = p.txt2, fontSize = t.type.caption, fontWeight = FontWeight.Bold, modifier = Modifier.heightIn(min = t.spacing.target).clickable { store.tourFinish() }.semantics { role = Role.Button }.padding(vertical = t.spacing.u * 0.75f))
+            Row(Modifier.fillMaxWidth().padding(horizontal = t.spacing.pad).padding(top = t.spacing.u * 1.5f, bottom = t.spacing.pad), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.heightIn(min = t.spacing.target).clickable { store.tourFinish() }.semantics { role = Role.Button }, contentAlignment = Alignment.Center) {
+                    Text(tr("Skip"), color = p.txt2, fontSize = t.type.caption, fontWeight = FontWeight.Bold)
+                }
                 Row(horizontalArrangement = Arrangement.spacedBy(t.spacing.u * 0.75f), modifier = Modifier.clearAndSetSemantics {}) {
                     for (k in TOUR_SLIDES.indices) Box(Modifier.size(t.spacing.u * 0.75f).background(if (k == slide) p.acc else p.bordStrong, CircleShape))
                 }
