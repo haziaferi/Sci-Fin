@@ -172,7 +172,7 @@ class ScreenRenderTest {
         runBlocking { st.updateSettings { it.copy(lowDistraction = true) }.join() }
         render("budget-envelopes-low-distraction", st, h = 1400)
         assertTrue(!File(out, "budget-envelopes-icons.png").readBytes().contentEquals(File(out, "budget-envelopes-low-distraction.png").readBytes()), "the mode changed nothing")
-        st.selectTab(Tab.SETTINGS); st.startTutorial(fromOnboarding = false); repeat(8) { st.tutorialNext() }; render("tutorial-stop9", st)
+        st.selectTab(Tab.SETTINGS); st.showStop(8); render("tutorial-stop9", st)
     }
 
     @Test fun `Budget Categories over the fixture, the editor and its delete sheet`() {

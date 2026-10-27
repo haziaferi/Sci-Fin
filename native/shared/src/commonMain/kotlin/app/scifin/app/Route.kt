@@ -67,11 +67,11 @@ sealed interface Route {
 }
 
 enum class SettingsPage {
-    APPEARANCE, INCOME, NOTIFICATIONS, BACKUP, SECURITY, TRASH, PROFILES, REPLAY;
+    APPEARANCE, INCOME, NOTIFICATIONS, BACKUP, SECURITY, TRASH, PROFILES;
 
     val title: String get() = when (this) {
         APPEARANCE -> tr("Appearance"); INCOME -> tr("Income"); NOTIFICATIONS -> tr("Notifications"); BACKUP -> tr("Data & backup")
-        SECURITY -> tr("Security & lock"); TRASH -> tr("Trash"); PROFILES -> tr("Profiles"); REPLAY -> tr("The tour, condensed")
+        SECURITY -> tr("Security & lock"); TRASH -> tr("Trash"); PROFILES -> tr("Profiles")
     }
 }
 

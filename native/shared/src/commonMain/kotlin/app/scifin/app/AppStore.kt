@@ -99,9 +99,11 @@ data class UiState(
     val sheet: Sheet? = null,
     /** §11.1 screen 1's live preview: the theme under the sheet before any Profile holds it. */
     val previewTheme: Theme? = null,
-    /** §11.6: the stop the tour is on, or null when it is not running; and whether it is step 3 of onboarding. */
-    val tutorialStop: Int? = null,
+    /** §11.6: the slideshow's slide, or null when it is not showing; and whether it is step 3 of onboarding. */
+    val tourSlide: Int? = null,
     val tutorialFromOnboarding: Boolean = false,
+    /** §11.6: the one stop Settings' Tour index opened, as a window over the live screen; null when none is. */
+    val tutorialStop: Int? = null,
     /** §12: the store was unreadable and moved aside as this copy; the screen that says so is owed. */
     val damagedCopy: String? = null,
     /** The routes Settings was opened from, which Back returns to; null elsewhere. */
@@ -223,7 +225,7 @@ class AppStore(
                 },
             )
         }
-        if (resume == 3) startTutorial(fromOnboarding = true)
+        if (resume == 3) startTour(fromOnboarding = true)
         // §3.10: salaried without auto-deposit -- opening the app after a payday with nothing logged brings up the
         // Income entry, pre-filled, once per payday (owner, 2026-10-26)
         data?.takeIf { resume == null }?.let { d ->
@@ -292,7 +294,7 @@ class AppStore(
         val cur = _state.value.route as? Route.Onboarding ?: return DONE
         if (cur.step == 2) {
             val job = rememberOnboardingStep(3)
-            startTutorial(fromOnboarding = true)
+            startTour(fromOnboarding = true)
             return job
         }
         val job = rememberOnboardingStep(4)
@@ -317,39 +319,42 @@ class AppStore(
 
     // ---- §11.6 the tour --------------------------------------------------------------------------
 
-    /** Step 3, or a replay from Settings: the overlay over the live app, starting at stop 1's screen. */
-    fun startTutorial(fromOnboarding: Boolean) {
-        _state.update { it.copy(tutorialStop = 0, tutorialFromOnboarding = fromOnboarding, sheet = null) }
-        goToStop(0)
+    /** Step 3, or a replay from Settings' Tour index: the slideshow, from its first slide. */
+    fun startTour(fromOnboarding: Boolean) {
+        _state.update { it.copy(tourSlide = 0, tutorialFromOnboarding = fromOnboarding, tutorialStop = null, sheet = null) }
     }
 
-    private fun goToStop(i: Int) {
+    /** Next is the next slide; on the last one it is Done. */
+    fun tourNext() {
+        val i = _state.value.tourSlide ?: return
+        if (i >= TOUR_SLIDES.lastIndex) tourFinish() else _state.update { it.copy(tourSlide = i + 1) }
+    }
+
+    /** Skipping at any point and finishing every slide land on the same next step (§11.1's step 4); a replay returns to where it was opened. */
+    fun tourFinish(): Job {
+        if (_state.value.tourSlide == null) return DONE
+        val job = if (_state.value.tutorialFromOnboarding) rememberOnboardingStep(4) else DONE
+        _state.update { st ->
+            val routes = if (st.tutorialFromOnboarding) listOf(Route.TabRoute(Tab.BUDGET), Route.Onboarding(4)) else st.routes
+            st.copy(tourSlide = null, tutorialFromOnboarding = false, routes = routes, sheet = null)
+        }
+        return job
+    }
+
+    /** Settings' Tour index: the stop's own screen, with its window over the section it describes. */
+    fun showStop(i: Int) {
         val stop = TUTORIAL_STOPS[i]
         _state.update { st ->
             val routes = buildList<Route> {
                 add(Route.TabRoute(stop.tab, stop.sub))
                 stop.settingsPage?.let { add(Route.Settings(it)) }
             }
-            st.copy(tutorialStop = i, routes = routes, sheet = null)
+            st.copy(tutorialStop = i, routes = routes, settingsFrom = null, sheet = null)
         }
     }
 
-    /** Next navigates the app to the next stop's screen; on the last stop it is Done. */
-    fun tutorialNext() {
-        val i = _state.value.tutorialStop ?: return
-        if (i >= TUTORIAL_STOPS.lastIndex) tutorialFinish() else goToStop(i + 1)
-    }
-
-    /** Skipping at any point and finishing every stop land on the same next step (§11.1's step 4); a replay returns to Settings. */
-    fun tutorialFinish(): Job {
-        if (_state.value.tutorialStop == null) return DONE
-        val job = if (_state.value.tutorialFromOnboarding) rememberOnboardingStep(4) else DONE
-        _state.update { st ->
-            val routes = if (st.tutorialFromOnboarding) listOf(Route.TabRoute(Tab.BUDGET), Route.Onboarding(4)) else listOf(Route.TabRoute(Tab.SETTINGS))
-            st.copy(tutorialStop = null, tutorialFromOnboarding = false, routes = routes, sheet = null)
-        }
-        return job
-    }
+    /** Done on a stop's window: the window goes, the screen it showed stays. */
+    fun closeStop() = _state.update { it.copy(tutorialStop = null) }
 
     /** Step 5: Budget home. `onboardingComplete` is one-way (§12); §11.3's prompt waits for Savings on its own. */
     fun completeOnboarding(): Job {
@@ -394,13 +399,14 @@ class AppStore(
         s.sheet is Sheet.Reconcile || (s.route as? Route.Onboarding)?.let { !it.forNewProfile || it.step > 1 } ?: false
 
     // §4.7: Back on the lock screen is the system's -- it leaves the app, it never reaches what is beneath
-    fun handlesBack(s: UiState): Boolean = !s.locked && (s.tutorialStop != null || holdsBack(s) || closesOnBack(s) || s.routes.size > 1 || (s.tab == Tab.SETTINGS && s.settingsFrom != null))
+    fun handlesBack(s: UiState): Boolean = !s.locked && (s.tourSlide != null || s.tutorialStop != null || holdsBack(s) || closesOnBack(s) || s.routes.size > 1 || (s.tab == Tab.SETTINGS && s.settingsFrom != null))
 
     /** Back closes an open sheet first, then pops a push; on a tab root there is nothing to pop and the host decides (Android: finish). */
     fun back(): Boolean {
         val s = _state.value
         if (s.locked) return false
-        s.tutorialStop?.let { i -> if (i > 0) goToStop(i - 1) else tutorialFinish(); return true }   // §11.6: the previous stop; before the first, the tour ends
+        s.tourSlide?.let { i -> if (i > 0) _state.update { it.copy(tourSlide = i - 1) } else tourFinish(); return true }   // §11.6: the previous slide; before the first, the tour ends
+        if (s.tutorialStop != null) { closeStop(); return true }
         if (holdsBack(s)) return true
         if (closesOnBack(s)) { closeSheet(); return true }
         if (s.routes.size <= 1 && s.tab == Tab.SETTINGS && s.settingsFrom != null) {

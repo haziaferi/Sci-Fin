@@ -46,6 +46,6 @@ class PermissionStepTest {
         }
         runBlocking { store.requestNotificationPermissionAndContinue().join() }
         assertEquals(1, sched.requests)
-        assertEquals(0, store.state.value.tutorialStop)
+        assertEquals(0, store.state.value.tourSlide)
     }
 }

@@ -142,6 +142,8 @@ fun SciFinApp(store: AppStore, targetDp: Int, systemDark: Boolean = isSystemInDa
                     state.sheet?.let { Sheets(it, state, store) }
                     (state.route as? Route.Onboarding)?.let { if (it.step == 1) OnboardingSheet(it, state, store) }
                     state.tutorialStop?.let { TutorialOverlay(it, anchors, state.data, store) }
+                    // §11.6: the slideshow covers the app, tab bar included
+                    state.tourSlide?.let { TourSlideshow(it, state, store) }
                     // §4.7: owed at once when the PIN turns on while the copies have no password
                     if (state.copyPasswordAsked) CopyPasswordPrompt(store)
                 }
@@ -185,7 +187,7 @@ private fun TabRootScreen(tab: Tab, state: UiState, store: AppStore) = when (tab
 }
 
 @Composable
-private fun RouteScreen(route: Route, state: UiState, store: AppStore) {
+internal fun RouteScreen(route: Route, state: UiState, store: AppStore) {
     when (val r = route) {
         is Route.Onboarding -> Unit
         is Route.LearnTopic -> LearnTopicScreen(r, store)
@@ -302,7 +304,7 @@ private fun RowScope.DesktopContent(state: UiState, store: AppStore, wc: WidthCl
     val edges = remember { mutableStateMapOf<Any, Float>() }
     var boxRight by remember { mutableStateOf(0f) }
     var addHeight by remember { mutableStateOf(0f) }
-    val shown = showsFloatingAdd(state, wc) && state.tutorialStop == null && !goalPromptShows(state)
+    val shown = showsFloatingAdd(state, wc) && state.tutorialStop == null && state.tourSlide == null && !goalPromptShows(state)
     val density = LocalDensity.current
     Box(Modifier.weight(1f).fillMaxHeight().onGloballyPositioned { boxRight = it.positionInWindow().x + it.size.width }) {
         val headerMin = if (shown) with(density) { addHeight.toDp() } else Dp.Unspecified

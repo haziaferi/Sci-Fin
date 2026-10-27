@@ -69,19 +69,25 @@ class CleanupAppTest {
         assertTrue(st.state.value.sheet is Sheet.Reconcile)
     }
 
-    @Test fun `Back during the tour steps to the previous stop, and before the first it ends the tour`() {
+    @Test fun `Back during the slideshow steps to the previous slide, and before the first it ends the tour`() {
         val st = store(db(Fixture.profile))
-        st.startTutorial(fromOnboarding = false)
-        st.tutorialNext(); assertEquals(1, st.state.value.tutorialStop)
-        st.back(); assertEquals(0, st.state.value.tutorialStop)
-        repeat(TUTORIAL_APPEARANCE) { st.tutorialNext() }
-        assertTrue(st.state.value.routes.size > 1, "the Appearance stop is a pushed Settings page")
-        assertTrue(st.back())
-        assertEquals(TUTORIAL_APPEARANCE - 1, st.state.value.tutorialStop)       // the stop, not the pushed page under it
-        repeat(TUTORIAL_APPEARANCE - 1) { st.back() }
-        assertEquals(0, st.state.value.tutorialStop)
+        st.selectTab(Tab.SETTINGS)
+        st.startTour(fromOnboarding = false)
+        st.tourNext(); assertEquals(1, st.state.value.tourSlide)
+        st.back(); assertEquals(0, st.state.value.tourSlide)
         assertTrue(st.handlesBack(st.state.value)); assertTrue(st.back())
-        assertEquals(null, st.state.value.tutorialStop); assertEquals(listOf<Route>(Route.TabRoute(Tab.SETTINGS)), st.state.value.routes)  // a replay returns to Settings
+        assertEquals(null, st.state.value.tourSlide); assertEquals(listOf<Route>(Route.TabRoute(Tab.SETTINGS)), st.state.value.routes)  // a replay returns to where it was opened
+    }
+
+    @Test fun `the Tour index opens one stop on its own screen, and Back or Done closes the window and keeps the screen`() {
+        val st = store(db(Fixture.profile))
+        st.selectTab(Tab.SETTINGS)
+        st.showStop(TUTORIAL_APPEARANCE)
+        assertEquals(TUTORIAL_APPEARANCE, st.state.value.tutorialStop); assertEquals(Route.Settings(SettingsPage.APPEARANCE), st.state.value.route)
+        assertTrue(st.back())
+        assertEquals(null, st.state.value.tutorialStop); assertEquals(Route.Settings(SettingsPage.APPEARANCE), st.state.value.route)   // the window, not the page under it
+        st.showStop(1); assertEquals(Route.TabRoute(Tab.BUDGET, "envelopes"), st.state.value.route)
+        st.closeStop(); assertEquals(null, st.state.value.tutorialStop); assertEquals(Route.TabRoute(Tab.BUDGET, "envelopes"), st.state.value.route)
     }
 
     @Test fun `a Profile switch leaves Settings' Back on the origin's tab, not the old Profile's screen`() {
