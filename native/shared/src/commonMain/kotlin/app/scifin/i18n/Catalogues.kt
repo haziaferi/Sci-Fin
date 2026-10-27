@@ -12,4 +12,4 @@ val CATALOGUES: Map<Language, Map<String, String>> = mapOf(
  * The languages beyond English that people are offered -- in Appearance and as the device fallback. A language joins
  * only once its whole catalogue, Learn topics included, is complete and reviewed by the owner (§2.7).
  */
-val SHIPPED: Set<Language> = emptySet()
+val SHIPPED: Set<Language> = setOf(Language.IT)   // owner review of the Italian Learn topics, 2026-10-27

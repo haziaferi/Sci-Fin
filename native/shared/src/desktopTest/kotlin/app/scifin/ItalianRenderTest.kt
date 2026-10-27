@@ -74,6 +74,17 @@ class ItalianRenderTest {
         }
     }
 
+    /** Every Learn topic in Italian (§2.7 step 3), for the owner's review in place. */
+    @Test fun `the Learn topics render in Italian`() {
+        I18n.preview = Language.IT
+        val st = store()
+        for (id in listOf("name-your-goal", "why-categories", "why-no-red", "borrowing", "credit-score", "money-on-hand", "uneven-months", "well-being", "time-worth")) {
+            st.closeSheet(); while (st.back()) Unit
+            st.selectTab(Tab.LEARN); st.push(Route.LearnTopic(id))
+            assertTrue(render(st, "learn-$id", h = 2600).isNotEmpty(), "$id drew nothing")
+        }
+    }
+
     /** The longest tour stop, Recurring Expenses, on a phone-sized frame from the Tour index; then every slide, as onboarding shows them. */
     @Test fun `the tour fits a phone in Italian`() {
         I18n.preview = Language.IT
