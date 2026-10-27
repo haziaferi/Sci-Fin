@@ -47,14 +47,14 @@ class OnboardingResumeTest {
         assertFalse(second.state.value.data!!.settings.onboardingComplete)
 
         second.requestNotificationPermissionAndContinue().join()
-        assertEquals(0, second.state.value.tutorialStop, "step 3 is the tour")
+        assertEquals(0, second.state.value.tourSlide, "step 3 is the tour")
         assertEquals(3, db.dao().load(id)!!.settings.onboardingStep)
 
-        // killed during the tour: the next open resumes into it, at stop 1 rather than nowhere
+        // killed during the tour: the next open resumes into it, at its first slide rather than nowhere
         val third = store(db, this)
         third.start()
-        assertEquals(0, third.state.value.tutorialStop)
-        third.tutorialFinish().join()
+        assertEquals(0, third.state.value.tourSlide)
+        third.tourFinish().join()
         assertEquals(Route.Onboarding(4), third.state.value.route)
         assertEquals(4, db.dao().load(id)!!.settings.onboardingStep)
 

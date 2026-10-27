@@ -14,6 +14,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import app.scifin.app.SettingsPage
+import app.scifin.app.TOUR_SLIDES
 import app.scifin.app.TUTORIAL_STOPS
 import app.scifin.ui.screens.appearanceSections
 
@@ -40,13 +41,11 @@ class OnboardingTest {
         // step 2: the scheduler says GRANTED, which is recorded on the Profile, then step 4, then home
         store.requestNotificationPermissionAndContinue().join()
         assertEquals(true, store.state.value.data!!.settings.notificationPermissionGranted)
-        assertEquals(0, store.state.value.tutorialStop); assertEquals(Route.TabRoute(Tab.BUDGET, "envelopes"), store.state.value.route)   // step 3: the tour, on stop 1's screen
-        repeat(8) { store.tutorialNext() }                                                                                         // ten stops since the split (2026-10-09)
-        assertEquals(8, store.state.value.tutorialStop); assertEquals(Route.Settings(SettingsPage.APPEARANCE), store.state.value.route)
-        store.tutorialNext()                                                                                                       // stop 10: Profiles, on the hub (§11.6, §8 shipped)
-        assertEquals(9, store.state.value.tutorialStop); assertEquals(Route.TabRoute(Tab.SETTINGS), store.state.value.route)
-        store.tutorialNext()                                                                                                       // Done on the last stop
-        assertNull(store.state.value.tutorialStop); assertEquals(Route.Onboarding(4), store.state.value.route)
+        assertEquals(0, store.state.value.tourSlide)                                                     // step 3: the tour, as a slideshow (owner, 2026-10-27)
+        repeat(TOUR_SLIDES.size - 1) { store.tourNext() }
+        assertEquals(TOUR_SLIDES.lastIndex, store.state.value.tourSlide)
+        store.tourNext()                                                                                 // Done on the last slide
+        assertNull(store.state.value.tourSlide); assertEquals(Route.Onboarding(4), store.state.value.route)
         store.completeOnboarding().join()
         assertTrue(store.state.value.data!!.settings.onboardingComplete); assertEquals(Route.TabRoute(Tab.BUDGET), store.state.value.route)
         assertEquals(store.state.value.data, db.dao().load(s1.data.profileId)); assertEquals(s1.data.profileId, db.dao().appState()!!.activeProfileId)

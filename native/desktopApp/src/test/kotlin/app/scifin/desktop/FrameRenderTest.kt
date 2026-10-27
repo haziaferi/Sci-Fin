@@ -112,11 +112,11 @@ class FrameRenderTest {
         val st = AppStore(AppSession(db, NoScheduler, SystemClock, ::newId), db, CoroutineScope(SupervisorJob() + Dispatchers.Unconfined))
         runBlocking { st.start(); st.createProfile("Ana", Theme.TALLOW_TOME, false).join() }
         render("onboarding-step2", 360, 756, st)          // NoScheduler answers GRANTED: no prompt, so the page shows Continue
-        st.advanceOnboarding(); render("tutorial-stop1", 360, 756, st)
-        st.tutorialNext(); st.tutorialNext(); render("tutorial-stop3", 360, 756, st)
-        st.tutorialNext(); st.tutorialNext(); st.tutorialNext(); render("tutorial-stop6-learn", 360, 756, st)
-        st.tutorialNext(); st.tutorialNext(); render("tutorial-stop8", 360, 756, st)
-        st.tutorialNext(); render("onboarding-step4", 360, 900, st)
+        st.advanceOnboarding(); render("tour-slide1", 360, 756, st)
+        st.tourNext(); st.tourNext(); render("tour-slide3", 360, 756, st)
+        st.tourNext(); st.tourNext(); render("tour-slide5-learn", 360, 756, st)
+        st.tourNext(); render("tour-slide6", 360, 756, st)
+        st.tourNext(); render("onboarding-step4", 360, 900, st)
     }
 
     @Test fun `the three width classes render bar, rail, rail`() {

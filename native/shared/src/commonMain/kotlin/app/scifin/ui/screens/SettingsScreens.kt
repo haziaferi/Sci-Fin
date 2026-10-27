@@ -1,5 +1,8 @@
 package app.scifin.ui.screens
 
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import app.scifin.app.TUTORIAL_STOPS
 import app.scifin.i18n.SUPPORTED
 import app.scifin.i18n.Language
 import app.scifin.i18n.I18n
@@ -119,7 +122,7 @@ fun SettingsScreen(state: UiState, store: AppStore) {
         NavRow(Lucide.DATABASE, tr("Data & backup"), if (exported != null) trf("Exported {0}", formatDate(exported)) else tr("Export or restore"), selected = shown == SettingsPage.BACKUP) { open(Route.Settings(SettingsPage.BACKUP)) }
         NavRow(Lucide.LOCK, tr("Security & lock"), if (state.lock != null) tr("PIN on") else tr("Off"), selected = shown == SettingsPage.SECURITY) { open(Route.Settings(SettingsPage.SECURITY)) }
         NavRow(Lucide.TRASH_2, tr("Trash"), if (state.trash.isEmpty()) tr("Empty") else trp("{0} item", "{0} items", state.trash.size), selected = shown == SettingsPage.TRASH) { open(Route.Settings(SettingsPage.TRASH)) }
-        NavRow(Lucide.ROTATE_CCW, tr("Replay onboarding"), tr("View"), selected = shown == SettingsPage.REPLAY) { open(Route.Settings(SettingsPage.REPLAY)) }
+        TourIndex(store)
         val total = state.profiles.size
         Box(Modifier.tutAnchor("profiles-hook")) { NavRow(null, tr("Profiles"), if (total > 1) trf("{0} · {1} total", d.profile.name, total) else d.profile.name, leading = { Avatar(d.profile.name.take(1).ifEmpty { "Y" }) }, selected = shown == SettingsPage.PROFILES) { open(Route.Settings(SettingsPage.PROFILES)) } }
     }
@@ -141,7 +144,6 @@ fun SettingsPageScreen(route: Route.Settings, state: UiState, store: AppStore) {
             SettingsPage.SECURITY -> SecurityPage(state, store)
             SettingsPage.TRASH -> TrashPage(state, store)
             SettingsPage.PROFILES -> ProfilesPage(state, store)
-            SettingsPage.REPLAY -> ReplaySummaryPage(store)
         }
     }
 }
@@ -342,28 +344,19 @@ private fun ProfilesPage(state: UiState, store: AppStore) {
     InfoNote(tr("Each profile is an environment of its own, a sealed compartment that doesn’t interact with the others, with independent contents."))
 }
 
-/** §11.6's condensed replay page: a static recap, one line per stop, with the replay button under it. */
+/**
+ * §11.6 (owner, 2026-10-27): the Tour row opens an index under it, one link per stop. A link goes to the
+ * stop's own screen with its window over the section it describes; the slideshow replays at the end.
+ */
 @Composable
-private fun ReplaySummaryPage(store: AppStore) {
-    val t = LocalTokens.current; val p = t.palette
-    InfoNote(tr("A static recap. You can replay the full tour below any time; your data stays intact."))
-    // the prototype's nine lines, verbatim -- one per stop of TUTORIAL_STOPS, Profiles included (§11.6)
-    val stops = listOf(
-        Triple(Lucide.WALLET, tr("Savings"), tr("What you have available — never inflated.")),
-        Triple(Lucide.BANKNOTE, tr("Income"), tr("Off by default. Manual or auto-deposit, your choice.")),
-        Triple(Lucide.REPEAT, tr("Recurring & Goals"), tr("Recurring expenses are taken automatically; you add money to Goals whenever you like.")),
-        Triple(Lucide.TAG, tr("Categories"), tr("What you set aside and what you spent.")),
-        Triple(Lucide.CREDIT_CARD, tr("Activity"), tr("A view of credit cards and loans.")),
-        Triple(Lucide.LIGHTBULB, tr("Learn"), tr("The science behind the app — look here first.")),
-        Triple(Lucide.BAR_CHART_3, tr("Reports"), tr("Visual and written summaries of how money moves over time.")),
-        Triple(Lucide.SLIDERS_HORIZONTAL, tr("Appearance"), tr("Density, motion, low-distraction — all personal.")),
-        Triple(Lucide.USERS, tr("Profiles"), tr("For money bound by different rules — someone else’s, or your own held apart.")),
-    )
-    Column(Modifier.padding(top = t.spacing.gap), verticalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
-        for ((icon, title, body) in stops) Row(Modifier.fillMaxWidth().background(p.surf, RoundedCornerShape(t.radii.lg)).padding(horizontal = t.spacing.u * 1.5f, vertical = t.spacing.u * 1.25f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.u * 1.125f)) {
-            EntityIcon(icon)
-            Column { Text(title, color = p.txt, fontSize = t.type.body, fontWeight = FontWeight.Bold); Text(body, color = p.txt2, fontSize = t.type.caption) }
-        }
+private fun TourIndex(store: AppStore) {
+    val t = LocalTokens.current
+    var open by rememberSaveable { mutableStateOf(false) }
+    Box(Modifier.semantics { stateDescription = if (open) tr("Expanded") else tr("Collapsed") }) {
+        NavRow(Lucide.ROTATE_CCW, tr("Tour"), if (open) tr("Hide") else tr("Show")) { open = !open }
     }
-    Button(tr("Replay the full tour"),modifier = Modifier.fillMaxWidth().padding(top = t.spacing.gap)) { store.startTutorial(fromOnboarding = false) }
+    if (open) Column(Modifier.padding(start = t.spacing.u * 2f), verticalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
+        for ((i, stop) in TUTORIAL_STOPS.withIndex()) NavRow(null, stop.title, stop.tab.label) { store.showStop(i) }
+        Button(tr("Watch the slideshow"), ButtonKind.SECONDARY, modifier = Modifier.fillMaxWidth()) { store.startTour(fromOnboarding = false) }
+    }
 }

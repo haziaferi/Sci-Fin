@@ -9,6 +9,7 @@ import app.scifin.app.AppStore
 import app.scifin.app.Route
 import app.scifin.app.SettingsPage
 import app.scifin.app.Sheet
+import app.scifin.app.TOUR_SLIDES
 import app.scifin.app.Tab
 import app.scifin.data.buildInMemorySciFinDatabase
 import app.scifin.i18n.I18n
@@ -73,11 +74,16 @@ class ItalianRenderTest {
         }
     }
 
-    /** The longest tour stop, Recurring Expenses, on a phone-sized frame: the window has to leave its section in view. */
-    @Test fun `the recurring tour stop fits a phone in Italian`() {
+    /** The longest tour stop, Recurring Expenses, on a phone-sized frame from the Tour index; then every slide, as onboarding shows them. */
+    @Test fun `the tour fits a phone in Italian`() {
         I18n.preview = Language.IT
         val st = store()
-        st.selectTab(Tab.BUDGET); st.startTutorial(fromOnboarding = false); repeat(3) { st.tutorialNext() }
+        st.showStop(3)
         assertTrue(render(st, "tour-recurring", h = 780).isNotEmpty())
+        st.closeStop()
+        for (i in TOUR_SLIDES.indices) {
+            if (i == 0) st.startTour(fromOnboarding = false) else st.tourNext()
+            assertTrue(render(st, "tour-slide${i + 1}", h = 780).isNotEmpty())
+        }
     }
 }

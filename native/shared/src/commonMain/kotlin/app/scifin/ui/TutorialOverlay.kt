@@ -54,22 +54,25 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.unit.dp
 import app.scifin.app.AppStore
 import app.scifin.app.TUTORIAL_STOPS
 import app.scifin.model.ProfileData
 import kotlin.math.roundToInt
 import app.scifin.i18n.tr
-import app.scifin.i18n.trf
 
 /*
- * §11.6's overlay: a scrim with a hole over the anchored element, an accent ring around it
+ * §11.6's overlay, for the one stop Settings' Tour index opened: a scrim with a hole over the anchored element, an accent ring around it
  * (the app's one "look here" mark, shared with §2.1's tick), and the window beside it. The
  * app underneath stays live: only the window takes taps.
  */
 
 /** Where each anchored element currently sits, in the root's coordinates. */
 val LocalTutorialAnchors = staticCompositionLocalOf<SnapshotStateMap<String, Rect>?> { null }
+
+/** True inside a slideshow miniature, where anchors are read at their full size rather than clipped to the frame. */
+val LocalTutorialUnclipped = staticCompositionLocalOf { false }
 
 /** The anchor the tour is on right now, so that element can scroll itself into view. */
 val LocalTutorialActive = compositionLocalOf<String?> { null }
@@ -83,7 +86,9 @@ fun Modifier.tutAnchor(id: String): Modifier {
     LaunchedEffect(active) { if (active) requester.bringIntoView() }
     // an element that leaves composition takes its position with it, or a stop would ring a stale spot
     DisposableEffect(id) { onDispose { anchors.remove(id) } }
-    return this.bringIntoViewRequester(requester).onGloballyPositioned { anchors[id] = it.boundsInRoot() }
+    // inside a slide's miniature the frame clips the screen, and the section's own extent is what is wanted
+    val unclipped = LocalTutorialUnclipped.current
+    return this.bringIntoViewRequester(requester).onGloballyPositioned { anchors[id] = if (unclipped) Rect(it.positionInRoot(), it.size.toSize()) else it.boundsInRoot() }
 }
 
 @Composable
@@ -123,7 +128,7 @@ fun TutorialOverlay(stopIndex: Int, anchors: SnapshotStateMap<String, Rect>, dat
                 .background(p.surf, RoundedCornerShape(t.radii.lg)).clickable(enabled = false) {}
                 .padding(horizontal = t.spacing.u * 1.625f, vertical = t.spacing.u * 1.5f),
         ) {
-            Text(trf("STOP {0} OF {1}", stopIndex + 1, TUTORIAL_STOPS.size), color = p.txt2, fontSize = t.type.caption, fontWeight = FontWeight.Bold, letterSpacing = t.type.caption * 0.05, modifier = Modifier.padding(bottom = t.spacing.u / 2))
+            Text(stop.place, color = p.txt2, fontSize = t.type.caption, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = t.spacing.u / 2))
             data?.let { stop.mock?.invoke(it) }?.let { m ->
                 Row(Modifier.fillMaxWidth().background(p.surf2, RoundedCornerShape(t.radii.sm)).padding(horizontal = t.spacing.u * 1.25f, vertical = t.spacing.gap), horizontalArrangement = Arrangement.spacedBy(t.spacing.u / 2)) {
                     Text(m, color = p.txt2, fontSize = t.type.caption); Text(tr("(illustrative)"), color = p.txt2.copy(alpha = 0.6f), fontSize = t.type.caption)
@@ -131,15 +136,20 @@ fun TutorialOverlay(stopIndex: Int, anchors: SnapshotStateMap<String, Rect>, dat
                 Spacer(Modifier.height(t.spacing.gap))
             }
             for ((i, line) in stop.lines.withIndex()) Text(line, color = p.txt, fontSize = t.type.body, lineHeight = t.type.body * 1.5, modifier = Modifier.padding(bottom = if (i < stop.lines.lastIndex) t.spacing.gap else 0.dp))
-            Row(Modifier.fillMaxWidth().padding(top = t.spacing.u * 1.25f), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(tr("Skip"), color = p.txt2, fontSize = t.type.caption, fontWeight = FontWeight.Bold, modifier = Modifier.heightIn(min = t.spacing.target).clickable { store.tutorialFinish() }.semantics { role = Role.Button }.padding(vertical = t.spacing.u * 0.75f))
-                // §2.5: the tap area is the full target; the pill drawn inside it stays a unit shorter
-                Box(Modifier.heightIn(min = t.spacing.target).clickable { store.tutorialNext() }.semantics { role = Role.Button }, contentAlignment = Alignment.Center) {
-                    Box(Modifier.heightIn(min = t.spacing.target - t.spacing.u).background(p.acc, CircleShape).padding(horizontal = t.spacing.u * 1.5f, vertical = t.spacing.u * 0.75f), contentAlignment = Alignment.Center) {
-                        Text(if (stopIndex == TUTORIAL_STOPS.lastIndex) tr("Done") else tr("Next"), color = p.onAcc, fontSize = t.type.caption, fontWeight = FontWeight.Bold)
-                    }
-                }
+            Row(Modifier.fillMaxWidth().padding(top = t.spacing.u * 1.25f), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
+                TourPill(tr("Done")) { store.closeStop() }
             }
+        }
+    }
+}
+
+/** The tour's one forward control, Next or Done. §2.5: the tap area is the full target; the pill drawn inside it stays a unit shorter. */
+@Composable
+internal fun TourPill(label: String, onClick: () -> Unit) {
+    val t = LocalTokens.current; val p = t.palette
+    Box(Modifier.heightIn(min = t.spacing.target).clickable(onClick = onClick).semantics { role = Role.Button }, contentAlignment = Alignment.Center) {
+        Box(Modifier.heightIn(min = t.spacing.target - t.spacing.u).background(p.acc, CircleShape).padding(horizontal = t.spacing.u * 1.5f, vertical = t.spacing.u * 0.75f), contentAlignment = Alignment.Center) {
+            Text(label, color = p.onAcc, fontSize = t.type.caption, fontWeight = FontWeight.Bold)
         }
     }
 }
