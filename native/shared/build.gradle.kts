@@ -84,3 +84,9 @@ ksp {
 tasks.matching { it.name == "kspKotlinDesktop" }.configureEach {
     mustRunAfter("kspAndroidMain")
 }
+// §2.7: the app follows the device's language once Italian ships, so the tests pin the JVM to English -- the Italian
+// renders and checks set their language themselves -- and pass the same on any machine.
+tasks.withType<Test>().configureEach {
+    systemProperty("user.language", "en")
+    systemProperty("user.country", "US")
+}

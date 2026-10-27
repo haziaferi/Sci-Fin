@@ -21,7 +21,12 @@ dependencies {
     testImplementation(libs.junit)
 }
 
-tasks.withType<Test> { useJUnit() }
+// §2.7: tests run in English whatever the machine's language (the app follows the device once Italian ships)
+tasks.withType<Test> {
+    useJUnit()
+    systemProperty("user.language", "en")
+    systemProperty("user.country", "US")
+}
 
 compose.desktop {
     application {

@@ -305,7 +305,7 @@ Every major structural decision below traces to a specific research finding in `
 - **CFPB Financial Well\-Being framework** — well\-being is a felt sense of security and freedom of choice, not adherence to a plan (audit §3.7) — the direct basis for the Buffer/Age\-of\-Money report being the app's default view (§5.1) rather than a spending breakdown.
 - **ADHD/autism\-specific findings** — automation and externalized reminders are the highest\-leverage intervention for ADHD; predictability and low\-distraction modes matter most for autism (audit §4.1–§4.2) — informs quick\-add's role (§3.6) and the low\-distraction setting (§2.5).
 
-### 2\.7 Languages (Decided with the owner 2026\-10\-26; being built in three steps)
+### 2\.7 Languages (Decided with the owner 2026\-10\-26; built in three steps, Italian offered from step 3)
 
 **English and Italian first**, the system built so that a further language is a catalogue, not code.
 
@@ -315,7 +315,7 @@ Every major structural decision below traces to a specific research finding in `
 - **Text the app itself writes into the data** — ledger labels such as *Payday*, *Auto\-deposit*, *Restored from the Trash* — is stored in English and **shown in the active language**, so switching language changes old rows too; what the person typed stays as typed.
 - **Every translation is reviewed by the owner before it ships**, the Learn topics as their own batch: a translation can overstate a finding the English was careful to narrow (§4.5).
 - **Mechanism:** the English text is the key. Every string the person reads passes through `tr`, `trf` (numbered placeholders, which a translation may reorder) or `trp` (one and other forms) in `i18n/I18n.kt`; each other language is a catalogue of English → its text. `LocalisationTest` reads every key from the source, fails the build if a shipped catalogue lacks one or if screen text reaches a component without `tr`, and pins both languages' formats.
-- **Delivered in three PRs:** (1) every string routed through `tr` and the formats made language\-aware, with no visible change in English; (2) the Italian interface and the Appearance row, for review; (3) the Italian Learn topics, for review.
+- **Delivered in three PRs:** (1) every string routed through `tr` and the formats made language\-aware, with no visible change in English; (2) the Italian interface and the Appearance row, for review; (3) the Italian Learn topics, for review, through correttore\-italiano as the interface was — and with them Italian joins `SHIPPED`, so the Appearance row and the device fallback offer it. Study, journal and institution names stay as published.
 
 ## 3\. The Financial Model
 
@@ -1171,7 +1171,7 @@ Credit score is real\-world consequential but not something the app can or shoul
   - **United States** — scored; source: Consumer Financial Protection Bureau, `consumerfinance.gov/consumer-tools/credit-reports-and-scores/`.
   - **Canada** — scored, with no single standardized formula: Equifax and TransUnion each run their own FICO/VantageScore\-derived model, so it isn't a clean US\-shaped entry either; source: Financial Consumer Agency of Canada, `canada.ca/en/financial-consumer-agency/services/credit-reports-score.html`.
   - **Germany** — **scored (reclassified 2026\-09\-02)**, with no single standardized formula: private bureaus, chiefly SCHUFA, each produce their own consumer\-facing score, which a person can request about themselves — structurally the same shape as Canada's, and previously mis\-filed on the strength of the word *standardized*. A nuance worth keeping in the entry itself: the financial regulator BaFin explicitly does not supervise credit bureaus or their scoring, so the correct government source is the federal data\-protection authority; source: BfDI, `bfdi.bund.de/DE/Buerger/Inhalte/Allgemein/Auskunfteien/FAQ-Auskunfteien.html`.
-  - **Italy** — "no consumer\-facing credit score; creditworthiness assessed via the Banca d'Italia's Centrale dei Rischi instead" — a public register of debts above a reporting threshold, not a score and not a blacklist; source: `bancaditalia.it/servizi-cittadino/servizi/accesso-cr/`.
+  - **Italy** — "no consumer\-facing credit score; creditworthiness assessed via the Banca d'Italia's Centrale dei Rischi instead" — ~~a public register~~ a Banca d'Italia register (kept by a public authority, but open only to the person and lenders; owner, 2026\-10\-27) of debts above a reporting threshold, not a score and not a blacklist; source: `bancaditalia.it/servizi-cittadino/servizi/accesso-cr/`.
   - **Spain** — "no consumer\-facing credit score; creditworthiness assessed via the Banco de España's Central de Información de Riesgos (CIRBE) instead" — same public\-register shape as Italy's; source: `bde.es/wbe/en/para-ciudadano/gestiones/informacion-riesgos-cir/`.
   - **France** — "no consumer\-facing credit score; creditworthiness assessed via the Banque de France's negative\-incident registries instead" — FICP for credit\-repayment incidents, FCC for cheque incidents; each bank then runs its own undisclosed internal scoring on top, which stays a fact worth naming rather than something the entry can point a resource at. Source: `banque-france.fr/fr/a-votre-service/particuliers/fichiers-incident-bancaire`.
 
@@ -1364,7 +1364,7 @@ Prior context for what Savings actually means (not a bank\-account balance, neve
 | Spacing unit `u`: **8 px** comfortable, **6 px** compact; `pad` \= 1\.75u, `gap` \= 1u | §2.5 | `density` |
 | Touch/click target minimum: **48 dp** Android, **40 px** Windows, at every density and scale | §2.5 | — |
 | Hit\-area expansion for controls drawn smaller than the minimum: ~~**44 px**~~ **the minimum itself, 48 dp / 40 px** (corrected 2026\-09\-25) | §2.5 | — |
-| Backup/store schema version: ~~**1**~~ ~~**3**~~ ~~**4**~~ ~~**5**~~ **9** (corrected 2026\-09\-25, twice — the fix pass moved the build to 5 and left this row at 4; 1→2, 2→3, 3→4 and 4→5 above; **corrected again 2026\-10\-26: 6 the app lock, 7 the automatic copy, 8 the Trash, 9 hourly income — this row had stayed at 5**) | §12 (above) | `SCHEMA_VERSION` (the Room `version` and the backup file's field are this one constant) |
+| Backup/store schema version: ~~**1**~~ ~~**3**~~ ~~**4**~~ ~~**5**~~ ~~**9**~~ **10** (10: a Profile's language, §2.7, 2026\-10\-26; corrected 2026\-09\-25, twice — the fix pass moved the build to 5 and left this row at 4; 1→2, 2→3, 3→4 and 4→5 above; **corrected again 2026\-10\-26: 6 the app lock, 7 the automatic copy, 8 the Trash, 9 hourly income — this row had stayed at 5**) | §12 (above) | `SCHEMA_VERSION` (the Room `version` and the backup file's field are this one constant) |
 | Credit\-card minimum\-payment walk and payoff walk cap: **1,200 months** | §9.2 | `Accounts.payoffAtFixedPayment`, `payoffAtMinimum` |
 
 **Sign convention:** `Transaction.amount` is the signed delta applied to the named target's own tracked quantity; the Savings movement per `key` is given in §3.6's table. Every ledger\-reading feature (§5.1, §5.2, §5.3, §5.4, §7.3) executes against that table.
