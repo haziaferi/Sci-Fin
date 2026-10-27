@@ -78,14 +78,14 @@ private fun buildCreditResources() = listOf(
     ),
     CreditResource(
         tr("Italy"), false,
-        tr("Creditworthiness is assessed through the Banca d’Italia’s Centrale dei Rischi: a public register of debts above a reporting threshold, not a score and not a blacklist."),
+        tr("Creditworthiness is assessed through the Centrale dei Rischi: a Banca d’Italia register of debts above a reporting threshold, not a score and not a blacklist."),
         tr("Banca d’Italia"),
         "bancaditalia.it/servizi-cittadino/servizi/accesso-cr/",
         LocalDate(2026, 8, 4),
     ),
     CreditResource(
         tr("Spain"), false,
-        tr("Creditworthiness is assessed through the Banco de España’s CIRBE — the same public-register shape as Italy’s."),
+        tr("Creditworthiness is assessed through the Banco de España’s CIRBE — the same kind of register as Italy’s."),
         tr("Banco de España"),
         "bde.es/wbe/en/para-ciudadano/gestiones/informacion-riesgos-cir/",
         LocalDate(2026, 8, 4),
