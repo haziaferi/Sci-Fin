@@ -310,6 +310,7 @@ Every major structural decision below traces to a specific research finding in `
 **English and Italian first**, the system built so that a further language is a catalogue, not code.
 
 - **Which language:** the device's, with English as the fallback for any language not shipped, **overridable per Profile in Appearance** — a Profile carries its language as it carries its theme (§8.4). Before a Profile exists (§11.1's first screen) and on the PIN gate (§4.7), the device's language is used.
+- **The palette names stay in English in every language** (*Swiss Blue*, *Daylight*, *Tallow & Tome*, *Dusk*; owner, 2026\-10\-28): they are names, not descriptions.
 - **Italian is written in the informal *tu*** — the usual register for personal\-finance apps and the closest to the English tone (§2.4).
 - **Dates and amounts take the language's own style:** English `Nov 13` and `€1,450.50`; Italian `13 nov` and `1.450,50 €`. The currency setting still chooses the symbol.
 - **Text the app itself writes into the data** — ledger labels such as *Payday*, *Auto\-deposit*, *Restored from the Trash* — is stored in English and **shown in the active language**, so switching language changes old rows too; what the person typed stays as typed.

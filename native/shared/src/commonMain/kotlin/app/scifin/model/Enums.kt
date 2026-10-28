@@ -1,6 +1,5 @@
 package app.scifin.model
 
-import app.scifin.i18n.tr
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -69,9 +68,9 @@ enum class Theme(val token: String) {
     @SerialName("swiss-blue") SWISS_BLUE("swiss-blue"), @SerialName("daylight") DAYLIGHT("daylight"),
     @SerialName("tallow-tome") TALLOW_TOME("tallow-tome"), @SerialName("dusk") DUSK("dusk");
 
-    /** The name shown in Appearance, in the current language (§2.7). */
+    /** The name shown in Appearance: a name, so it stays in English in every language (owner, 2026-10-28; §2.7). */
     val label: String get() = when (this) {
-        SWISS_BLUE -> tr("Swiss Blue"); DAYLIGHT -> tr("Daylight"); TALLOW_TOME -> tr("Tallow & Tome"); DUSK -> tr("Dusk")
+        SWISS_BLUE -> "Swiss Blue"; DAYLIGHT -> "Daylight"; TALLOW_TOME -> "Tallow & Tome"; DUSK -> "Dusk"
     }
 
     companion object {
