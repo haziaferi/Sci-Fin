@@ -15,6 +15,7 @@ import app.scifin.data.buildInMemorySciFinDatabase
 import app.scifin.i18n.I18n
 import app.scifin.i18n.Language
 import app.scifin.model.AppState
+import app.scifin.model.IncomeType
 import app.scifin.ui.LocalProbe
 import app.scifin.ui.SciFinApp
 import kotlinx.coroutines.CoroutineScope
@@ -71,6 +72,22 @@ class ItalianRenderTest {
             st.closeSheet(); while (st.back()) Unit
             go(st)
             assertTrue(render(st, name).isNotEmpty(), "$name drew nothing")
+        }
+    }
+
+    /** The empty amount and rate read `0,00 €` in Italian and `€ 0.00` in English (§2.7): the sheet for a shift and for a purchase, in both. */
+    @Test fun `the entry sheet's empty figures take the language's style`() {
+        val db = buildInMemorySciFinDatabase()
+        val p = Fixture.profile.let { it.copy(settings = it.settings.copy(goalPromptDismissed = true, incomeEnabled = true, incomeType = IncomeType.HOURLY)) }
+        runBlocking { db.dao().save(p); db.dao().upsertAppState(AppState(activeProfileId = p.profileId)) }
+        val st = AppStore(AppSession(db, RecordingScheduler(), FakeClock(Fixture.simDate), Ids("ih")::next), db, CoroutineScope(SupervisorJob() + Dispatchers.Unconfined))
+            .also { runBlocking { it.start() } }
+        for (lang in listOf(Language.IT, Language.EN)) {
+            I18n.preview = lang
+            st.closeSheet(); st.selectTab(Tab.BUDGET); st.openSheet(Sheet.Entry(income = true))
+            assertTrue(render(st, "entry-hours-${lang.name.lowercase()}", h = 900).isNotEmpty())
+            st.closeSheet(); st.openSheet(Sheet.Entry())
+            assertTrue(render(st, "entry-${lang.name.lowercase()}", h = 900).isNotEmpty())
         }
     }
 

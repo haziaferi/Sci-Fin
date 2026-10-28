@@ -46,6 +46,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import app.scifin.app.AppStore
 import app.scifin.app.Sheet
 import app.scifin.engine.Entry
+import app.scifin.engine.decimalText
+import app.scifin.engine.symbolAfter
 import app.scifin.engine.Hourly
 import app.scifin.i18n.tr
 import app.scifin.i18n.trf
@@ -171,7 +173,9 @@ fun EntrySheet(sheet: Sheet.Entry, d: ProfileData, store: AppStore) {
             val dirs = Entry.directions(d, target)
             if (dirs != null) Word(dirs.first { it.first == direction }.second, open == "dir", "dir") { open = if (open == "dir") null else "dir" }
             else Inline(Entry.fixedVerb(target))
-            if (!shift) Inline(currencySymbol(cur))
+            // the symbol sits where the language writes it (§2.7): `€ 0.00` before the field, `0,00 €` at the end of its line
+            val after = symbolAfter()
+            if (!shift && !after) Inline(currencySymbol(cur))
             BasicTextField(
                 amountText, { amountText = it }, singleLine = true, textStyle = field.copy(fontWeight = FontWeight.Bold), cursorBrush = SolidColor(p.acc),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done, autoCorrectEnabled = false), keyboardActions = KeyboardActions(onDone = { done() }),
@@ -179,11 +183,14 @@ fun EntrySheet(sheet: Sheet.Entry, d: ProfileData, store: AppStore) {
                 decorationBox = { inner ->
                     // the one always-typed field: underlined in the accent
                     val line = t.strokes.emph; val gap = t.spacing.u
-                    Box(Modifier.heightIn(min = t.spacing.target).drawBehind {
+                    Row(Modifier.heightIn(min = t.spacing.target).drawBehind {
                         val y = size.height - gap.toPx(); drawLine(p.acc, Offset(0f, y), Offset(size.width, y), line.toPx())
-                    }, contentAlignment = Alignment.CenterStart) {
-                        if (amountText.isEmpty()) Text(if (shift) "0" else "0.00", color = p.txt3, fontSize = t.type.body, fontWeight = FontWeight.Bold)
-                        inner()
+                    }, verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                            if (amountText.isEmpty()) Text(if (shift) "0" else decimalText("0.00"), color = p.txt3, fontSize = t.type.body, fontWeight = FontWeight.Bold)
+                            inner()
+                        }
+                        if (!shift && after) Text(currencySymbol(cur).trim(), color = p.txt2, fontSize = t.type.body)
                     }
                 },
             )
@@ -199,11 +206,12 @@ fun EntrySheet(sheet: Sheet.Entry, d: ProfileData, store: AppStore) {
                         Row(Modifier.heightIn(min = t.spacing.target).drawBehind {
                             val y = size.height - gap.toPx(); drawLine(p.acc, Offset(0f, y), Offset(size.width, y), line.toPx())
                         }, verticalAlignment = Alignment.CenterVertically) {
-                            Text(currencySymbol(cur), color = p.txt2, fontSize = t.type.body)
-                            Box(Modifier.padding(start = t.spacing.u * 0.4f), contentAlignment = Alignment.CenterStart) {
-                                if (rateText.isEmpty()) Text("0.00", color = p.txt3, fontSize = t.type.body, fontWeight = FontWeight.Bold)
+                            if (!after) Text(currencySymbol(cur), color = p.txt2, fontSize = t.type.body)
+                            Box(if (after) Modifier.weight(1f) else Modifier.padding(start = t.spacing.u * 0.4f), contentAlignment = Alignment.CenterStart) {
+                                if (rateText.isEmpty()) Text(decimalText("0.00"), color = p.txt3, fontSize = t.type.body, fontWeight = FontWeight.Bold)
                                 inner()
                             }
+                            if (after) Text(currencySymbol(cur).trim(), color = p.txt2, fontSize = t.type.body)
                         }
                     },
                 )
