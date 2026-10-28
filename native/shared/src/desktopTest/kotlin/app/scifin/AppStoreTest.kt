@@ -44,6 +44,8 @@ class AppStoreTest {
         store.push(Route.TabRoute(Tab.SETTINGS))          // any Route; the pushes proper arrive with their screens
         assertEquals(2, store.state.value.routes.size)
         assertTrue(store.back()); assertEquals(1, store.state.value.routes.size)
+        assertTrue(store.back()); assertEquals(Route.TabRoute(Tab.REPORTS), store.state.value.route)   // the pages opened before it
+        assertTrue(store.back()); assertEquals(Route.TabRoute(Tab.BUDGET), store.state.value.route)
         assertFalse(store.back())
         store.selectTab(Tab.BUDGET)
         assertEquals(Route.TabRoute(Tab.BUDGET), store.state.value.route)
