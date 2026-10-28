@@ -1,6 +1,7 @@
 package app.scifin.app
 
 import app.scifin.i18n.I18n
+import app.scifin.i18n.Language
 import app.scifin.data.SciFinDao
 import app.scifin.data.SciFinDatabase
 import app.scifin.engine.Clock
@@ -114,7 +115,8 @@ class AppSession(
     /** Guards the two caches below: the store's writes and Android's top-up worker both reach them. */
     private val notify = Mutex()
     private var lastReminders: List<ReminderRegistration>? = null
-    private var lastNewMonth: Boolean? = null
+    /** On or off, and the language its text was armed in: the OS holds the text, so a new language re-arms it (§2.7). */
+    private var lastNewMonth: Pair<Boolean, Language>? = null
 
     /**
      * Hands the OS only what changed since the last call in this process: on Windows each call is
@@ -126,8 +128,8 @@ class AppSession(
             I18n.current = I18n.resolve(d.settings.language)
             val regs = Reminders.registrations(d, Reminders.localNow(clock))
             if (regs != lastReminders) { scheduler.syncReminders(regs); lastReminders = regs }
-            val nm = d.settings.newMonthNotificationEnabled
-            if (nm != lastNewMonth) { scheduler.setNewMonthNotification(nm); lastNewMonth = nm }
+            val nm = d.settings.newMonthNotificationEnabled to I18n.current
+            if (nm != lastNewMonth) { scheduler.setNewMonthNotification(nm.first); lastNewMonth = nm }
         }
     }
 
@@ -181,7 +183,7 @@ class AppSession(
     suspend fun clearSchedule() {
         notify.withLock {
             scheduler.syncReminders(emptyList()); scheduler.setNewMonthNotification(false)
-            lastReminders = emptyList(); lastNewMonth = false
+            lastReminders = emptyList(); lastNewMonth = false to I18n.current
         }
     }
 
@@ -194,10 +196,12 @@ class AppSession(
     suspend fun restoreAfterBoot() {
         notify.withLock {
             val stored = activeOrFirst(db.dao()) ?: return
+            // a background run has no screen that set the language: the reminders, the New Month text and any notice are composed in it
+            I18n.current = I18n.resolve(stored.settings.language)
             val d = Recurring.advanceDueDates(stored, clock.today())
             val regs = Reminders.registrations(d, Reminders.localNow(clock))
             scheduler.restoreAfterBoot(regs, d.settings.newMonthNotificationEnabled)
-            lastReminders = regs; lastNewMonth = d.settings.newMonthNotificationEnabled
+            lastReminders = regs; lastNewMonth = d.settings.newMonthNotificationEnabled to I18n.current
         }
         // the same daily run writes §4.7's automatic copy when one is due; a failure is recorded, never thrown
         runCatching { runCopy() }

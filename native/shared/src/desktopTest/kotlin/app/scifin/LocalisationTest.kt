@@ -6,6 +6,7 @@ import app.scifin.i18n.I18n
 import app.scifin.i18n.Language
 import app.scifin.i18n.SHIPPED
 import app.scifin.i18n.tr
+import app.scifin.i18n.trc
 import app.scifin.i18n.trf
 import app.scifin.i18n.trp
 import app.scifin.model.moneyOf
@@ -35,6 +36,8 @@ class LocalisationTest {
         private const val LIT = "\"((?:[^\"\\\\\\n]|\\\\.)*)\""
         private val CALL = Regex("""\b(tr|trf|stored)\(\s*$LIT""")
         private val PLURAL = Regex("""\btrp\(\s*$LIT\s*,\s*$LIT""")
+        /** [trc]'s key: the sense, then the English. */
+        private val SENSE = Regex("""\btrc\(\s*$LIT\s*,\s*$LIT""")
 
         fun unescape(s: String): String = s.replace(Regex("""\\u([0-9a-fA-F]{4})""")) { it.groupValues[1].toInt(16).toChar().toString() }
             .replace("\\\"", "\"").replace("\\$", "$").replace("\\\\", "\\")
@@ -42,7 +45,8 @@ class LocalisationTest {
 
     /** Every English key in the source. */
     private val keys: Set<String> by lazy {
-        sources.flatMap { (_, text) -> CALL.findAll(text).map { it.groupValues[2] } + PLURAL.findAll(text).flatMap { sequenceOf(it.groupValues[1], it.groupValues[2]) } }
+        sources.flatMap { (_, text) -> CALL.findAll(text).map { it.groupValues[2] } + PLURAL.findAll(text).flatMap { sequenceOf(it.groupValues[1], it.groupValues[2]) } +
+            SENSE.findAll(text).map { "${it.groupValues[1]}::${it.groupValues[2]}" } }
             .map(::unescape).toSet()
     }
 
@@ -98,6 +102,12 @@ class LocalisationTest {
         assertEquals("Log hours", tr("Log hours"))
         assertEquals("6 h logged for the payday on Nov 13", trf("{0} logged for the payday on {1}", "6 h", "Nov 13"))
         assertEquals("1 day", trp("{0} day", "{0} days", 1)); assertEquals("3 days", trp("{0} day", "{0} days", 3))
+        assertEquals("Log", trc("noun", "Log"))
+    }
+
+    @Test fun `one English word in two senses takes each sense's own word`() {
+        I18n.current = Language.IT
+        assertEquals("Registra", tr("Log")); assertEquals("Registro", trc("noun", "Log"))
     }
 
     @Test fun `amounts and dates take the language's own style`() {

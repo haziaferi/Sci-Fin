@@ -13,7 +13,7 @@ enum class Tab {
     BUDGET, ACTIVITY, LEARN, REPORTS, SETTINGS;
 
     val label: String get() = when (this) {
-        BUDGET -> tr("Budget"); ACTIVITY -> tr("Activity"); LEARN -> tr("Learn"); REPORTS -> tr("Reports"); SETTINGS -> tr("Settings")
+        BUDGET -> tr("Budget"); ACTIVITY -> tr("Activity"); LEARN -> tr("Science"); REPORTS -> tr("Reports"); SETTINGS -> tr("Settings")
     }
 }
 

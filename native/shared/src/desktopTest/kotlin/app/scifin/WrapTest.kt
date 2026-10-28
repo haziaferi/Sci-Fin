@@ -53,7 +53,7 @@ class WrapTest {
     @Test fun `the tab bar picks one label size for all five -- the largest step at which the widest fits, never below 9sp`() {
         val widthPerSpPerChar = 0.6f   // a fake measurer: width grows with size and length, like real glyphs do
         val measure = { text: String, size: androidx.compose.ui.unit.TextUnit -> text.length * size.value * widthPerSpPerChar }
-        val labels = listOf("Budget", "Activity", "Learn", "Reports", "Settings")
+        val labels = listOf("Budget", "Activity", "Science", "Reports", "Settings")
         assertEquals(13.5f, fitLabelSize(labels, limitPx = 200f, max = 13.5.sp, measure).value)          // fits as is
         assertEquals(10.0f, fitLabelSize(labels, limitPx = 48f, max = 13.5.sp, measure).value)           // "Settings" (8 chars) needs 8*0.6*s <= 48 -> s <= 10
         assertEquals(9.0f, fitLabelSize(labels, limitPx = 10f, max = 13.5.sp, measure).value)            // the floor
