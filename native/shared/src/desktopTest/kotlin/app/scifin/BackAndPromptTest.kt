@@ -42,7 +42,9 @@ class BackAndPromptTest {
         st.selectTab(Tab.ACTIVITY); st.push(Route.Ledger); st.openSheet(Sheet.Entry())
         assertTrue(st.handlesBack(st.state.value))
         assertTrue(st.back()); assertNull(st.state.value.sheet); assertEquals(Route.Ledger, st.state.value.route)   // the sheet, not the screen
-        assertTrue(st.back()); assertFalse(st.handlesBack(st.state.value))                                            // then the screen; at the root, the host's
+        assertTrue(st.back()); assertEquals(listOf(Route.TabRoute(Tab.ACTIVITY)), st.state.value.routes)              // then the screen
+        assertTrue(st.back()); assertEquals(Tab.BUDGET, st.state.value.tab)                                            // then the page opened before
+        assertFalse(st.handlesBack(st.state.value))                                                                     // and at the first, the host's
         st.openSheet(Sheet.Reconcile(Recurring.Reconcile(Fixture.profile.recurringExpenses.first().id, 0, Fixture.simDate)))
         assertFalse(st.closesOnBack(st.state.value))
     }
@@ -55,9 +57,42 @@ class BackAndPromptTest {
         assertTrue(st.back()); assertEquals(Tab.SETTINGS, st.state.value.tab)                  // the sub-page first
         assertTrue(st.handlesBack(st.state.value))
         assertTrue(st.back()); assertEquals(before, st.state.value.routes)                      // then Budget, on Categories
-        assertFalse(st.handlesBack(st.state.value))                                              // and from there, the host's
-        st.selectTab(Tab.REPORTS); st.selectTab(Tab.SETTINGS); st.selectTab(Tab.SETTINGS)        // reselecting keeps the origin
+        assertTrue(st.back()); assertEquals(listOf(Route.TabRoute(Tab.BUDGET)), st.state.value.routes)   // then Envelopes, opened before it
+        assertFalse(st.handlesBack(st.state.value))                                              // and from the first page, the host's
+        st.selectTab(Tab.REPORTS); st.selectTab(Tab.SETTINGS); st.selectTab(Tab.SETTINGS)        // reselecting is not a new page
         assertTrue(st.back()); assertEquals(Tab.REPORTS, st.state.value.tab)
+    }
+
+    /** Owner, 2026-10-28: Back returns to the last page opened -- a tab or its sub-page -- never to a screen pushed on it. */
+    @Test fun `Back returns to the last page opened, not the screen that was open on it`() {
+        val st = store()
+        st.selectTab(Tab.ACTIVITY); st.push(Route.Ledger)
+        st.selectTab(Tab.LEARN)
+        assertTrue(st.handlesBack(st.state.value))
+        assertTrue(st.back()); assertEquals(listOf(Route.TabRoute(Tab.ACTIVITY)), st.state.value.routes)   // Activity, not its ledger
+        st.selectTab(Tab.REPORTS); st.selectSub("spending"); st.selectTab(Tab.LEARN)
+        assertTrue(st.back()); assertEquals(Route.TabRoute(Tab.REPORTS, "spending"), st.state.value.route)
+        assertTrue(st.back()); assertEquals(Route.TabRoute(Tab.REPORTS), st.state.value.route)              // a sub-page is a page too
+        assertTrue(st.back()); assertEquals(Tab.ACTIVITY, st.state.value.tab)
+    }
+
+    /** Owner, 2026-10-28: the floating + is hidden for the whole tour, a stop's window included. */
+    @Test fun `the floating + is not drawn over a tour stop's window`() {
+        val st = store(Fixture.profile.let { it.copy(settings = it.settings.copy(goalPromptDismissed = true)) })
+        fun fabDrawn(): Boolean {
+            val seen = HashSet<String>()
+            ImageComposeScene(width = 360, height = 780, density = UnitDensity(1f)).use { scene ->
+                scene.setContent { CompositionLocalProvider(LocalProbe provides { n, _ -> seen += n }) { SciFinApp(st, targetDp = 48, systemDark = false) } }
+                scene.render(); scene.render(16_000_000)
+            }
+            return "el:fab" in seen
+        }
+        st.selectTab(Tab.BUDGET)
+        assertTrue(fabDrawn())                     // Budget's root shows it
+        st.showStop(3)                             // Recurring Expenses, on Budget
+        assertFalse(fabDrawn())
+        st.closeStop()
+        assertTrue(fabDrawn())
     }
 
     @Test fun `while the goal prompt is up the floating + is not drawn over it`() {
