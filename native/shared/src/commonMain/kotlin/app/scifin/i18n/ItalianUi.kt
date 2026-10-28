@@ -297,6 +297,7 @@ internal val ITALIAN_UI: Map<String, String> = mapOf(
     "Lock now" to "Blocca ora",
     "Lock with a PIN" to "Blocca con un PIN",
     "Log" to "Registra",
+    "noun::Log" to "Registro",
     "Log a purchase" to "Registra un acquisto",
     "Log hours" to "Registra ore",
     "Log hours whenever you work them; they reach Savings on payday, when you confirm what arrived. The estimate is hours × rate before deductions until your first payday, then it follows what your recent paydays brought." to "Registra le tue ore di lavoro; si aggiungono ai Risparmi il giorno di paga, in cui confermi quanto è arrivato. Fino al primo giorno di paga la stima è ore × tariffa al lordo delle trattenute, poi si basa su quanto hai ricevuto negli ultimi giorni di paga.",

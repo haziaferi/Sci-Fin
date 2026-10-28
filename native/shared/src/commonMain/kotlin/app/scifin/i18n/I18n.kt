@@ -56,6 +56,15 @@ fun tr(en: String): String {
     return cat[en] ?: storedTemplate(en, cat) ?: en
 }
 
+/**
+ * [en] where English uses one word in two senses that another language tells apart ("Log" the verb and the noun):
+ * a catalogue holds it under "[sense]::[en]", and English shows [en].
+ */
+fun trc(sense: String, en: String): String {
+    if (I18n.current == Language.EN) return en
+    return CATALOGUES[I18n.current]?.get("$sense::$en") ?: en
+}
+
 /** [en] in the current language, with `{0}`, `{1}`… replaced by [args] in order. */
 fun trf(en: String, vararg args: Any?): String {
     var s = tr(en)

@@ -11,6 +11,9 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import app.scifin.i18n.I18n
+import app.scifin.i18n.Language
 import app.scifin.app.AppStore
 import app.scifin.model.Theme
 import app.scifin.notify.NotificationPermission
@@ -28,6 +31,38 @@ class NotifyAuditTest {
         AppSession(db, sched, FakeClock(LocalDate(2026, 11, 14)), Ids("n")::next).restoreAfterBoot()
         assertEquals(LocalDate(2026, 11, 27), sched.reminders.single().fireAt.date)
         assertEquals(LocalDate(2026, 9, 30), db.dao().load("p-1")!!.recurringExpenses.single().dueDate)   // nothing saved: that is the next open's job
+    }
+
+    /** §2.7: the background run has no screen to have set the language, so it reads it from the Profile itself. */
+    @Test fun `the top-up composes in the Profile's language`() = runTest {
+        val db = buildInMemorySciFinDatabase()
+        val rent = RecurringExpense("rent", "p-1", "Affitto", null, moneyOf(950.0), Cadence.MONTHLY, firstDueDate = LocalDate(2026, 1, 30),
+            dueDate = LocalDate(2026, 11, 30), dueDateAnchorDay = 30, dateMode = DateMode.FIXED_DATE, reminderEnabled = true, reminderLeadDays = 3)
+        val d = profileWith().let { it.copy(settings = it.settings.copy(language = "it"), recurringExpenses = listOf(rent)) }
+        db.dao().save(d); db.dao().upsertAppState(AppState(activeProfileId = d.profileId))
+        val sched = RecordingScheduler()
+        try {
+            I18n.current = Language.EN   // as a process woken only for the top-up starts
+            AppSession(db, sched, FakeClock(LocalDate(2026, 11, 14)), Ids("n")::next).restoreAfterBoot()
+            assertTrue("scade il" in sched.reminders.single().body, sched.reminders.single().body)
+        } finally { I18n.current = Language.EN }
+    }
+
+    /** §2.7: the OS holds New Month's text, so changing the language arms it again; changing nothing does not. */
+    @Test fun `a new language re-arms New Month`() = runTest {
+        val db = buildInMemorySciFinDatabase()
+        var newMonthCalls = 0
+        val sched = object : RecordingScheduler() { override fun setNewMonthNotification(enabled: Boolean) { newMonthCalls++; super.setNewMonthNotification(enabled) } }
+        val store = AppStore(AppSession(db, sched, FakeClock(LocalDate(2026, 9, 14)), Ids("l")::next), db, this)
+        try {
+            store.start(); store.createProfile("Ana", Theme.SWISS_BLUE, false).join(); store.completeOnboarding().join()
+            val before = newMonthCalls
+            store.updateSettings { it.copy(language = "en") }.join()
+            assertEquals(before, newMonthCalls)
+            store.updateSettings { it.copy(language = "it") }.join()
+            assertEquals(before + 1, newMonthCalls)
+            assertEquals(Language.IT, I18n.current)
+        } finally { I18n.current = Language.EN }
     }
 
     @Test fun `on Android 13+ a denial reads as not-asked, and once the question was asked the store calls it a denial`() = runTest {

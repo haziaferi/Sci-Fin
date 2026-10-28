@@ -1,6 +1,7 @@
 package app.scifin.ui.screens
 
 import app.scifin.i18n.tr
+import app.scifin.i18n.trc
 import app.scifin.i18n.trf
 import app.scifin.i18n.trp
 import app.scifin.ui.components.FigureLabel
@@ -147,7 +148,7 @@ fun ActivityScreen(state: UiState, store: AppStore) {
             AddRow(tr("New account")) { store.push(Route.AccountEditor(null)) }
         }
         Column(verticalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
-            SectionLabel(tr("Log"))
+            SectionLabel(trc("noun", "Log"))
             LedgerGroup {
                 NavRow(Lucide.ROTATE_CCW, tr("Activity log"), trp("{0} entry", "{0} entries", d.transactions.size), decorative = true, selected = shown == Route.Ledger) { open(Route.Ledger) }
                 NavRow(Lucide.DATABASE, tr("Import a statement"), d.importState.lastImportDate?.let { trf("Last {0}", formatDate(it)) } ?: tr("CSV or OFX"), decorative = true, selected = shown == Route.Import) { open(Route.Import) }

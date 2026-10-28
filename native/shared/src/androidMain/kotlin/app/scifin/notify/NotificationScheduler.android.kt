@@ -151,11 +151,14 @@ class AndroidNotificationScheduler(
     }
 
     override fun setNewMonthNotification(enabled: Boolean) {
+        // the session calls this again whenever the language changes, so the channels' names follow it (§2.7)
+        ensureChannels()
         if (!enabled) {
             work.cancelUniqueWork(WORK_NEW_MONTH)
             return
         }
-        enqueueNextNewMonth(context)
+        // composed now, in the Profile's language: the worker may run in a process that never loaded it (§2.7)
+        enqueueNextNewMonth(context, NewMonthCopy.TITLE, NewMonthCopy.BODY)
     }
 
     override fun restoreAfterBoot(
@@ -199,7 +202,7 @@ class AndroidNotificationScheduler(
  * occurrence enqueues the next: a self-renewing chain that survives reboot with the rest of
  * WorkManager's queue and needs no fixed horizon.
  */
-internal fun enqueueNextNewMonth(context: Context) {
+internal fun enqueueNextNewMonth(context: Context, title: String, body: String) {
     val tz = TimeZone.currentSystemDefault()
     val next = Reminders.nextNewMonthFire(Clock.System.now().toLocalDateTime(tz))
     val delayMs = next.toInstant(tz).toEpochMilliseconds() -
@@ -207,6 +210,7 @@ internal fun enqueueNextNewMonth(context: Context) {
 
     val request = OneTimeWorkRequestBuilder<NewMonthWorker>()
         .setInitialDelay(delayMs.coerceAtLeast(0), TimeUnit.MILLISECONDS)
+        .setInputData(workDataOf(KEY_TITLE to title, KEY_BODY to body))
         .build()
 
     WorkManager.getInstance(context)
@@ -227,11 +231,14 @@ class NotifyWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params)
     }
 }
 
-/** Delivers the New Month ping, then arms the next one. */
+/** Delivers the New Month ping, then arms the next one with the same text. Composes nothing, like [NotifyWorker]. */
 class NewMonthWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params) {
     override fun doWork(): Result {
-        post(applicationContext, CHANNEL_NEW_MONTH, NEW_MONTH_ID, NewMonthCopy.TITLE, NewMonthCopy.BODY)
-        enqueueNextNewMonth(applicationContext)
+        // a ping armed before the text travelled with it has none; English is what it was composed in then
+        val title = inputData.getString(KEY_TITLE) ?: NewMonthCopy.TITLE
+        val body = inputData.getString(KEY_BODY) ?: NewMonthCopy.BODY
+        post(applicationContext, CHANNEL_NEW_MONTH, NEW_MONTH_ID, title, body)
+        enqueueNextNewMonth(applicationContext, title, body)
         return Result.success()
     }
 }
