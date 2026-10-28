@@ -22,7 +22,7 @@ private val MONTHS_SHORT = mapOf(
 private fun separators(): Pair<Char, Char> = if (I18n.current == Language.IT) '.' to ',' else ',' to '.'
 
 /** Whether the symbol follows the figure, as Italian writes it. */
-private fun symbolAfter(): Boolean = I18n.current == Language.IT
+fun symbolAfter(): Boolean = I18n.current == Language.IT
 
 /** Symbol first where the currency has one the app knows; otherwise the code itself -- never another currency's symbol. */
 fun currencySymbolOf(code: String): String = when (code) { "EUR" -> "€"; "USD" -> "$"; "GBP" -> "£"; else -> "$code " }

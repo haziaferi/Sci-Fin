@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.offset
+import app.scifin.engine.symbolAfter
 import app.scifin.ui.LocalProbe
 import app.scifin.ui.LocalTokens
 import app.scifin.ui.Lucide
@@ -166,16 +167,21 @@ fun FieldLabel(text: String) {
     Text(text, color = t.palette.txt2, fontSize = t.type.body, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = t.spacing.u * 0.75f))
 }
 
-/** `.field`: a bordered single-line text field; [prefix] gives `.field-cur`'s currency symbol; [label] is its name for a screen reader (the [FieldLabel] text); [masked] shows dots for a PIN or password. */
+/**
+ * `.field`: a bordered single-line text field; [prefix] gives `.field-cur`'s currency symbol, `%` or `#`; [label] is its name for a
+ * screen reader (the [FieldLabel] text); [masked] shows dots for a PIN or password. A currency symbol or `%` goes where the language
+ * writes it -- after the figure in Italian (§2.7); `#` marks a count and stays in front.
+ */
 @Composable
 fun TextField(value: String, onChange: (String) -> Unit, modifier: Modifier = Modifier, placeholder: String = "", prefix: String? = null, keyboard: KeyboardType = KeyboardType.Text, singleLine: Boolean = true, label: String? = null, masked: Boolean = false) {
     val t = LocalTokens.current; val p = t.palette
+    val after = prefix != null && prefix != "#" && symbolAfter()
     Row(
         modifier.fillMaxWidth().heightIn(min = t.spacing.target).background(p.surf, RoundedCornerShape(t.radii.md))
             .border(t.strokes.ctl, p.bordStrong, RoundedCornerShape(t.radii.md)).padding(horizontal = t.spacing.u * 1.5f),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.gap),
     ) {
-        if (prefix != null) Text(prefix, color = p.txt2, fontSize = t.type.body, fontWeight = FontWeight.Bold)
+        if (prefix != null && !after) Text(prefix, color = p.txt2, fontSize = t.type.body, fontWeight = FontWeight.Bold)
         BasicTextField(
             value = value, onValueChange = onChange, singleLine = singleLine,
             textStyle = TextStyle(color = p.txt, fontSize = t.type.body), cursorBrush = SolidColor(p.acc),
@@ -184,6 +190,7 @@ fun TextField(value: String, onChange: (String) -> Unit, modifier: Modifier = Mo
             modifier = Modifier.weight(1f).let { m -> if (label == null) m else m.semantics { contentDescription = label } },
             decorationBox = { inner -> Box { if (value.isEmpty()) Text(placeholder, color = p.txt3, fontSize = t.type.body); inner() } },
         )
+        if (after) Text(prefix!!.trim(), color = p.txt2, fontSize = t.type.body, fontWeight = FontWeight.Bold)
     }
 }
 
