@@ -275,7 +275,7 @@ internal val ITALIAN_UI: Map<String, String> = mapOf(
     "Last restore: {0}." to "Ultimo ripristino: {0}.",
     "Last {0}" to "Ultima: {0}",
     "Later" to "Più tardi",
-    "Learn" to "Scienza",
+    "Science" to "Scienza",
     "Leave blank for ongoing expenses like rent or a subscription. Set for a finite one, like a loan payoff date." to "Lascia in bianco per spese continuative come l’affitto o un abbonamento. Imposta una data per una spesa con un termine predefinito, ad esempio quella di estinzione di un prestito.",
     "Leave it as swept" to "Lascia il prelievo com’è",
     "Leaving is switching to another app or minimising Sci-Fin." to "\"Uscire\" significa passare a un’altra app o ridurre a icona Sci-Fin.",
