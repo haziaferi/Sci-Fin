@@ -4,7 +4,7 @@
 Log income  A tap Savings -> choices   B a button on the Income row   C an Income direction in the floating +'s sheet
   taps       to start logging income, from Budget and from Activity (counted from each option's flow)
   parity     §3.6/§3.7: Activity's Savings carries the same affordances as Budget's
-  refs       the reference apps' own entry points, observed on the 6T on 2026-10-09 (design/refs-apps/income-*):
+  refs       the reference apps' own entry points, observed on the 6.4-inch test phone (1080 x 2340) on 2026-10-09 (design/refs-apps/income-*):
              income as a choice inside the main add control 5 of 7 (Cashew, Money Manager, Wallet, My Expenses, Ivy),
              a separate visible income control 2 of 7 (Monefy's button, Goodbudget's Fill Envelopes), behind a tap on
              the balance 0 of 7

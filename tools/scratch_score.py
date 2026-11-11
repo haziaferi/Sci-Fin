@@ -1,7 +1,7 @@
 """Score the from-scratch candidates against the purpose inventory (2026-10-08).
 
 Reads native/shared/build/scratch/<variant>-light-<tab>.png and .json (ScratchRenderTest, the
-OnePlus 6T's geometry: 1080 x 2340 px, density 2.625). The ranks come from
+6.4-inch test phone's geometry: 1080 x 2340 px, density 2.625). The ranks come from
 design/scratch-2026-10-08/inventory.md; the assumptions are the constants below.
 
   order    Kendall's tau between purpose rank and vertical position, over the sections every

@@ -1,0 +1,3 @@
+# GitHub's language bar: the design record and the HTML prototypes are not the app
+design/** linguist-documentation
+*.html linguist-detectable=false

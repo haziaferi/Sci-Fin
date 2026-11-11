@@ -15,7 +15,7 @@ class TutorialWindowTest {
 
     private val gutter = 30f
     private val w = 1080f
-    private val h = 2184f          // the OnePlus' frame: 2412 less a 96px status bar and a 132px navigation bar
+    private val h = 2184f          // the 6.7-inch test phone's frame (1080 x 2412): 2412 less a 96px status bar and a 132px navigation bar
     private val bubble = 900f
 
     private fun fits(y: Float, cardH: Float) = y >= 0f && y + cardH <= h
