@@ -1,7 +1,7 @@
 """The reference-app comparison (2026-10-08): every screen read the same way, from its pixels.
 
 Money figures are found by OCR (Tesseract, word boxes), so the 23 reference captures from the
-OnePlus 6T and Sci-Fin's renders at the 6T's own geometry (1080 x 2340, density 2.625) are measured
+6.4-inch test phone (Snapdragon 845) and Sci-Fin's renders at its geometry (1080 x 2340, density 2.625) are measured
 by one method. All distances are in dp (px / DENSITY).
 
   key figures  money values at least as tall as the screen's median money value -- the figures a

@@ -43,3 +43,11 @@ design/axis-harvest-*/inventory.json
 design/feature-map.json
 design/feature-map.md
 tools/feature_map.py
+
+# device records: they name the owner's phones (model and build), so they stay local
+design/Sci-Fin on the Phone.html
+design/critique-2026-09-15.md
+design/audit-2026-09-25.md
+design/axis-harvest-2026-10-14/scifin_baseline.json
+design/refs-apps/income-bc-1.png
+design/refs-apps/income-bc-1.xml

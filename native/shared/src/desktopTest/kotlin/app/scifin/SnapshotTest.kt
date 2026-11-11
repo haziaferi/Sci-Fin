@@ -103,7 +103,7 @@ class SnapshotTest {
 
     @Test fun `names carry version and device, and no timestamp, so they are written once`() {
         assertEquals("scifin-v2-DESKTOP.db", Snapshot.nameFor(2, "DESKTOP"))
-        assertEquals("scifin-v2-OnePlus9Pro.db", Snapshot.nameFor(2, "OnePlus 9 Pro"))
+        assertEquals("scifin-v2-TestPhone2.db", Snapshot.nameFor(2, "Test Phone 2"))
         assertEquals("scifin-vunknown-A.db", Snapshot.nameFor(null, "A"))
     }
 
