@@ -293,6 +293,10 @@ internal fun showsFloatingAdd(state: UiState, wc: WidthClass): Boolean {
     return state.routes.size == 1 || (wc != WidthClass.COMPACT && root.tab == Tab.ACTIVITY && shownDetail(state) != null)
 }
 
+/** Whether the + (phone) or Add (desktop) is drawn now: never over the tour -- a slide or a stop's window (owner, 2026-10-28) -- nor the goal prompt. */
+private fun drawsAdd(state: UiState, wc: WidthClass): Boolean =
+    showsFloatingAdd(state, wc) && state.tutorialStop == null && state.tourSlide == null && !goalPromptShows(state)
+
 /**
  * The desktop's content area (§3.6, owner 2026-10-22, from the Add Bench): the screen, and over it one labelled
  * Add fixed at the top right of the content -- the edge of the right-most column, not the window's, so it stays
@@ -304,7 +308,7 @@ private fun RowScope.DesktopContent(state: UiState, store: AppStore, wc: WidthCl
     val edges = remember { mutableStateMapOf<Any, Float>() }
     var boxRight by remember { mutableStateOf(0f) }
     var addHeight by remember { mutableStateOf(0f) }
-    val shown = showsFloatingAdd(state, wc) && state.tutorialStop == null && state.tourSlide == null && !goalPromptShows(state)
+    val shown = drawsAdd(state, wc)
     val density = LocalDensity.current
     Box(Modifier.weight(1f).fillMaxHeight().onGloballyPositioned { boxRight = it.positionInWindow().x + it.size.width }) {
         val headerMin = if (shown) with(density) { addHeight.toDp() } else Dp.Unspecified
@@ -322,7 +326,7 @@ private fun RowScope.DesktopContent(state: UiState, store: AppStore, wc: WidthCl
 /** The floating + (phone only, §3.6): the last area and target used. The desktop's Add is [DesktopContent]'s. */
 @Composable
 private fun BoxScope.FloatingAddOver(state: UiState, store: AppStore, wc: WidthClass) {
-    if (wc != WidthClass.COMPACT || !showsFloatingAdd(state, wc) || goalPromptShows(state)) return
+    if (wc != WidthClass.COMPACT || !drawsAdd(state, wc)) return
     val t = LocalTokens.current
     FloatingAdd(Modifier.align(Alignment.BottomEnd).padding(end = t.spacing.pad, bottom = t.spacing.pad)) { store.openSheet(Sheet.Entry()) }
 }

@@ -63,6 +63,9 @@ import kotlin.coroutines.cancellation.CancellationException
 import app.scifin.i18n.tr
 import app.scifin.i18n.trf
 
+/** How many pages Back can return through; older ones are dropped (owner, 2026-10-28). */
+private const val PAGES_KEPT = 20
+
 /** §4.3: the count and the two totals of a confirmed import. */
 data class ImportDone(val count: Int, val out: Money, val inn: Money)
 
@@ -106,8 +109,8 @@ data class UiState(
     val tutorialStop: Int? = null,
     /** §12: the store was unreadable and moved aside as this copy; the screen that says so is owed. */
     val damagedCopy: String? = null,
-    /** The routes Settings was opened from, which Back returns to; null elsewhere. */
-    val settingsFrom: List<Route>? = null,
+    /** The pages opened before this one, most recent last: Back at a page's root returns to the last of them (owner, 2026-10-28). */
+    val pages: List<Route.TabRoute> = emptyList(),
     /** §4.7's app lock as Settings and the gate need it -- never the PIN or its hash; null while no PIN is set. */
     val lock: LockSummary? = null,
     /** The gate is up: nothing beneath it is drawn. */
@@ -249,11 +252,10 @@ class AppStore(
         refreshTrash()
     }
 
-    /** A change of Profile keeps nothing read against the old one (§8.3); Settings' origin keeps only its tab. */
+    /** A change of Profile keeps nothing read against the old one (§8.3); the pages opened are places, not data, and stay. */
     private fun UiState.forProfile(d: ProfileData?): UiState = copy(
         data = d, sheet = null, importReview = null, importError = null, importDone = null,
         notificationPermission = readPermission(d?.settings),
-        settingsFrom = settingsFrom?.let { listOf(it.first()) },
     )
 
     // ---- §11.1 ----------------------------------------------------------------------------
@@ -349,7 +351,7 @@ class AppStore(
                 add(Route.TabRoute(stop.tab, stop.sub))
                 stop.settingsPage?.let { add(Route.Settings(it)) }
             }
-            st.copy(tutorialStop = i, routes = routes, settingsFrom = null, sheet = null)
+            st.copy(tutorialStop = i, routes = routes, pages = st.opened(routes.first() as Route.TabRoute), sheet = null)
         }
     }
 
@@ -359,20 +361,29 @@ class AppStore(
     /** Step 5: Budget home. `onboardingComplete` is one-way (§12); §11.3's prompt waits for Savings on its own. */
     fun completeOnboarding(): Job {
         val job = dispatch { it.copy(settings = it.settings.copy(onboardingComplete = true, onboardingStep = null)) }
-        _state.update { it.copy(routes = listOf(Route.TabRoute(Tab.BUDGET)), sheet = null) }
+        _state.update { it.copy(routes = listOf(Route.TabRoute(Tab.BUDGET)), pages = emptyList(), sheet = null) }
         return job
     }
 
     // ---- navigation ------------------------------------------------------------------------
 
+    /**
+     * The history with the page now showing added, when [next] is a different page: a tab, or a tab's own sub-page
+     * (Envelopes, Categories; a report). Back returns to pages, never to the screens that were pushed on them (owner, 2026-10-28).
+     */
+    private fun UiState.opened(next: Route.TabRoute): List<Route.TabRoute> {
+        val now = routes.firstOrNull() as? Route.TabRoute ?: return pages
+        return if (now == next || pages.lastOrNull() == now) pages else (pages + now).takeLast(PAGES_KEPT)
+    }
+
     fun selectTab(tab: Tab) = _state.update {
-        val from = if (tab == Tab.SETTINGS) (if (it.tab == Tab.SETTINGS) it.settingsFrom else it.routes) else null
-        it.copy(routes = listOf(Route.TabRoute(tab)), settingsFrom = from)
+        val next = Route.TabRoute(tab)
+        it.copy(routes = listOf(next), pages = it.opened(if (it.tab == tab) it.routes.first() as Route.TabRoute else next))
     }
 
     fun selectSub(sub: String) = _state.update { s ->
         val top = s.routes.first() as Route.TabRoute
-        s.copy(routes = listOf(top.copy(sub = sub)) + s.routes.drop(1))
+        s.copy(routes = listOf(top.copy(sub = sub)) + s.routes.drop(1), pages = s.opened(top.copy(sub = sub)))
     }
 
     fun push(route: Route) = _state.update { it.copy(routes = it.routes + route) }
@@ -399,9 +410,9 @@ class AppStore(
         s.sheet is Sheet.Reconcile || (s.route as? Route.Onboarding)?.let { !it.forNewProfile || it.step > 1 } ?: false
 
     // §4.7: Back on the lock screen is the system's -- it leaves the app, it never reaches what is beneath
-    fun handlesBack(s: UiState): Boolean = !s.locked && (s.tourSlide != null || s.tutorialStop != null || holdsBack(s) || closesOnBack(s) || s.routes.size > 1 || (s.tab == Tab.SETTINGS && s.settingsFrom != null))
+    fun handlesBack(s: UiState): Boolean = !s.locked && (s.tourSlide != null || s.tutorialStop != null || holdsBack(s) || closesOnBack(s) || s.routes.size > 1 || s.pages.isNotEmpty())
 
-    /** Back closes an open sheet first, then pops a push; on a tab root there is nothing to pop and the host decides (Android: finish). */
+    /** Back closes an open sheet first, then pops a push, then returns to the last page opened; with none left the host decides (Android: finish). */
     fun back(): Boolean {
         val s = _state.value
         if (s.locked) return false
@@ -409,10 +420,10 @@ class AppStore(
         if (s.tutorialStop != null) { closeStop(); return true }
         if (holdsBack(s)) return true
         if (closesOnBack(s)) { closeSheet(); return true }
-        if (s.routes.size <= 1 && s.tab == Tab.SETTINGS && s.settingsFrom != null) {
-            _state.update { it.copy(routes = it.settingsFrom!!, settingsFrom = null) }; return true
+        if (s.routes.size <= 1) {
+            val last = s.pages.lastOrNull() ?: return false
+            _state.update { it.copy(routes = listOf(last), pages = it.pages.dropLast(1)) }; return true
         }
-        if (s.routes.size <= 1) return false
         _state.update { it.copy(routes = it.routes.dropLast(1)) }
         return true
     }
@@ -468,14 +479,14 @@ class AppStore(
             val m = Accounts.loanMath(draft.principal, draft.rate, draft.termMonths, draft.rateType)
             d.copy(goals = d.goals + Accounts.saveForItGoal(draft.principal, m, name, clock.today(), newId(), d.profileId))
         }
-        _state.update { it.copy(sheet = null, routes = listOf(Route.TabRoute(Tab.BUDGET))) }
+        _state.update { it.copy(sheet = null, routes = listOf(Route.TabRoute(Tab.BUDGET)), pages = it.opened(Route.TabRoute(Tab.BUDGET))) }
         return job
     }
 
     /** "Get loan": the Account and its payment, atomic; the calculator closes onto Activity, where both now are. */
     fun loanGetLoan(draft: LoanDraft, accountName: String, expenseName: String, autoUpdate: Boolean): Job {
         val job = dispatch { Accounts.getLoan(it, draft.principal, draft.rate, draft.termMonths, draft.rateType, accountName, expenseName, autoUpdate, clock, newId) }
-        _state.update { it.copy(sheet = null, routes = listOf(Route.TabRoute(Tab.ACTIVITY))) }
+        _state.update { it.copy(sheet = null, routes = listOf(Route.TabRoute(Tab.ACTIVITY)), pages = it.opened(Route.TabRoute(Tab.ACTIVITY))) }
         return job
     }
 
