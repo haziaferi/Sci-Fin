@@ -116,7 +116,8 @@ fun SettingsScreen(state: UiState, store: AppStore) {
         NavRow(Lucide.PALETTE, tr("Appearance & accessibility"), "${s.theme.label} · $modeCaption", selected = shown == SettingsPage.APPEARANCE) { open(Route.Settings(SettingsPage.APPEARANCE)) }
         NavRow(Lucide.BANKNOTE, tr("Income"), incomeCaption, selected = shown == SettingsPage.INCOME) { open(Route.Settings(SettingsPage.INCOME)) }
         NavRow(Lucide.BELL, tr("Notifications"), if (s.newMonthNotificationEnabled) tr("New Month on") else tr("New Month off"), selected = shown == SettingsPage.NOTIFICATIONS) { open(Route.Settings(SettingsPage.NOTIFICATIONS)) }
-        SettingRow(Lucide.LANDMARK, tr("Show Savings vs. Owed in Reports"), tr("Off by default — only useful once there’s a liability to weigh against")) {
+        // its line only while off, as every setting's (owner, 2026-11-21)
+        SettingRow(Lucide.LANDMARK, tr("Show Savings vs. Owed in Reports"), if (s.savingsVsOwedEnabled) "" else tr("Off by default — only useful once there’s a liability to weigh against")) {
             Switch(s.savingsVsOwedEnabled) { store.updateSettings { it.copy(savingsVsOwedEnabled = !it.savingsVsOwedEnabled) } }
         }
         SectionLabel(tr("Other"))
