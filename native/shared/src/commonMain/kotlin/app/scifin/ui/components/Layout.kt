@@ -29,7 +29,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import app.scifin.ui.LocalTokens
 import app.scifin.ui.LocalWidthClass
 import app.scifin.ui.WidthClass
@@ -92,7 +91,8 @@ fun Page(title: String?, maxColumns: Int = 1, header: (@Composable () -> Unit)? 
                     Column(
                         Modifier.widthIn(max = w).fillMaxWidth()
                             .let { m -> if (edges == null) m else m.onGloballyPositioned { c -> edges[key] = c.positionInWindow().x + c.size.width } }
-                            .padding(start = t.spacing.pad, end = t.spacing.pad, bottom = t.spacing.pad, top = if (pinned) 0.dp else t.spacing.pad),
+                            .padding(start = t.spacing.pad, end = t.spacing.pad, bottom = t.spacing.pad)
+                            .let { m -> if (pinned) m else m.padding(top = t.spacing.pad) },
                         verticalArrangement = Arrangement.spacedBy(t.spacing.gap),
                     ) {
                         if (title != null) Text(title, color = t.palette.txt, fontSize = t.type.title, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = t.spacing.gap).semantics { heading() })
