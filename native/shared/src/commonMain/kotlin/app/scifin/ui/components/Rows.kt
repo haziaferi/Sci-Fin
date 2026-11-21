@@ -93,7 +93,7 @@ fun NavRow(icon: Lucide?, label: String, caption: String, leading: (@Composable 
 /** The enclosing [SettingRow]'s title, which a [Switch] in its control slot takes as its accessible name. */
 private val LocalControlLabel = compositionLocalOf<String?> { null }
 
-/** `.row-toggle`: icon, a title with a one-line description, and the control on the right. */
+/** `.row-toggle`: icon, a title with a one-line description (none when blank), and the control on the right. */
 @Composable
 fun SettingRow(icon: Lucide, title: String, description: String, control: @Composable () -> Unit) {
     val t = LocalTokens.current; val p = t.palette
@@ -109,7 +109,7 @@ fun SettingRow(icon: Lucide, title: String, description: String, control: @Compo
                 LucideIcon(icon, tint = p.txt2, size = t.icons.md)
                 Column {
                     Text(title, color = p.txt, fontSize = t.type.body, fontWeight = FontWeight.Bold)
-                    Text(description, color = p.txt2, fontSize = t.type.caption)
+                    if (description.isNotBlank()) Text(description, color = p.txt2, fontSize = t.type.caption)
                 }
             }
         },
@@ -117,7 +117,11 @@ fun SettingRow(icon: Lucide, title: String, description: String, control: @Compo
     )
 }
 
-/** `.switch`: 4.75u × 2.75u, the knob 2.25u, accent when on. Wrapped in a target-sized hit area; [label] is its accessible name. */
+/**
+ * `.switch`: 4.75u × 2.75u, the knob 2.25u, accent when on. Off, the track is outlined and the knob drawn in the strong border
+ * colour, so the switch shows at 3:1 against any ground (owner, 2026-11-21: the off track had been 1.1:1). Wrapped in a
+ * target-sized hit area; [label] is its accessible name.
+ */
 @Composable
 fun Switch(on: Boolean, label: String? = LocalControlLabel.current, onToggle: () -> Unit) {
     val t = LocalTokens.current; val p = t.palette
@@ -127,10 +131,13 @@ fun Switch(on: Boolean, label: String? = LocalControlLabel.current, onToggle: ()
             .let { m -> if (label == null) m else m.semantics { contentDescription = label } },
         contentAlignment = Alignment.Center,
     ) {
-        Box(Modifier.width(ru * 4.75f).heightIn(min = ru * 2.75f).background(if (on) p.acc else p.surf2, CircleShape)) {
+        Box(
+            Modifier.width(ru * 4.75f).heightIn(min = ru * 2.75f).background(if (on) p.acc else p.surf2, CircleShape)
+                .let { m -> if (on) m else m.border(t.strokes.ctl, p.bordStrong, CircleShape) },
+        ) {
             Box(
                 Modifier.padding(ru * 0.25f).offset(x = if (on) ru * 2f else 0.dp).size(ru * 2.25f)
-                    .background(if (on) p.onAcc else p.surf, CircleShape),
+                    .background(if (on) p.onAcc else p.bordStrong, CircleShape),
             )
         }
     }
@@ -152,19 +159,22 @@ fun PillToggle(options: List<Pair<String, String>>, selected: String, onSelect: 
     }
 }
 
-/** `.chip-row` / `.chip`: outlined pills that wrap, the chosen one on a 12 % accent wash. */
+/**
+ * `.chip-row` / `.chip`: outlined pills that wrap, the chosen one filled with the accent, as [PillToggle]'s is -- one selected
+ * look in the app, readable without colour (owner, 2026-11-21: the 12 % wash had differed from the others by hue alone).
+ */
 @Composable
 fun ChipRow(options: List<Pair<String, String>>, selected: String, onSelect: (String) -> Unit) {
     val t = LocalTokens.current; val p = t.palette
     FlowRow(Modifier.selectableGroup(), horizontalArrangement = Arrangement.spacedBy(t.spacing.u * 0.75f), verticalArrangement = Arrangement.spacedBy(t.spacing.u * 0.75f)) {
         for ((id, label) in options) {
             val on = id == selected
-            val visual = Modifier.background(if (on) p.acc.copy(alpha = 0.12f) else Color.Transparent, CircleShape).border(t.strokes.ctl, if (on) p.acc else p.bordStrong, CircleShape)
+            val visual = Modifier.background(if (on) p.acc else Color.Transparent, CircleShape).border(t.strokes.ctl, if (on) p.acc else p.bordStrong, CircleShape)
             Box(
                 Modifier.selectableAtTarget(on, Role.RadioButton, t.spacing.target - t.spacing.u, visual) { onSelect(id) }
                     .padding(horizontal = t.spacing.u * 1.5f, vertical = t.spacing.u * 0.75f),
                 contentAlignment = Alignment.Center,
-            ) { Text(label, color = if (on) p.acc else p.txt2, fontSize = t.type.body, fontWeight = FontWeight.Bold) }
+            ) { Text(label, color = if (on) p.onAcc else p.txt2, fontSize = t.type.body, fontWeight = FontWeight.Bold) }
         }
     }
 }
@@ -227,18 +237,21 @@ fun Avatar(initial: String) {
     }
 }
 
-/** A dashed "+ New …" row. */
+/**
+ * A "+ New …" line: accent text with no outline, at the target height, so creating something rare weighs less than the
+ * round + a row logs with (owner, 2026-11-21: the outlined full-width row had outweighed them).
+ */
 @Composable
 fun AddRow(label: String, onClick: () -> Unit) {
     val t = LocalTokens.current; val p = t.palette
     val pr = LocalProbe.current
     Row(
-        Modifier.fillMaxWidth().heightIn(min = t.spacing.target).border(t.strokes.ctl, p.bordStrong, RoundedCornerShape(t.radii.lg)).clickable(onClick = onClick).semantics { role = Role.Button }
+        Modifier.heightIn(min = t.spacing.target).clickable(onClick = onClick).semantics { role = Role.Button }
             .let { m -> if (pr == null) m else m.onGloballyPositioned { c -> val o = c.positionInWindow(); pr("el:add:$label", mapOf("x" to o.x, "y" to o.y, "w" to c.size.width.toFloat(), "h" to c.size.height.toFloat())) } }
-            .padding(horizontal = t.spacing.u * 1.5f, vertical = t.spacing.u * 1.25f),
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center,
+            .padding(horizontal = t.spacing.u * 0.5f),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        LucideIcon(Lucide.PLUS, tint = p.txt2, size = t.icons.md)
-        Text(label, color = p.txt2, fontSize = t.type.body, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = t.spacing.u * 0.75f))
+        LucideIcon(Lucide.PLUS, tint = p.acc, size = t.icons.md)
+        Text(label, color = p.acc, fontSize = t.type.body, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = t.spacing.u * 0.75f))
     }
 }

@@ -90,22 +90,25 @@ fun IconPicker(current: String?, onPick: (String?) -> Unit) {
             }, fontSize = t.type.body)
         }
         FlowRow(horizontalArrangement = Arrangement.spacedBy(t.spacing.u * 0.75f), verticalArrangement = Arrangement.spacedBy(t.spacing.u * 0.75f)) {
-            Chip(on = current == null, onClick = { onPick(null) }) { Text(tr("Default"), color = if (current == null) p.acc else p.txt2, fontSize = t.type.body, fontWeight = FontWeight.Bold) }
+            Chip(on = current == null, onClick = { onPick(null) }) { Text(tr("Default"), color = if (current == null) p.onAcc else p.txt2, fontSize = t.type.body, fontWeight = FontWeight.Bold) }
             for (name in ICON_CHOICES) {
                 val icon = Lucide.byKey(name) ?: continue
                 val on = current == name
-                Chip(on = on, onClick = { onPick(name) }, padding = t.spacing.u * 0.875f, label = name.replace('-', ' ')) { LucideIcon(icon, tint = if (on) p.acc else p.txt2, size = t.icons.md) }
+                Chip(on = on, onClick = { onPick(name) }, padding = t.spacing.u * 0.875f, label = name.replace('-', ' ')) { LucideIcon(icon, tint = if (on) p.onAcc else p.txt2, size = t.icons.md) }
             }
         }
     }
 }
 
-/** A pill: one choice of a set when [choice], otherwise a plain button; [label] names a chip whose content is a glyph. */
+/**
+ * A pill: one choice of a set when [choice] (the chosen one filled with the accent, as [ChipRow]'s), otherwise a plain button
+ * outlined in the accent; [label] names a chip whose content is a glyph.
+ */
 @Composable
 private fun Chip(on: Boolean, onClick: () -> Unit, padding: Dp = LocalTokens.current.spacing.u * 1.5f, label: String? = null, choice: Boolean = true, content: @Composable () -> Unit) {
     val t = LocalTokens.current; val p = t.palette
     Box(
-        Modifier.heightIn(min = t.spacing.target - t.spacing.u).background(if (on) p.acc.copy(alpha = 0.12f) else Color.Transparent, CircleShape)
+        Modifier.heightIn(min = t.spacing.target - t.spacing.u).background(if (on && choice) p.acc else Color.Transparent, CircleShape)
             .border(t.strokes.ctl, if (on) p.acc else p.bordStrong, CircleShape)
             .then(if (choice) Modifier.selectable(selected = on, role = Role.RadioButton, onClick = onClick) else Modifier.clickable(role = Role.Button, onClick = onClick))
             .then(if (label != null) Modifier.semantics { contentDescription = label } else Modifier)

@@ -65,14 +65,16 @@ fun ThemeGrid(selected: Theme, onSelect: (Theme) -> Unit) {
                         val on = th == selected
                         Row(
                             Modifier.weight(1f).height(t.spacing.target).probeSize(probe, "theme-card")
-                                .background(if (on) p.acc.copy(alpha = 0.09f) else p.surf, RoundedCornerShape(t.radii.lg))
+                                // the chosen card filled with the accent, as a chosen chip is (owner, 2026-11-21)
+                                .background(if (on) p.acc else p.surf, RoundedCornerShape(t.radii.lg))
                                 .border(if (on) t.strokes.emph else t.strokes.ctl, if (on) p.acc else p.bordStrong, RoundedCornerShape(t.radii.lg))
                                 .selectable(selected = on, role = Role.RadioButton) { onSelect(th) }
                                 .padding(horizontal = sidePad),
                             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.u),
                         ) {
-                            if (showSwatch) Box(Modifier.size(swatch).background(Palettes.of(th, t.dark).acc, CircleShape))
-                            Text(tr(th.label), color = p.txt, fontSize = size, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false,
+                            // ringed on the accent fill, so a theme whose accent is the fill's still shows its swatch
+                            if (showSwatch) Box(Modifier.size(swatch).background(Palettes.of(th, t.dark).acc, CircleShape).let { m -> if (on) m.border(t.strokes.ctl, p.onAcc, CircleShape) else m })
+                            Text(tr(th.label), color = if (on) p.onAcc else p.txt, fontSize = size, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false,
                                 modifier = Modifier.probeSize(probe, "theme-name"),
                                 onTextLayout = { r -> probe?.invoke("theme-name-fit", mapOf("overflow" to if (r.hasVisualOverflow) 1f else 0f, "lines" to r.lineCount.toFloat())) })
                         }

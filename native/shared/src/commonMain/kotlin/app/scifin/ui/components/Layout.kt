@@ -29,7 +29,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import app.scifin.ui.LocalTokens
+import app.scifin.ui.LocalWidthClass
+import app.scifin.ui.WidthClass
 
 /**
  * How many one-measure columns fit in [avail] -- §4.8's column rule, stated as arithmetic:
@@ -67,27 +70,35 @@ val LocalHeaderMinHeight = compositionLocalOf { Dp.Unspecified }
  * narrower than the measure (every phone up to about 496dp at the default sizes) it changes nothing.
  *
  * The cap is `measure + 2 × pad`, so the content inside the padding is exactly one measure.
+ *
+ * [header] (a tab's title row) scrolls with the page on a phone. Wider, it stays put above the scrolling column, so the
+ * desktop's Add, drawn on the title's line, never has rows passing under it (owner, 2026-11-21).
  */
 @Composable
-fun Page(title: String?, maxColumns: Int = 1, content: @Composable ColumnScope.() -> Unit) {
+fun Page(title: String?, maxColumns: Int = 1, header: (@Composable () -> Unit)? = null, content: @Composable ColumnScope.() -> Unit) {
     val t = LocalTokens.current
+    val pinned = header != null && LocalWidthClass.current != WidthClass.COMPACT
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val n = columnsIn(maxWidth - t.spacing.pad * 2, t.measure, t.spacing.gap).coerceAtMost(maxColumns)
         val w = t.measure * n + t.spacing.gap * (n - 1) + t.spacing.pad * 2
         LocalProbe.current?.let { probe -> SideEffect { probe("page", mapOf("n" to n.toFloat(), "avail" to maxWidth.value, "maxColumns" to maxColumns.toFloat())) } }
-        Box(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), contentAlignment = Alignment.TopCenter) {
-            CompositionLocalProvider(LocalPageColumns provides n) {
-                val edges = LocalContentEdges.current
-                val key = remember { Any() }
-                if (edges != null) DisposableEffect(key) { onDispose { edges.remove(key) } }
-                Column(
-                    Modifier.widthIn(max = w).fillMaxWidth()
-                        .let { m -> if (edges == null) m else m.onGloballyPositioned { c -> edges[key] = c.positionInWindow().x + c.size.width } }
-                        .padding(t.spacing.pad),
-                    verticalArrangement = Arrangement.spacedBy(t.spacing.gap),
-                ) {
-                    if (title != null) Text(title, color = t.palette.txt, fontSize = t.type.title, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = t.spacing.gap).semantics { heading() })
-                    content()
+        CompositionLocalProvider(LocalPageColumns provides n) {
+            Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                if (pinned) Box(Modifier.widthIn(max = w).fillMaxWidth().padding(start = t.spacing.pad, end = t.spacing.pad, top = t.spacing.pad)) { header!!() }
+                Box(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()), contentAlignment = Alignment.TopCenter) {
+                    val edges = LocalContentEdges.current
+                    val key = remember { Any() }
+                    if (edges != null) DisposableEffect(key) { onDispose { edges.remove(key) } }
+                    Column(
+                        Modifier.widthIn(max = w).fillMaxWidth()
+                            .let { m -> if (edges == null) m else m.onGloballyPositioned { c -> edges[key] = c.positionInWindow().x + c.size.width } }
+                            .padding(start = t.spacing.pad, end = t.spacing.pad, bottom = t.spacing.pad, top = if (pinned) 0.dp else t.spacing.pad),
+                        verticalArrangement = Arrangement.spacedBy(t.spacing.gap),
+                    ) {
+                        if (title != null) Text(title, color = t.palette.txt, fontSize = t.type.title, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = t.spacing.gap).semantics { heading() })
+                        if (header != null && !pinned) header()
+                        content()
+                    }
                 }
             }
         }

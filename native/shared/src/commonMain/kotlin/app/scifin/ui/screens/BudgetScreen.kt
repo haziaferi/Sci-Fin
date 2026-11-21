@@ -74,8 +74,7 @@ fun BudgetScreen(state: UiState, store: AppStore) {
     val t = LocalTokens.current
     val d = state.dataOrEmpty()
     val sub = state.sub ?: "envelopes"
-    Page(null, maxColumns = 2) {
-        TabTitle(Lucide.WALLET, Tab.BUDGET.label) { store.selectTab(Tab.SETTINGS) }
+    Page(null, maxColumns = 2, header = { TabTitle(Lucide.WALLET, Tab.BUDGET.label) { store.selectTab(Tab.SETTINGS) } }) {
         // §4.3: at two columns both views render side by side and the switch is not drawn; `sub` governs one column.
         if (LocalPageColumns.current >= 2) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(t.spacing.gap)) {

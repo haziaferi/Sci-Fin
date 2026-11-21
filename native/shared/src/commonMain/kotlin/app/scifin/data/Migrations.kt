@@ -120,4 +120,11 @@ val SCIFIN_MIGRATIONS: Array<Migration> = arrayOf(
             connection.execSQL("ALTER TABLE settings ADD COLUMN language TEXT")
         }
     },
+
+    /** 10 → 11: Activity's optional month totals on a wide window (owner, 2026-11-21). Off for every existing Profile. */
+    object : Migration(10, 11) {
+        override fun migrate(connection: SQLiteConnection) {
+            connection.execSQL("ALTER TABLE settings ADD COLUMN activityTotalsEnabled INTEGER NOT NULL DEFAULT 0")
+        }
+    },
 )
