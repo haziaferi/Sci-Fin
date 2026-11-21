@@ -236,14 +236,17 @@ fun FigureLabel(text: String) {
     Text(text, color = t.palette.txt2, fontSize = t.type.body, fontWeight = FontWeight.Bold)
 }
 
-/** `.section-label`: uppercase small heading over a section, with an optional right-hand slot. */
+/**
+ * `.section-label`: uppercase small heading over a section, with an optional right-hand slot. Twice as far from the
+ * section above as from its own, so it reads as the next section's (2026-11-21 critique: it had sat at 1.3–1.6 : 1).
+ */
 @Composable
 fun SectionLabel(text: String, trailing: (@Composable () -> Unit)? = null) {
     val t = LocalTokens.current
     val probe = LocalProbe.current
     Row(
         Modifier.fillMaxWidth()
-            .padding(top = t.spacing.u * 1.5f, start = t.spacing.u * 0.25f, bottom = t.spacing.u * 0.25f)
+            .padding(top = t.spacing.u * 2.5f, start = t.spacing.u * 0.25f)
             .let { m -> if (probe == null) m else m.onGloballyPositioned { c -> probe("section:$text", mapOf("y" to c.positionInWindow().y, "h" to c.size.height.toFloat())) } },
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween,
     ) {

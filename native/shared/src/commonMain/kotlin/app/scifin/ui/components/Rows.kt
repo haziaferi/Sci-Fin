@@ -1,5 +1,6 @@
 package app.scifin.ui.components
 
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +50,7 @@ import app.scifin.ui.LocalWidthClass
 import app.scifin.ui.Lucide
 import app.scifin.ui.LucideIcon
 import app.scifin.ui.WidthClass
+import app.scifin.ui.selectedEdge
 import app.scifin.ui.selectedWash
 
 /*
@@ -71,8 +74,8 @@ fun NavRow(icon: Lucide?, label: String, caption: String, leading: (@Composable 
     // §2.5: the caption goes under the label rather than split one of its words
     BesideOrUnder(
         floorPx = floor, gapPx = gapPx,
-        modifier = Modifier.fillMaxWidth().heightIn(min = t.spacing.target).background(p.surf2, shape)
-            .then(if (wash != null) Modifier.background(wash, shape) else Modifier).clickable(onClick = onClick).semantics { role = Role.Button; selectedState = selected }
+        modifier = Modifier.fillMaxWidth().heightIn(min = t.spacing.target).clip(shape).background(p.surf2, shape)
+            .then(if (wash != null) Modifier.background(wash, shape) else Modifier).selectedEdge(selected).clickable(onClick = onClick).semantics { role = Role.Button; selectedState = selected }
             .padding(horizontal = t.spacing.u * 1.5f, vertical = t.spacing.u * 1.25f),
         label = {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.u * 1.125f)) {
@@ -84,7 +87,8 @@ fun NavRow(icon: Lucide?, label: String, caption: String, leading: (@Composable 
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.u / 2)) {
                 // the caption yields to the label: at most two lines, at most 18.75u wide
                 Text(caption, color = p.txt2, fontSize = t.type.caption, maxLines = 2, textAlign = TextAlign.End, modifier = Modifier.widthIn(max = t.spacing.u * 18.75f))
-                LucideIcon(Lucide.CHEVRON_RIGHT, tint = p.txt2, size = t.icons.sm)
+                // in the ledger rows' figure slot, so every chevron on a page shares one column (2026-11-21 critique)
+                FigureSlot { LucideIcon(Lucide.CHEVRON_RIGHT, tint = p.txt2, size = t.icons.sm) }
             }
         },
     )
@@ -98,6 +102,7 @@ private val LocalControlLabel = compositionLocalOf<String?> { null }
 fun SettingRow(icon: Lucide, title: String, description: String, control: @Composable () -> Unit) {
     val t = LocalTokens.current; val p = t.palette
     val density = LocalDensity.current
+    LocalProbe.current?.let { probe -> SideEffect { probe("setting:$title", mapOf("described" to if (description.isNotBlank()) 1f else 0f)) } }
     // §2.5 at large text sizes: the label keeps a floor of 18u; a control that would take it away goes under the label instead
     val gapPx = with(density) { (t.spacing.u * 1.25f).roundToPx() }
     BesideOrUnder(
@@ -126,9 +131,12 @@ fun SettingRow(icon: Lucide, title: String, description: String, control: @Compo
 fun Switch(on: Boolean, label: String? = LocalControlLabel.current, onToggle: () -> Unit) {
     val t = LocalTokens.current; val p = t.palette
     val ru = t.spacing.u
+    val probe = LocalProbe.current
     Box(
         Modifier.heightIn(min = t.spacing.target).toggleable(value = on, role = Role.Switch) { onToggle() }
-            .let { m -> if (label == null) m else m.semantics { contentDescription = label } },
+            .let { m -> if (label == null) m else m.semantics { contentDescription = label } }
+            // the tests read a switch's state and place by its name
+            .let { m -> if (probe == null || label == null) m else m.onGloballyPositioned { c -> val o = c.positionInWindow(); probe("switch:$label", mapOf("on" to if (on) 1f else 0f, "x" to o.x, "y" to o.y, "w" to c.size.width.toFloat(), "h" to c.size.height.toFloat())) } },
         contentAlignment = Alignment.Center,
     ) {
         Box(

@@ -75,10 +75,10 @@ fun ProgressBar(amount: Money, reference: Money) {
                     }
                 }
             }
-            if (over || amount == ref) {
-                val tx = if (over) fillW else w
-                drawRect(p.txt, topLeft = Offset(tx - t.strokes.emph.toPx() / 2, 0f), size = Size(t.strokes.emph.toPx(), h))   // the tick spans the bar, no overhang
-            }
+            // the tick marks the reference on every bar -- at its end below it, where the light track alone showed no end
+            // (owner, 2026-11-21) -- and spans the bar, no overhang
+            val e = t.strokes.emph.toPx()
+            drawRect(p.txt, topLeft = Offset(if (over) fillW - e / 2 else w - e, 0f), size = Size(e, h))
         }
     }
 }

@@ -12,6 +12,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import app.scifin.app.AppStore
 import app.scifin.app.Route
@@ -59,6 +61,19 @@ fun opener(store: AppStore): (Route) -> Unit {
 /** The chosen row, marked as the rail marks the current tab: a 12 % accent wash. */
 @Composable
 fun selectedWash(on: Boolean): Color? = if (on) LocalTokens.current.palette.acc.copy(alpha = 0.12f) else null
+
+/**
+ * With the wash, an accent bar along the chosen row's left edge, so the open row reads without colour (owner, 2026-11-21:
+ * the wash alone differed by hue). Clip the row to its shape first, so the bar follows the rounded corners.
+ */
+@Composable
+fun Modifier.selectedEdge(on: Boolean): Modifier {
+    if (!on) return this
+    val t = LocalTokens.current
+    val acc = t.palette.acc
+    val w = t.spacing.u * 0.5f
+    return drawWithContent { drawContent(); drawRect(acc, size = Size(w.toPx(), size.height)) }
+}
 
 /** Lays out [root] and [detail] as two measure-wide columns, centred, when the width allows; [single] otherwise. */
 @Composable

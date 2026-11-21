@@ -84,7 +84,14 @@ fun Page(title: String?, maxColumns: Int = 1, header: (@Composable () -> Unit)? 
         CompositionLocalProvider(LocalPageColumns provides n) {
             Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                 if (pinned) Box(Modifier.widthIn(max = w).fillMaxWidth().padding(start = t.spacing.pad, end = t.spacing.pad, top = t.spacing.pad)) { header!!() }
-                Box(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()), contentAlignment = Alignment.TopCenter) {
+                val probe = LocalProbe.current
+                Box(
+                    Modifier.fillMaxWidth().weight(1f)
+                        // where the scrolling column starts: the tests check that nothing scrolls under the desktop's Add
+                        .let { m -> if (probe == null) m else m.onGloballyPositioned { c -> probe("page:scroll", mapOf("y" to c.positionInWindow().y)) } }
+                        .verticalScroll(rememberScrollState()),
+                    contentAlignment = Alignment.TopCenter,
+                ) {
                     val edges = LocalContentEdges.current
                     val key = remember { Any() }
                     if (edges != null) DisposableEffect(key) { onDispose { edges.remove(key) } }

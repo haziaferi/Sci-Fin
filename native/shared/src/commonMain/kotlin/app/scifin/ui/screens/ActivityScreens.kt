@@ -52,6 +52,7 @@ import app.scifin.ui.Lucide
 import app.scifin.ui.LucideIcon
 import app.scifin.ui.WidthClass
 import app.scifin.ui.opener
+import app.scifin.ui.selectedEdge
 import app.scifin.ui.selectedWash
 import app.scifin.ui.shownDetail
 import app.scifin.ui.components.AddRow
@@ -124,7 +125,7 @@ fun ActivityScreen(state: UiState, store: AppStore) {
                 for (a in d.accounts) {
                     val finished = Accounts.finished(d, a)
                     val wash = selectedWash(shown == Route.AccountDetail(a.id))
-                    Box(Modifier.fillMaxWidth().then(if (wash != null) Modifier.background(wash) else Modifier)) {
+                    Box(Modifier.fillMaxWidth().then(if (wash != null) Modifier.background(wash) else Modifier).selectedEdge(wash != null)) {
                         LedgerRow(
                             onClick = { open(Route.AccountDetail(a.id)) },
                             name = {
