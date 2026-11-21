@@ -154,12 +154,13 @@ fun RuledNote(text: String, modifier: Modifier = Modifier) {
 fun NoteLine(text: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val t = LocalTokens.current; val p = t.palette
     Row(
-        modifier.fillMaxWidth().heightIn(min = t.spacing.target).clickable(role = Role.Button, onClick = onClick).padding(horizontal = t.spacing.u * 0.25f),
+        // the chevron in the rows' figure slot, inset as a row's padding is, so it shares their column (2026-11-21 critique)
+        modifier.fillMaxWidth().heightIn(min = t.spacing.target).clickable(role = Role.Button, onClick = onClick).padding(start = t.spacing.u * 0.25f, end = t.spacing.u * 1.5f),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(t.spacing.u),
     ) {
         LucideIcon(Lucide.INFO, tint = p.txt2, size = t.icons.sm)
         Text(text, color = p.txt2, fontSize = t.type.caption, modifier = Modifier.weight(1f))
-        LucideIcon(Lucide.CHEVRON_RIGHT, tint = p.txt2, size = t.icons.sm)
+        FigureSlot { LucideIcon(Lucide.CHEVRON_RIGHT, tint = p.txt2, size = t.icons.sm) }
     }
 }
 

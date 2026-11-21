@@ -1,5 +1,6 @@
 package app.scifin.ui.screens
 
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -45,6 +46,7 @@ import app.scifin.ui.components.TopRow
 import app.scifin.ui.components.measureCap
 import app.scifin.ui.formatDateFull
 import app.scifin.ui.opener
+import app.scifin.ui.selectedEdge
 import app.scifin.ui.selectedWash
 import app.scifin.ui.shownDetail
 
@@ -168,7 +170,7 @@ fun LearnScreen(
         for (topic in LEARN_TOPICS) {
             val isOpen = !pane && open == topic.id
             val wash = selectedWash(reading == topic.id)
-            Column(Modifier.fillMaxWidth().background(p.surf, RoundedCornerShape(t.radii.lg)).then(if (wash != null) Modifier.background(wash, RoundedCornerShape(t.radii.lg)) else Modifier)) {
+            Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(t.radii.lg)).background(p.surf, RoundedCornerShape(t.radii.lg)).then(if (wash != null) Modifier.background(wash, RoundedCornerShape(t.radii.lg)) else Modifier).selectedEdge(wash != null)) {
                 Row(
                     Modifier.fillMaxWidth().heightIn(min = t.spacing.target).clickable(role = Role.Button) { if (pane) openRoute(Route.LearnTopic(topic.id)) else open = if (isOpen) null else topic.id }
                         .semantics { if (!pane) stateDescription = if (isOpen) tr("Expanded") else tr("Collapsed") }.padding(horizontal = t.spacing.u * 1.5f, vertical = t.spacing.u * 1.25f),

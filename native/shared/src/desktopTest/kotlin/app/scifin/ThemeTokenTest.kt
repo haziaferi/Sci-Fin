@@ -8,7 +8,7 @@ import kotlin.test.assertEquals
 class ThemeTokenTest {
     @Test fun `the four tokens and their labels`() {
         assertEquals(listOf("swiss-blue", "daylight", "tallow-tome", "dusk"), Theme.entries.map { it.token })
-        assertEquals(listOf("Swiss Blue", "Daylight", "Tallow & Tome", "Dusk"), Theme.entries.map { it.label })
+        assertEquals(listOf("Swiss Blue", "Daylight", "Tallow", "Dusk"), Theme.entries.map { it.label })
     }
 
     @Test fun `retired and legacy tokens resolve to the nearest theme by hue, unknown ones to Swiss Blue`() {

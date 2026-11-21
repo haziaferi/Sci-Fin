@@ -196,14 +196,17 @@ internal fun SecurityPage(state: UiState, store: AppStore) {
     var settingUp by rememberSaveable { mutableStateOf(false) }
     var turningOff by rememberSaveable { mutableStateOf(false) }
     var changing by rememberSaveable { mutableStateOf(false) }
-    SettingRow(Lucide.LOCK, tr("Lock with a PIN"), tr("Off by default — 4 to 6 digits, asked for each time Sci-Fin opens on this device")) {
-        Switch(lock != null || settingUp) {
+    // owner, 2026-11-21: the switch shows the lock as it is -- on only once a PIN is set -- and its line only while off
+    SettingRow(Lucide.LOCK, tr("Lock with a PIN"), if (lock == null) tr("Off by default — 4 to 6 digits, asked for each time Sci-Fin opens on this device") else "") {
+        Switch(lock != null) {
             when {
                 lock != null -> { turningOff = !turningOff; changing = false; store.clearPinWrong() }
                 else -> settingUp = !settingUp
             }
         }
     }
+    // the warning comes before the fields and the button it is about (owner, 2026-11-21)
+    Caption(FORGOTTEN, Modifier.padding(top = t.spacing.gap))
     when {
         lock == null && settingUp -> NewPin(state, store) { settingUp = false }
         lock != null && changing -> NewPin(state, store, change = true) { changing = false }
@@ -225,7 +228,6 @@ internal fun SecurityPage(state: UiState, store: AppStore) {
         }
     }
     LaunchedEffect(lock == null) { if (lock == null) { turningOff = false; changing = false } }
-    Caption(FORGOTTEN, Modifier.padding(top = t.spacing.gap))
 }
 
 /**

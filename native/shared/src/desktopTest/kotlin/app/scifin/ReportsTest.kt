@@ -130,6 +130,19 @@ class ReportsTest {
         assertEquals(Reports.savingsVsOwedNow(d), trend.last().value)
     }
 
+    @Test fun `Activity's month totals count this month only, a Goal contribution in the change but not in what went out`() {
+        val d = profileWith().copy(transactions = listOf(
+            tx("old", "savings", 500.0, LocalDate(2026, 8, 30)),     // last month: not counted
+            tx("in", "savings", 100.0, LocalDate(2026, 9, 1)),
+            tx("out", "cat:x", 30.0, LocalDate(2026, 9, 5)),
+            tx("kept", "goal:g", 20.0, LocalDate(2026, 9, 6)),       // money kept, not spent
+        ))
+        val m = Reports.monthTotals(d, today)
+        assertEquals(moneyOf(100.0), m.inn)
+        assertEquals(moneyOf(30.0), m.out)
+        assertEquals(moneyOf(50.0), m.change)
+    }
+
     @Test fun `income vs expenses is absent with income off and counts Goal money once, when it is spent`() {
         assertNull(Reports.incomeVsExpenses(profileWith(), today))
         val clock = FakeClock(today)

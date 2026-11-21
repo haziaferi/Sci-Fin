@@ -77,7 +77,7 @@ class OnboardingTest {
 class CurrencyLandingOrderTest {
     @Test fun `the landing puts Currency before Look and the settings page keeps Look first`() {
         assertEquals("currency", appearanceSections(currencyFirst = true).first())
-        assertEquals(listOf("look", "mode", "language", "currency", "density", "motion", "distraction"), appearanceSections(currencyFirst = false))
+        assertEquals(listOf("look", "mode", "language", "currency", "density", "motion", "distraction", "totals"), appearanceSections(currencyFirst = false))
         assertEquals(appearanceSections(false).toSet(), appearanceSections(true).toSet())
     }
 }

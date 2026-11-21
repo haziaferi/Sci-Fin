@@ -46,6 +46,8 @@ import app.scifin.model.ThemeMode
 import app.scifin.notify.NotificationPermission
 import app.scifin.ui.LocalSecondColumn
 import app.scifin.ui.LocalTokens
+import app.scifin.ui.LocalWidthClass
+import app.scifin.ui.WidthClass
 import app.scifin.ui.Lucide
 import app.scifin.ui.opener
 import app.scifin.ui.shownDetail
@@ -114,7 +116,8 @@ fun SettingsScreen(state: UiState, store: AppStore) {
         NavRow(Lucide.PALETTE, tr("Appearance & accessibility"), "${s.theme.label} · $modeCaption", selected = shown == SettingsPage.APPEARANCE) { open(Route.Settings(SettingsPage.APPEARANCE)) }
         NavRow(Lucide.BANKNOTE, tr("Income"), incomeCaption, selected = shown == SettingsPage.INCOME) { open(Route.Settings(SettingsPage.INCOME)) }
         NavRow(Lucide.BELL, tr("Notifications"), if (s.newMonthNotificationEnabled) tr("New Month on") else tr("New Month off"), selected = shown == SettingsPage.NOTIFICATIONS) { open(Route.Settings(SettingsPage.NOTIFICATIONS)) }
-        SettingRow(Lucide.LANDMARK, tr("Show Savings vs. Owed in Reports"), tr("Off by default — only useful once there’s a liability to weigh against")) {
+        // its line only while off, as every setting's (owner, 2026-11-21)
+        SettingRow(Lucide.LANDMARK, tr("Show Savings vs. Owed in Reports"), if (s.savingsVsOwedEnabled) "" else tr("Off by default — only useful once there’s a liability to weigh against")) {
             Switch(s.savingsVsOwedEnabled) { store.updateSettings { it.copy(savingsVsOwedEnabled = !it.savingsVsOwedEnabled) } }
         }
         SectionLabel(tr("Other"))
@@ -163,9 +166,9 @@ internal fun AppearancePage(d: ProfileData, store: AppStore, currencyFirst: Bool
             "mode" -> SettingRow(if (t.dark) Lucide.MOON else Lucide.SUN, tr("Appearance"), tr("System follows your device")) {
                 PillToggle(listOf("system" to tr("Auto"), "light" to tr("Light"), "dark" to tr("Dark")), s.mode.token) { v -> store.updateSettings { it.copy(mode = ThemeMode.of(v)) } }
             }
-            // §2.7: the device's language unless this Profile chooses one; each language is named in itself
-            "language" -> if (SUPPORTED.size > 1) FieldGroup {
-                FieldLabel(tr("Language"))
+            // §2.7: the device's language unless this Profile chooses one; each language is named in itself. A card like
+            // every other setting on the page (owner, 2026-11-21); its chips go under the title when they do not fit beside it
+            "language" -> if (SUPPORTED.size > 1) SettingRow(Lucide.TYPE, tr("Language"), tr("The device’s, or one you choose")) {
                 ChipRow(listOf("" to trf("Device ({0})", I18n.device().label)) + SUPPORTED.map { it.tag to it.label }, s.language ?: "") { v ->
                     store.updateSettings { it.copy(language = v.ifEmpty { null }) }
                 }
@@ -182,6 +185,10 @@ internal fun AppearancePage(d: ProfileData, store: AppStore, currencyFirst: Bool
             "distraction" -> SettingRow(if (s.lowDistraction) Lucide.EYE_OFF else Lucide.EYE, tr("Low-distraction mode"), tr("Hides decorative detail")) {
                 Switch(s.lowDistraction) { store.updateSettings { it.copy(lowDistraction = !it.lowDistraction) } }
             }
+            // owner, 2026-11-21: wide windows only, where Activity's list column has the room; off by default
+            "totals" -> if (LocalWidthClass.current != WidthClass.COMPACT) SettingRow(Lucide.CALENDAR, tr("Month totals on Activity"), tr("In, out and the change in Savings, under the list")) {
+                Switch(s.activityTotalsEnabled) { store.updateSettings { it.copy(activityTotalsEnabled = !it.activityTotalsEnabled) } }
+            }
         }
     }
 }
@@ -191,7 +198,7 @@ internal fun AppearancePage(d: ProfileData, store: AppStore, currencyFirst: Bool
  * asks about currency, so there -- and only there -- Currency leads.
  */
 fun appearanceSections(currencyFirst: Boolean): List<String> {
-    val base = listOf("look", "mode", "language", "currency", "density", "motion", "distraction")
+    val base = listOf("look", "mode", "language", "currency", "density", "motion", "distraction", "totals")
     return if (currencyFirst) listOf("currency") + base.filter { it != "currency" } else base
 }
 
@@ -199,7 +206,8 @@ fun appearanceSections(currencyFirst: Boolean): List<String> {
 private fun IncomePage(d: ProfileData, store: AppStore) {
     val t = LocalTokens.current
     val s = d.settings
-    SettingRow(Lucide.BANKNOTE, tr("Income"), tr("Off by default — cleared, not remembered, on toggle-off")) {
+    // the line under the title is shown only while the setting is off (owner, 2026-11-21)
+    SettingRow(Lucide.BANKNOTE, tr("Income"), if (s.incomeEnabled) "" else tr("Off by default — cleared, not remembered, on toggle-off")) {
         Switch(s.incomeEnabled) { store.setIncomeEnabled(!s.incomeEnabled) }
     }
     if (!s.incomeEnabled) return
@@ -254,11 +262,12 @@ private fun IncomePage(d: ProfileData, store: AppStore) {
         )
         return
     }
-    SettingRow(Lucide.REPEAT, tr("Auto-deposit every payday"), tr("Off by default — manual keeps the pre-fill, not the auto-tag")) {
+    // plain words for what the switch changes (2026-11-21 critique: "pre-fill" and "auto-tag" were the build's terms)
+    SettingRow(Lucide.REPEAT, tr("Auto-deposit every payday"), if (s.incomeAutoDeposit) "" else tr("On: each paycheck is added to Savings on payday by itself")) {
         Switch(s.incomeAutoDeposit) { store.setAutoDeposit(!s.incomeAutoDeposit) }
     }
     if (!s.incomeAutoDeposit) Caption(
-        trf("Manual path: the Savings card’s Income button pre-fills {0}, and a “no income logged” note appears if a paycheck goes unrecorded.", formatMoney(s.income, s.currency)),
+        trf("Off: log each paycheck from Savings, where Income starts at {0}. If a payday goes unlogged, a note says so.", formatMoney(s.income, s.currency)),
         Modifier.padding(start = t.spacing.u * 0.25f, bottom = t.spacing.gap),
     )
 }

@@ -35,6 +35,7 @@ import app.scifin.app.UiState
 import app.scifin.engine.AccountEditing
 import app.scifin.engine.Accounts
 import app.scifin.engine.Recurring
+import app.scifin.engine.Reports
 import app.scifin.ui.components.DeleteWithReturnSheet
 import app.scifin.ui.components.deleteAddBackCopy
 import app.scifin.ui.components.deleteOnlyCopy
@@ -51,6 +52,7 @@ import app.scifin.ui.Lucide
 import app.scifin.ui.LucideIcon
 import app.scifin.ui.WidthClass
 import app.scifin.ui.opener
+import app.scifin.ui.selectedEdge
 import app.scifin.ui.selectedWash
 import app.scifin.ui.shownDetail
 import app.scifin.ui.components.AddRow
@@ -114,8 +116,7 @@ fun ActivityScreen(state: UiState, store: AppStore) {
     val open = opener(store)
     // §4.8: what the second column shows, so its row can say so; null on a single column
     val shown = if (LocalSecondColumn.current) shownDetail(state) else null
-    Page(null) {
-        TabTitle(Lucide.CREDIT_CARD, Tab.ACTIVITY.label) { store.selectTab(Tab.SETTINGS) }
+    Page(null, header = { TabTitle(Lucide.CREDIT_CARD, Tab.ACTIVITY.label) { store.selectTab(Tab.SETTINGS) } }) {
         SavingsRow(d, store)
         // §4.4: Accounts, then the log, then the note, each row in the shared figure column
         Column(Modifier.tutAnchor("accounts-section"), verticalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
@@ -124,7 +125,7 @@ fun ActivityScreen(state: UiState, store: AppStore) {
                 for (a in d.accounts) {
                     val finished = Accounts.finished(d, a)
                     val wash = selectedWash(shown == Route.AccountDetail(a.id))
-                    Box(Modifier.fillMaxWidth().then(if (wash != null) Modifier.background(wash) else Modifier)) {
+                    Box(Modifier.fillMaxWidth().then(if (wash != null) Modifier.background(wash) else Modifier).selectedEdge(wash != null)) {
                         LedgerRow(
                             onClick = { open(Route.AccountDetail(a.id)) },
                             name = {
@@ -155,6 +156,18 @@ fun ActivityScreen(state: UiState, store: AppStore) {
             }
         }
         AccountsNote(store)
+        // owner, 2026-11-21: on a wide window the list column can end with this month's totals; off by default
+        if (d.settings.activityTotalsEnabled && LocalWidthClass.current != WidthClass.COMPACT) {
+            val m = Reports.monthTotals(d, store.clock.today())
+            Column(verticalArrangement = Arrangement.spacedBy(t.spacing.gap)) {
+                SectionLabel(tr("This month"))
+                LedgerGroup {
+                    LedgerRow(null, { Text(tr("Into Savings"), color = p.txt, fontSize = t.type.body) }, formatMoney(m.inn, cur), probeName = "totals-in")
+                    LedgerRow(null, { Text(tr("Out of Savings"), color = p.txt, fontSize = t.type.body) }, formatMoney(m.out, cur), probeName = "totals-out")
+                    LedgerRow(null, { Text(tr("Change in Savings"), color = p.txt, fontSize = t.type.body, fontWeight = FontWeight.Bold) }, (if (m.change > 0) "+" else "") + formatMoney(m.change, cur), probeName = "totals-change")
+                }
+            }
+        }
         FloatingAddRoom()
     }
 }

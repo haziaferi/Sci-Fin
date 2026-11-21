@@ -165,4 +165,21 @@ object Reports {
             IncomeExpensePoint(p, inc, exp)
         }
     }
+
+    // ---- Activity's month totals ------------------------------------------------------------
+
+    /**
+     * This month so far, for Activity's optional totals (owner, 2026-11-21): what came into Savings, what went out of it
+     * (counted as §5.4's expenses are, so Goal money counts when it is spent), and the net change in Savings.
+     */
+    fun monthTotals(d: ProfileData, today: LocalDate): MonthTotals {
+        val ym = today.ymKey()
+        val month = d.transactions.filter { it.date.ymKey() == ym }
+        val inn = month.sumOf { t -> Ledger.savingsEffect(t).let { if (it > 0) it else 0 } }
+        val out = month.filter { !it.key.startsWith("goal:") }.sumOf { t -> Ledger.savingsEffect(t).let { if (it < 0) -it else 0 } } +
+            month.filter { it.key.startsWith("spend:") }.sumOf { -it.amount }
+        return MonthTotals(inn, out, month.sumOf { Ledger.savingsEffect(it) })
+    }
 }
+
+data class MonthTotals(val inn: Money, val out: Money, val change: Money)

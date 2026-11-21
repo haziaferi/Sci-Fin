@@ -71,10 +71,13 @@ enum class ButtonKind { PRIMARY, SECONDARY, GHOST }
 @Composable
 fun Button(label: String, kind: ButtonKind = ButtonKind.PRIMARY, enabled: Boolean = true, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val t = LocalTokens.current; val p = t.palette
-    val bg = if (kind == ButtonKind.PRIMARY) p.acc else Color.Transparent
-    val fg = when (kind) { ButtonKind.PRIMARY -> p.onAcc; ButtonKind.SECONDARY -> p.acc; ButtonKind.GHOST -> p.txt2 }
+    // a primary that cannot be used yet is outlined, not filled, so it never outweighs the fields it waits on (owner, 2026-11-21)
+    val idle = kind == ButtonKind.PRIMARY && !enabled
+    val bg = if (kind == ButtonKind.PRIMARY && !idle) p.acc else Color.Transparent
+    val fg = when { idle -> p.txt2; kind == ButtonKind.PRIMARY -> p.onAcc; kind == ButtonKind.SECONDARY -> p.acc; else -> p.txt2 }
     var m = modifier.heightIn(min = t.spacing.target).background(bg, RoundedCornerShape(t.radii.md))
     if (kind == ButtonKind.SECONDARY) m = m.border(t.strokes.ctl, p.acc, RoundedCornerShape(t.radii.md))
+    if (idle) m = m.border(t.strokes.ctl, p.bordStrong, RoundedCornerShape(t.radii.md))
     Box(
         m.clickable(enabled = enabled, onClick = onClick).semantics { role = Role.Button }.padding(horizontal = t.spacing.u * 2.25f, vertical = t.spacing.u * 1.5f),
         contentAlignment = Alignment.Center,
@@ -160,11 +163,11 @@ fun Segmented(options: List<Pair<String, String>>, selected: String, onSelect: (
     }
 }
 
-/** `.field-label` over a control. */
+/** `.field-label` over a control, in the text colour so it outranks the unselected chips under it (owner, 2026-11-21). */
 @Composable
 fun FieldLabel(text: String) {
     val t = LocalTokens.current
-    Text(text, color = t.palette.txt2, fontSize = t.type.body, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = t.spacing.u * 0.75f))
+    Text(text, color = t.palette.txt, fontSize = t.type.body, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = t.spacing.u * 0.75f))
 }
 
 /**
@@ -233,14 +236,17 @@ fun FigureLabel(text: String) {
     Text(text, color = t.palette.txt2, fontSize = t.type.body, fontWeight = FontWeight.Bold)
 }
 
-/** `.section-label`: uppercase small heading over a section, with an optional right-hand slot. */
+/**
+ * `.section-label`: uppercase small heading over a section, with an optional right-hand slot. Twice as far from the
+ * section above as from its own, so it reads as the next section's (2026-11-21 critique: it had sat at 1.3–1.6 : 1).
+ */
 @Composable
 fun SectionLabel(text: String, trailing: (@Composable () -> Unit)? = null) {
     val t = LocalTokens.current
     val probe = LocalProbe.current
     Row(
         Modifier.fillMaxWidth()
-            .padding(top = t.spacing.u * 1.5f, start = t.spacing.u * 0.25f, bottom = t.spacing.u * 0.25f)
+            .padding(top = t.spacing.u * 2.5f, start = t.spacing.u * 0.25f)
             .let { m -> if (probe == null) m else m.onGloballyPositioned { c -> probe("section:$text", mapOf("y" to c.positionInWindow().y, "h" to c.size.height.toFloat())) } },
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween,
     ) {
