@@ -163,7 +163,7 @@ internal fun AppearancePage(d: ProfileData, store: AppStore, currencyFirst: Bool
                     ThemeGrid(s.theme) { th -> store.updateSettings { it.copy(theme = th) } }
                 }
             }
-            "mode" -> SettingRow(if (t.dark) Lucide.MOON else Lucide.SUN, tr("Appearance"), tr("System follows your device")) {
+            "mode" -> SettingRow(if (t.dark) Lucide.MOON else Lucide.SUN, tr("Colour mode"), tr("System follows your device")) {
                 PillToggle(listOf("system" to tr("Auto"), "light" to tr("Light"), "dark" to tr("Dark")), s.mode.token) { v -> store.updateSettings { it.copy(mode = ThemeMode.of(v)) } }
             }
             // §2.7: the device's language unless this Profile chooses one; each language is named in itself. A card like

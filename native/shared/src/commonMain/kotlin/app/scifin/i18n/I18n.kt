@@ -69,7 +69,19 @@ fun trc(sense: String, en: String): String {
 fun trf(en: String, vararg args: Any?): String {
     var s = tr(en)
     for ((i, a) in args.withIndex()) s = s.replace("{$i}", a.toString())
-    return s
+    return if (I18n.current == Language.IT) elideItalian(s) else s
+}
+
+/**
+ * Italian elides the article before a number said with a vowel: "l’11 novembre", "dell’8", not "il 11", "del 8".
+ * A template writes "il {0}" before it knows the date, so the fix is made once the figure is in. Only 1, 8 and 11
+ * standing alone are touched (the day numbers said uno, otto, undici); 18, 1,5 and 11.000 are left as they are.
+ */
+private val ELIDES = Regex("""\b(il|del|al|dal|nel|sul) (1|8|11)(?![\d.,]\d|\d)""")
+
+internal fun elideItalian(s: String): String = ELIDES.replace(s) { m ->
+    val art = m.groupValues[1]
+    (if (art == "il") "l’" else art.dropLast(1) + "ll’") + m.groupValues[2]
 }
 
 /**

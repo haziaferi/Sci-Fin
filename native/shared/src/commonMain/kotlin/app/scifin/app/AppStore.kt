@@ -62,9 +62,13 @@ import kotlinx.coroutines.plus
 import kotlin.coroutines.cancellation.CancellationException
 import app.scifin.i18n.tr
 import app.scifin.i18n.trf
+import app.scifin.i18n.stored
 
 /** How many pages Back can return through; older ones are dropped (owner, 2026-10-28). */
 private const val PAGES_KEPT = 20
+
+/** The Trash row's name for a turned-off Income's setup, stored in English and shown in the Profile's language. */
+private val INCOME_SETUP = stored("Income setup")
 
 /** §4.3: the count and the two totals of a confirmed import. */
 data class ImportDone(val count: Int, val out: Money, val inn: Money)
@@ -119,6 +123,8 @@ data class UiState(
     val pinWrong: Boolean = false,
     /** While set and not yet passed, no PIN is checked (Pin.waitAfter). */
     val pinWaitEnds: TimeMark? = null,
+    /** The short notice at the foot of the screen, with its one action (owner, 2026-11-21); in memory only. */
+    val notice: Notice? = null,
 ) {
     val route: Route get() = routes.last()
     /** §3.9's unread card, read from where it is stored so a restart cannot lose it. */
@@ -135,6 +141,15 @@ data class UiState(
 
 /** One row of the Trash page: what it was, when it goes for good, and the money restoring moves back. */
 data class TrashEntry(val id: String, val kind: String, val name: String, val deletedOn: LocalDate, val goesOn: LocalDate, val money: Money)
+
+/**
+ * A notice shown for a few seconds with one action (owner, 2026-11-21). Today there is one: Income was just turned
+ * off. [saved] is the setup as it was, for Undo; [trashId] is its copy in the Trash, null when nothing was set up.
+ */
+sealed interface Notice {
+    val id: String
+    data class IncomeOff(override val id: String, val trashId: String?, val saved: Settings) : Notice
+}
 
 /** §4.7: what is known about the lock outside the store -- enough to draw it, nothing to break it. */
 data class LockSummary(val pinLength: Int, val hint: String?, val after: LockAfter)
@@ -254,7 +269,7 @@ class AppStore(
 
     /** A change of Profile keeps nothing read against the old one (§8.3); the pages opened are places, not data, and stay. */
     private fun UiState.forProfile(d: ProfileData?): UiState = copy(
-        data = d, sheet = null, importReview = null, importError = null, importDone = null,
+        data = d, sheet = null, importReview = null, importError = null, importDone = null, notice = null,
         notificationPermission = readPermission(d?.settings),
     )
 
@@ -613,8 +628,54 @@ class AppStore(
     fun setIncomeEnabled(enabled: Boolean): Job {
         // §3.10: hours still logged are settled first (owner, 2026-10-26)
         if (!enabled && _state.value.data?.shifts?.isNotEmpty() == true) { openSheet(Sheet.SettleShifts(null)); return settled() }
-        return dispatch { Income.setEnabled(it, enabled, clock.today()) }
+        if (!enabled) return turnOffIncome { Income.setEnabled(it, false, clock.today()) }
+        return dispatch { Income.setEnabled(it, true, clock.today()) }
     }
+
+    /**
+     * Income off (owner, 2026-11-21): the setup is cleared as §3.3 says, but a copy of it waits in the Trash for 30
+     * days -- only the latest one -- and a notice offers Undo for a few seconds. A setup with no amount or rate has
+     * nothing to keep, so it gets the notice and no Trash row.
+     */
+    private fun turnOffIncome(write: (ProfileData) -> ProfileData): Job = scope.launch {
+        writes.withLock {
+            val dao = db.dao()
+            val before = _state.value.data ?: return@withLock
+            val after = write(before)
+            if (after == before) return@withLock
+            dao.save(after)
+            val saved = before.settings
+            val trashId = if (Income.worthKeeping(saved)) newId().also { id ->
+                dao.trash().filter { it.kind == "income" && it.profileId == before.profileId }.forEach { dao.deleteTrash(it.id) }
+                dao.upsertTrash(TrashItem(id, before.profileId, "income", INCOME_SETUP, clock.today().toString(), Trash.encode(TrashPayload(income = saved))))
+            } else null
+            session.syncNotifications(after)
+            val notice = Notice.IncomeOff(newId(), trashId, saved)
+            _state.update { it.copy(data = after, profiles = dao.profiles(), notice = notice) }
+        }
+        refreshTrash()
+    }
+
+    /** The notice's Undo: Income exactly as it was a moment ago, and its copy gone from the Trash. */
+    fun undoIncomeOff(): Job {
+        val n = _state.value.notice as? Notice.IncomeOff ?: return settled()
+        _state.update { it.copy(notice = null) }
+        return scope.launch {
+            writes.withLock {
+                val d = _state.value.data ?: return@withLock
+                if (d.settings.incomeEnabled || d.profileId != n.saved.profileId) return@withLock
+                val after = Income.putBack(d, n.saved, clock.today(), exact = true)
+                db.dao().save(after)
+                n.trashId?.let { db.dao().deleteTrash(it) }
+                session.syncNotifications(after)
+                _state.update { it.copy(data = after, profiles = db.dao().profiles()) }
+            }
+            refreshTrash()
+        }
+    }
+
+    /** The notice's time is up, or something replaced it; a later notice is left alone. */
+    fun dismissNotice(id: String) = _state.update { if (it.notice?.id == id) it.copy(notice = null) else it }
 
     // ---- §3.10's hourly income ------------------------------------------------------------
 
@@ -646,10 +707,8 @@ class AppStore(
     /** [Sheet.SettleShifts]' answer: what arrived for the logged hours (null discards them), then the switch it was asked for. */
     fun settleShifts(next: app.scifin.model.IncomeType?, arrived: app.scifin.model.Money?): Job {
         closeSheet()
-        return dispatch { d ->
-            val settled = Hourly.settleOnSwitch(d, arrived, clock, newId())
-            if (next == null) Income.setEnabled(settled, false, clock.today()) else Hourly.setType(settled, next, clock.today())
-        }
+        if (next == null) return turnOffIncome { d -> Income.setEnabled(Hourly.settleOnSwitch(d, arrived, clock, newId()), false, clock.today()) }
+        return dispatch { d -> Hourly.setType(Hourly.settleOnSwitch(d, arrived, clock, newId()), next, clock.today()) }
     }
     fun setIncomeCadence(cadence: IncomeCadence): Job = dispatch { Income.setCadence(it, cadence) }
     fun setAutoDeposit(on: Boolean): Job = dispatch { Income.setAutoDeposit(it, on, clock.today()) }
@@ -823,6 +882,8 @@ class AppStore(
                 if (dao.profile(tp.profile.id) == null) dao.save(tp.data())
             } ?: run {
                 val d = _state.value.data?.takeIf { it.profileId == t.profileId } ?: return@withLock
+                // an Income setup comes back only while Income is off; the Trash row says so and offers no Restore
+                if (p.income != null && d.settings.incomeEnabled) return@withLock
                 val after = Trash.restore(d, p, clock, newId)
                 dao.save(after); session.syncNotifications(after)
                 _state.update { it.copy(data = after) }

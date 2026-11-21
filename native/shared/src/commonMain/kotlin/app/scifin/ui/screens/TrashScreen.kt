@@ -37,7 +37,7 @@ import app.scifin.i18n.trf
 
 private fun kindLabel(kind: String) = when (kind) {
     "goal" -> tr("Goal"); "category" -> tr("Category"); "expense" -> tr("Recurring expense"); "account" -> tr("Account")
-    "pair" -> tr("Ledger entries"); "profile" -> tr("Profile"); else -> tr("Item")
+    "pair" -> tr("Ledger entries"); "profile" -> tr("Profile"); "income" -> tr("Income setup"); else -> tr("Item")
 }
 
 @Composable
@@ -60,9 +60,14 @@ private fun TrashRow(e: TrashEntry, state: UiState, store: AppStore) {
     val cur = state.data?.settings?.currency ?: "USD"
     Column(Modifier.fillMaxWidth().background(p.surf2, RoundedCornerShape(t.radii.lg)).padding(horizontal = t.spacing.u * 1.5f, vertical = t.spacing.u * 1.25f)) {
         Text(e.name.ifEmpty { kindLabel(e.kind) }.let { tr(it) }, color = p.txt, fontSize = t.type.body, fontWeight = FontWeight.Bold)
-        Caption(trf("{0} · deleted {1} · goes for good on {2}", kindLabel(e.kind), formatDateFull(e.deletedOn), formatDateFull(e.goesOn)))
+        val income = e.kind == "income"
+        val incomeOn = income && state.data?.settings?.incomeEnabled == true
+        if (income) Caption(trf("Income turned off {0} · goes for good on {1}", formatDateFull(e.deletedOn), formatDateFull(e.goesOn)))
+        else Caption(trf("{0} · deleted {1} · goes for good on {2}", kindLabel(e.kind), formatDateFull(e.deletedOn), formatDateFull(e.goesOn)))
         if (e.money > 0) Caption(trf("Its delete returned {0} to Savings; restoring takes that back out, logged.", formatMoney(e.money, cur)))
         if (e.kind == "profile") Caption(tr("Restoring brings it back as one more profile; it is not opened."))
+        // owner, 2026-11-21: the setup comes back from today, so no payday it missed is added
+        if (income) Caption(if (incomeOn) tr("Income is on. Turn it off to restore this setup.") else tr("Restoring turns Income on again from today. Paydays while it was off are not added."))
         if (confirming) {
             Caption(tr("Delete for good? It can’t be brought back after this."), Modifier.padding(top = t.spacing.u / 2))
             ButtonRow {
@@ -71,7 +76,7 @@ private fun TrashRow(e: TrashEntry, state: UiState, store: AppStore) {
             }
         } else ButtonRow {
             Button(tr("Delete forever"), ButtonKind.GHOST, modifier = Modifier.weight(1f)) { confirming = true }
-            Button(tr("Restore"), ButtonKind.SECONDARY, modifier = Modifier.weight(1f)) { store.restoreFromTrash(e.id) }
+            Button(tr("Restore"), ButtonKind.SECONDARY, enabled = !incomeOn, modifier = Modifier.weight(1f)) { store.restoreFromTrash(e.id) }
         }
     }
 }
