@@ -138,6 +138,31 @@ object Income {
         ))
     }
 
+    /** Whether turning Income off loses a setup worth keeping: an amount or an hourly rate (owner, 2026-11-21). */
+    fun worthKeeping(s: Settings): Boolean = s.incomeEnabled && (s.income > 0 || s.hourlyRate > 0)
+
+    /**
+     * Income put back as [saved] held it (owner, 2026-11-21). [exact] is the Undo, seconds after turning it off:
+     * every field as it was, markers included, since nothing ran in between. Otherwise it is a restore from the
+     * Trash, days later: the setup comes back but starts from today, like a fresh switch-on, so no payday that
+     * passed while Income was off is deposited or asked about -- the invented money §3.3 forbids.
+     */
+    fun putBack(d: ProfileData, saved: Settings, today: LocalDate, exact: Boolean): ProfileData {
+        val back = d.settings.copy(
+            incomeEnabled = true, income = saved.income, incomeCadence = saved.incomeCadence,
+            incomePayDate = saved.incomePayDate ?: today, incomePayDate2 = saved.incomePayDate2,
+            incomeAutoDeposit = saved.incomeAutoDeposit, incomeType = saved.incomeType, hourlyRate = saved.hourlyRate,
+        )
+        return d.copy(settings = if (exact) back.copy(
+            incomeEnabledDate = saved.incomeEnabledDate, lastIncomeDepositDate = saved.lastIncomeDepositDate,
+            lastIncomeLoggedDate = saved.lastIncomeLoggedDate, lastPaydayHandled = saved.lastPaydayHandled,
+        ) else back.copy(
+            incomeEnabledDate = today,
+            lastIncomeDepositDate = if (saved.incomeAutoDeposit) today.minusDays(1) else null,
+            lastIncomeLoggedDate = null, lastPaydayHandled = null,
+        ))
+    }
+
     /**
      * §3.3's auto-deposit switch: turning it back ON after
      * an earlier on-period starts from today -- the stale marker would otherwise replay every

@@ -88,6 +88,13 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.runtime.LaunchedEffect
+import app.scifin.app.Notice
+import app.scifin.engine.Trash
+import app.scifin.i18n.trf
+import app.scifin.ui.components.NOTICE_MILLIS
+import app.scifin.ui.components.NoticeBar
+import kotlinx.coroutines.delay
 
 /** §4.8's width classes: the container swaps at 600dp, list-detail begins at 840dp. */
 enum class WidthClass { COMPACT, MEDIUM, EXPANDED }
@@ -129,9 +136,11 @@ fun SciFinApp(store: AppStore, targetDp: Int, systemDark: Boolean = isSystemInDa
                 // §4.7: the gate is drawn instead of the app, never over it
                 if (state.locked) { LockGate(state, store); return@CompositionLocalProvider }
                 Box(Modifier.fillMaxSize()) {
+                    // a phone's notice sits above the tab bar, or over a sheet when one is open (a sheet covers the bar)
+                    val noticeOverSheet = wc != WidthClass.COMPACT || state.sheet != null
                     when (wc) {
                         WidthClass.COMPACT -> Column(Modifier.fillMaxSize()) {
-                            Box(Modifier.weight(1f).fillMaxWidth()) { Screen(state, store); FloatingAddOver(state, store, wc) }
+                            Box(Modifier.weight(1f).fillMaxWidth()) { Screen(state, store); FloatingAddOver(state, store, wc); if (!noticeOverSheet) NoticeOver(state, store, wc) }
                             if (!state.inOnboardingPage) NavBar(state.tab, tokens, onSelect = store::selectTab)
                         }
                         else -> Row(Modifier.fillMaxSize()) {
@@ -140,6 +149,7 @@ fun SciFinApp(store: AppStore, targetDp: Int, systemDark: Boolean = isSystemInDa
                         }
                     }
                     state.sheet?.let { Sheets(it, state, store) }
+                    if (noticeOverSheet) NoticeOver(state, store, wc)
                     (state.route as? Route.Onboarding)?.let { if (it.step == 1) OnboardingSheet(it, state, store) }
                     state.tutorialStop?.let { TutorialOverlay(it, anchors, state.data, store) }
                     // §11.6: the slideshow covers the app, tab bar included
@@ -321,6 +331,20 @@ private fun RowScope.DesktopContent(state: UiState, store: AppStore, wc: WidthCl
             Button(tr("Add"), ButtonKind.PRIMARY, modifier = Modifier.align(Alignment.TopEnd).padding(top = t.spacing.pad, end = end).onGloballyPositioned { addHeight = it.size.height.toFloat() }.probeAs("add")) { store.openSheet(Sheet.Entry()) }
         }
     }
+}
+
+/**
+ * The notice (owner, 2026-11-21) for [NOTICE_MILLIS]: on a phone above the tab bar and clear of the + when it is
+ * drawn, or over an open sheet; at the foot of the window on a wide one. Its action is also in Settings › Trash.
+ */
+@Composable
+private fun BoxScope.NoticeOver(state: UiState, store: AppStore, wc: WidthClass) {
+    val n = state.notice as? Notice.IncomeOff ?: return
+    val t = LocalTokens.current
+    LaunchedEffect(n.id) { delay(NOTICE_MILLIS); store.dismissNotice(n.id) }
+    val clearAdd = if (wc == WidthClass.COMPACT && state.sheet == null && drawsAdd(state, wc)) t.spacing.target + t.spacing.pad else t.spacing.u * 0
+    val text = if (n.trashId != null) trf("Income is off. Its setup is in Settings › Trash for {0} days.", Trash.KEPT_DAYS) else tr("Income is off.")
+    NoticeBar(text, tr("Undo"), Modifier.align(Alignment.BottomCenter).padding(start = t.spacing.pad, end = t.spacing.pad, bottom = t.spacing.pad + clearAdd)) { store.undoIncomeOff() }
 }
 
 /** The floating + (phone only, §3.6): the last area and target used. The desktop's Add is [DesktopContent]'s. */

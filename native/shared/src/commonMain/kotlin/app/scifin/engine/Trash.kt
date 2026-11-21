@@ -46,6 +46,8 @@ data class TrashPayload(
     val reversed: Map<String, Long> = emptyMap(),
     /** §8.3: a whole Profile. */
     val profile: TrashedProfile? = null,
+    /** §3.3: the Income setup as it stood when Income was turned off (owner, 2026-11-21). */
+    val income: Settings? = null,
 )
 
 /** A Profile's whole world, in serialisable pieces. */
@@ -154,6 +156,8 @@ object Trash {
                 n = n.copy(settings = s.copy(lastIncomeLoggedDate = income))
             }
         }
+        // an Income setup is put back only while Income is off: it never replaces one set up since
+        p.income?.let { saved -> if (!n.settings.incomeEnabled) n = Income.putBack(n, saved, today, exact = false) }
         return n
     }
 
